@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "../../../test_helper"
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+
+require "ff/ruby/server/sdk"
+require "minitest/autorun"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
