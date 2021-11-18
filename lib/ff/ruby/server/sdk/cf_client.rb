@@ -13,6 +13,6 @@ class CfClient
 
   def hello
 
-    puts "Hello from the client: " + self.to_s
+    puts "Hello from the FF Ruby Server SDK: " + self.to_s
   end
 end
