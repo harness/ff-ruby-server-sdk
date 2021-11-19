@@ -1,3 +1,5 @@
+require "openapi_client"
+
 class CfClient
 
   # Static:
@@ -13,6 +15,6 @@ class CfClient
 
   def hello
 
-    puts "Hello from the FF Ruby Server SDK: " + self.to_s
+    puts "Hello from the FF Ruby Server SDK: " + self.to_s # + ", target instance: " + OpenapiClient::Variation.new
   end
 end
