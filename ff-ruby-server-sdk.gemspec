@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+system "sh scripts/openapi.sh"
+
 require_relative "lib/ff/ruby/server/sdk/version"
 
 Gem::Specification.new do |spec|
