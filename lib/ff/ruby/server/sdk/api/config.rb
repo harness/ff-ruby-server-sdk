@@ -9,7 +9,9 @@ class Config
 
       @@min_frequency
     end
-  end # Static - End
+  end
+
+  # Static - End
 
   def initialize
     super
@@ -56,24 +58,24 @@ class Config
   def describe
 
     to_s + "\n" +
-    "\tmin_frequency = " + @@min_frequency.to_s + "\n" +
-           "\tconfig_url = " + @config_url + "\n" +
-           "\tevent_url = " + @event_url + "\n" +
-           "\tstream_enabled = " + @stream_enabled.to_s + "\n" +
-           "\tpoll_interval_in_seconds = " + @poll_interval_in_seconds.to_s + "\n" +
-           "\tanalytics_enabled = " + @analytics_enabled.to_s + "\n" +
-           "\tfrequency = " + @frequency.to_s + "\n" +
-           "\tget_frequency = " + get_frequency.to_s + "\n" +
-           "\tbuffer_size = " + @buffer_size.to_s + "\n" +
-           "\tall_attributes_private = " + @all_attributes_private.to_s + "\n" +
-           "\tprivate_attributes = " + @private_attributes.to_s + "\n" +
-           "\tconnection_timeout = " + @connection_timeout.to_s + "\n" +
-           "\tread_timeout = " + @read_timeout.to_s + "\n" +
-           "\twrite_timeout = " + @write_timeout.to_s + "\n" +
-           "\tdebug = " + @debug.to_s + "\n" +
-           "\tmetrics_service_acceptable_duration = " + @metrics_service_acceptable_duration.to_s + "\n" +
-           "\tcache = " + @cache.to_s + "\n" +
-           "\tstore = " + @store.to_s
+      "\tmin_frequency = " + @@min_frequency.to_s + "\n" +
+      "\tconfig_url = " + @config_url + "\n" +
+      "\tevent_url = " + @event_url + "\n" +
+      "\tstream_enabled = " + @stream_enabled.to_s + "\n" +
+      "\tpoll_interval_in_seconds = " + @poll_interval_in_seconds.to_s + "\n" +
+      "\tanalytics_enabled = " + @analytics_enabled.to_s + "\n" +
+      "\tfrequency = " + @frequency.to_s + "\n" +
+      "\tget_frequency = " + get_frequency.to_s + "\n" +
+      "\tbuffer_size = " + @buffer_size.to_s + "\n" +
+      "\tall_attributes_private = " + @all_attributes_private.to_s + "\n" +
+      "\tprivate_attributes = " + @private_attributes.to_s + "\n" +
+      "\tconnection_timeout = " + @connection_timeout.to_s + "\n" +
+      "\tread_timeout = " + @read_timeout.to_s + "\n" +
+      "\twrite_timeout = " + @write_timeout.to_s + "\n" +
+      "\tdebug = " + @debug.to_s + "\n" +
+      "\tmetrics_service_acceptable_duration = " + @metrics_service_acceptable_duration.to_s + "\n" +
+      "\tcache = " + @cache.to_s + "\n" +
+      "\tstore = " + @store.to_s
   end
 
   # TODO: Getters
