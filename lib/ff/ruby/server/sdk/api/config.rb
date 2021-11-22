@@ -11,42 +11,68 @@ class Config
     end
   end # Static - End
 
-  @config_url = "https://config.ff.harness.io/api/1.0"
-  @event_url = "https://events.ff.harness.io/api/1.0"
+  def initialize
+    super
 
-  @stream_enabled = true
+    @config_url = "https://config.ff.harness.io/api/1.0"
+    @event_url = "https://events.ff.harness.io/api/1.0"
 
-  @poll_interval_in_seconds = min_frequency
+    @stream_enabled = true
 
-  @analytics_enabled = true
+    @poll_interval_in_seconds = @@min_frequency
 
-  @frequency = min_frequency
+    @analytics_enabled = true
 
-  @buffer_size = 1024
+    @frequency = @@min_frequency
 
-  @all_attributes_private = false
+    @buffer_size = 1024
 
-  @private_attributes = Set[]
+    @all_attributes_private = false
 
-  @connection_timeout = 10 * 1000
+    @private_attributes = Set[]
 
-  @read_timeout = 30 * 1000
+    @connection_timeout = 10 * 1000
 
-  @write_timeout = 10 * 1000
+    @read_timeout = 30 * 1000
 
-  @debug = false
+    @write_timeout = 10 * 1000
 
-  @metrics_service_acceptable_duration = 10 * 1000
+    @debug = false
 
-  # TODO: Cache goes here
-  @cache = nil
+    @metrics_service_acceptable_duration = 10 * 1000
 
-  # TODO: Storage goes here
-  @store = nil
+    # TODO: Cache goes here
+    @cache = nil
+
+    # TODO: Storage goes here
+    @store = nil
+  end
 
   def get_frequency
 
     [@frequency, @@min_frequency].max
   end
 
+  def describe
+
+    to_s + "\n" +
+    "\tmin_frequency = " + @@min_frequency.to_s + "\n" +
+           "\tconfig_url = " + @config_url + "\n" +
+           "\tevent_url = " + @event_url + "\n" +
+           "\tstream_enabled = " + @stream_enabled.to_s + "\n" +
+           "\tpoll_interval_in_seconds = " + @poll_interval_in_seconds.to_s + "\n" +
+           "\tanalytics_enabled = " + @analytics_enabled.to_s + "\n" +
+           "\tfrequency = " + @frequency.to_s + "\n" +
+           "\tget_frequency = " + get_frequency.to_s + "\n" +
+           "\tbuffer_size = " + @buffer_size.to_s + "\n" +
+           "\tall_attributes_private = " + @all_attributes_private.to_s + "\n" +
+           "\tprivate_attributes = " + @private_attributes.to_s + "\n" +
+           "\tconnection_timeout = " + @connection_timeout.to_s + "\n" +
+           "\tread_timeout = " + @read_timeout.to_s + "\n" +
+           "\twrite_timeout = " + @write_timeout.to_s + "\n" +
+           "\tdebug = " + @debug.to_s + "\n" +
+           "\tmetrics_service_acceptable_duration = " + @metrics_service_acceptable_duration.to_s + "\n" +
+           "\tcache = " + @cache.to_s + "\n" +
+           "\tstore = " + @store.to_s
+  end
 end

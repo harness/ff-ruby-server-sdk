@@ -10,3 +10,6 @@ client3 = CfClient.instance
 client.hello
 client2.hello
 client3.hello
+
+configuration = Config.new
+puts configuration.describe
