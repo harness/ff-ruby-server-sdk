@@ -5,7 +5,7 @@ $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
-class Ff::Ruby::Server::SdkTest < Minitest::Test
+class Ff::Ruby::Server::SdkClientInstantiationTest < Minitest::Test
 
   def test_version_number
 
