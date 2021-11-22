@@ -13,8 +13,18 @@ class CfClient
     end
   end # Static - End
 
+  private_class_method :new
+
+  def init(sdk_key)
+
+    if @client == nil
+
+      @client = InnerClient.new(sdk_key)
+    end
+  end
+
   def hello
 
-    puts "Hello from the FF Ruby Server SDK: " + self.to_s # + ", target instance: " + OpenapiClient::Variation.new
+    puts "Hello from the FF Ruby Server SDK: " + self.to_s
   end
 end

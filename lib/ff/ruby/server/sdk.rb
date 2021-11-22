@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require_relative "sdk/version"
-require_relative "sdk/cf_client"
+require_relative "sdk/api/client"
+require_relative "sdk/api/cf_client"
+require_relative "sdk/api/inner_client"
+require_relative "sdk/api/config"
 
 module Ff
   module Ruby

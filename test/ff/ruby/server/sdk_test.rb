@@ -12,16 +12,23 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     refute_nil ::Ff::Ruby::Server::Sdk::VERSION
   end
 
-  def test_instantiation
+  def test_singleton_instantiation
 
     instance = CfClient.instance
     (0..5).each {
 
       compare_equal = CfClient.instance
-      compare_not_equal = CfClient.new
-
       assert_equal(instance.to_s, compare_equal.to_s)
-      assert(instance.to_s != compare_not_equal.to_s)
     }
+  end
+
+  def test_constructor_instantiation
+
+    # instance = Client.new("sss", "sss")
+    # (0..5).each {
+    #
+    #   compare_equal = CfClient.instance
+    #   assert_equal(instance.to_s, compare_equal.to_s)
+    # }
   end
 end
