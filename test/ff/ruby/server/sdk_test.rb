@@ -24,11 +24,12 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_constructor_instantiation
 
-    # instance = Client.new("sss", "sss")
-    # (0..5).each {
-    #
-    #   compare_equal = CfClient.instance
-    #   assert_equal(instance.to_s, compare_equal.to_s)
-    # }
+    test_string = "test"
+    instance_with = Client.new(test_string)
+    instance_with_no_config = Client.new(test_string, test_string)
+
+    assert(instance_with != nil)
+    assert(instance_with_no_config != nil)
+    assert(instance_with != instance_with_no_config)
   end
 end
