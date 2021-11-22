@@ -75,4 +75,7 @@ class Config
            "\tcache = " + @cache.to_s + "\n" +
            "\tstore = " + @store.to_s
   end
+
+  # TODO: Getters
+
 end
