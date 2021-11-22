@@ -18,7 +18,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     (0..5).each {
 
       compare_equal = CfClient.instance
-      assert_equal(instance.to_s, compare_equal.to_s)
+      assert_equal(instance, compare_equal)
     }
   end
 
