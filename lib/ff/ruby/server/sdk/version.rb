@@ -4,6 +4,7 @@ module Ff
   module Ruby
     module Server
       module Sdk
+
         VERSION = "0.0.3"
       end
     end
