@@ -42,6 +42,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config_not_equal != nil)
     assert(config != config_not_equal)
 
+    assert(Config.min_frequency >= 0)
     assert(config.get_frequency == Config.min_frequency)
   end
 end
