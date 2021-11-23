@@ -74,6 +74,71 @@ class Config
     @stream_enabled
   end
 
+  def poll_interval_in_seconds
+
+    @poll_interval_in_seconds
+  end
+
+  def analytics_enabled
+
+    @analytics_enabled
+  end
+
+  def frequency
+
+    @frequency
+  end
+
+  def buffer_size
+
+    @buffer_size
+  end
+
+  def all_attributes_private
+
+    @all_attributes_private
+  end
+
+  def private_attributes
+
+    @private_attributes
+  end
+
+  def connection_timeout
+
+    @connection_timeout
+  end
+
+  def read_timeout
+
+    @read_timeout
+  end
+
+  def write_timeout
+
+    @write_timeout
+  end
+
+  def debug
+
+    @debug
+  end
+
+  def metrics_service_acceptable_duration
+
+    @metrics_service_acceptable_duration
+  end
+
+  def cache
+
+    @cache
+  end
+
+  def store
+
+    @store
+  end
+
   def describe
 
     to_s + "\n" +
