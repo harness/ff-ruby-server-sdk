@@ -1,5 +1,9 @@
 class Config
 
+  attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
+                :frequency, :buffer_size, :all_attributes_private, :private_attributes, :connection_timeout,
+                :read_timeout, :write_timeout, :debug, :metrics_service_acceptable_duration, :cache, :store
+
   # Static:
   class << self
 
@@ -54,91 +58,6 @@ class Config
     [@frequency, @@min_frequency].max
   end
 
-  def frequency
-
-    @frequency
-  end
-
-  def config_url
-
-    @config_url
-  end
-
-  def event_url
-
-    @event_url
-  end
-
-  def stream_enabled
-
-    @stream_enabled
-  end
-
-  def poll_interval_in_seconds
-
-    @poll_interval_in_seconds
-  end
-
-  def analytics_enabled
-
-    @analytics_enabled
-  end
-
-  def frequency
-
-    @frequency
-  end
-
-  def buffer_size
-
-    @buffer_size
-  end
-
-  def all_attributes_private
-
-    @all_attributes_private
-  end
-
-  def private_attributes
-
-    @private_attributes
-  end
-
-  def connection_timeout
-
-    @connection_timeout
-  end
-
-  def read_timeout
-
-    @read_timeout
-  end
-
-  def write_timeout
-
-    @write_timeout
-  end
-
-  def debug
-
-    @debug
-  end
-
-  def metrics_service_acceptable_duration
-
-    @metrics_service_acceptable_duration
-  end
-
-  def cache
-
-    @cache
-  end
-
-  def store
-
-    @store
-  end
-
   def describe
 
     to_s + "\n" +
@@ -161,5 +80,4 @@ class Config
       "\tcache = " + @cache.to_s + "\n" +
       "\tstore = " + @store.to_s
   end
-
 end

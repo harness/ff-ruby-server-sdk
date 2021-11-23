@@ -44,5 +44,19 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     assert(Config.min_frequency >= 0)
     assert(config.get_frequency == Config.min_frequency)
+    assert(config.config_url == "https://config.ff.harness.io/api/1.0")
+    assert(config.stream_enabled)
+    assert(config.analytics_enabled)
+    assert(config.frequency == Config.min_frequency)
+    assert(!config.all_attributes_private)
+    assert(config.private_attributes == Set[])
+    assert(config.connection_timeout == 10 * 1000)
+    assert(config.read_timeout == (Config.min_frequency * 1000) / 2)
+    assert(config.write_timeout == config.connection_timeout)
+    assert(!config.debug)
+    assert(config.metrics_service_acceptable_duration == config.connection_timeout)
+
+    # TODO: Assert cache and storage
+
   end
 end
