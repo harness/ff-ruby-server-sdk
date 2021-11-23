@@ -10,7 +10,6 @@ class Config
       @@min_frequency
     end
   end
-
   # Static - End
 
   def initialize
@@ -53,6 +52,26 @@ class Config
   def get_frequency
 
     [@frequency, @@min_frequency].max
+  end
+
+  def frequency
+
+    @frequency
+  end
+
+  def config_url
+
+    @config_url
+  end
+
+  def event_url
+
+    @event_url
+  end
+
+  def stream_enabled
+
+    @stream_enabled
   end
 
   def describe
