@@ -1,5 +1,7 @@
 require "openapi_client"
 
+require_relative "inner_client"
+
 class CfClient
 
   # Static:
@@ -13,13 +15,16 @@ class CfClient
     end
   end # Static - End
 
-  private_class_method :new
+  def initialize(api_key = nil, config = nil, connector = nil)
 
-  def init(sdk_key)
+    @client = InnerClient(api_key, config, connector)
+  end
+
+  def init(api_key = nil, config = nil, connector = nil)
 
     if @client == nil
 
-      @client = InnerClient.new(sdk_key)
+      @client = InnerClient.new(api_key)
     end
   end
 

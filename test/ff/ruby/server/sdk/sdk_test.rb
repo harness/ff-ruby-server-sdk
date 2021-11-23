@@ -26,20 +26,30 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     (0..5).each {
 
       compare_equal = CfClient.instance
+      compare_not_equal = CfClient.new
+
+      refute_nil compare_equal
+      refute_nil compare_not_equal
+
       assert_equal(instance, compare_equal)
+      assert(instance != compare_not_equal)
     }
   end
 
   def test_client_constructor_inst
 
     test_string = "test"
-    instance_with = Client.new(test_string)
-    instance_with_no_config = Client.new(test_string, test_string)
+    instance_with_no_config = CfClient.new(test_string)
+    instance_with_config = CfClient.new(test_string, test_string)
+    instance_with_connector = CfClient.new(test_string, test_string, test_string)
 
-    refute_nil instance_with
+    refute_nil instance_with_config
+    refute_nil instance_with_connector
     refute_nil instance_with_no_config
 
-    assert(instance_with != instance_with_no_config)
+    assert(instance_with_config != instance_with_no_config)
+    assert(instance_with_connector != instance_with_no_config)
+    assert(instance_with_connector != instance_with_config)
   end
 
   def test_config_constructor_inst

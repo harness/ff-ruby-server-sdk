@@ -1,6 +1,7 @@
 class InnerClient
 
-  def initialize(sdk_key, config = nil)
+  def initialize(api_key = nil, config = nil, connector = nil)
 
+    @config = config
   end
 end
