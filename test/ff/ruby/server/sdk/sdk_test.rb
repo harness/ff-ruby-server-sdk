@@ -7,6 +7,10 @@ require "minitest/autorun"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
+  @bool = false
+  @number = 100
+  @string = "test"
+
   def test_version_number
 
     refute_nil ::Ff::Ruby::Server::Sdk::VERSION
@@ -49,36 +53,32 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     assert_defaults(config)
 
-    number = 100
-    bool = false
-    string = "test"
+    config.frequency = @number
+    config.config_url = @string
+    config.event_url = @string
+    config.stream_enabled = @bool
+    config.analytics_enabled = @bool
+    config.all_attributes_private = !@bool
+    config.private_attributes = Set[@string]
+    config.connection_timeout = @number
+    config.read_timeout = @number
+    config.write_timeout = @number
+    config.debug = !@bool
+    config.metrics_service_acceptable_duration = @number
 
-    config.frequency = number
-    config.config_url = string
-    config.event_url = string
-    config.stream_enabled = bool
-    config.analytics_enabled = bool
-    config.all_attributes_private = !bool
-    config.private_attributes = Set[string]
-    config.connection_timeout = number
-    config.read_timeout = number
-    config.write_timeout = number
-    config.debug = !bool
-    config.metrics_service_acceptable_duration = number
-
-    assert(config.get_frequency == number)
-    assert(config.config_url == string)
-    assert(config.event_url == string)
+    assert(config.get_frequency == @number)
+    assert(config.config_url == @string)
+    assert(config.event_url == @string)
     assert(!config.stream_enabled)
     assert(!config.analytics_enabled)
-    assert(config.frequency == number)
+    assert(config.frequency == @number)
     assert(config.all_attributes_private)
-    assert(config.private_attributes == Set[string])
-    assert(config.connection_timeout == number)
-    assert(config.read_timeout == number)
-    assert(config.write_timeout == number)
+    assert(config.private_attributes == Set[@string])
+    assert(config.connection_timeout == @number)
+    assert(config.read_timeout == @number)
+    assert(config.write_timeout == @number)
     assert(config.debug)
-    assert(config.metrics_service_acceptable_duration == number)
+    assert(config.metrics_service_acceptable_duration == @number)
   end
 
   def test_config_builder
@@ -87,6 +87,14 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     config = builder.build
     assert_defaults(config)
 
+    # config = ConfigBuilder.new
+    #                       .event_url(@string)
+    #                       .config_url(@string)
+    #                       .build
+
+    # assert(config != nil)
+    # assert(config.config_url == @string)
+    # assert(config.event_url == @string)
 
   end
 
