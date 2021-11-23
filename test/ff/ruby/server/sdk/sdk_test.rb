@@ -41,10 +41,16 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config != nil)
     assert(config_not_equal != nil)
     assert(config != config_not_equal)
+  end
+
+  def test_config_properties
+
+    config = Config.new
 
     assert(Config.min_frequency >= 0)
     assert(config.get_frequency == Config.min_frequency)
     assert(config.config_url == "https://config.ff.harness.io/api/1.0")
+    assert(config.event_url == "https://events.ff.harness.io/api/1.0")
     assert(config.stream_enabled)
     assert(config.analytics_enabled)
     assert(config.frequency == Config.min_frequency)
@@ -58,5 +64,35 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     # TODO: Assert cache and storage
 
+    number = 100
+    bool = false
+    string = "test"
+
+    config.frequency = number
+    config.config_url = string
+    config.event_url = string
+    config.stream_enabled = bool
+    config.analytics_enabled = bool
+    config.all_attributes_private = !bool
+    config.private_attributes = Set[string]
+    config.connection_timeout = number
+    config.read_timeout = number
+    config.write_timeout = number
+    config.debug = !bool
+    config.metrics_service_acceptable_duration = number
+
+    assert(config.get_frequency == number)
+    assert(config.config_url == string)
+    assert(config.event_url == string)
+    assert(!config.stream_enabled)
+    assert(!config.analytics_enabled)
+    assert(config.frequency == number)
+    assert(config.all_attributes_private)
+    assert(config.private_attributes == Set[string])
+    assert(config.connection_timeout == number)
+    assert(config.read_timeout == number)
+    assert(config.write_timeout == number)
+    assert(config.debug)
+    assert(config.metrics_service_acceptable_duration == number)
   end
 end
