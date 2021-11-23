@@ -17,7 +17,7 @@ class CfClient
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
-    @client = InnerClient(api_key, config, connector)
+    @client = InnerClient.new(api_key, config, connector)
   end
 
   def init(api_key = nil, config = nil, connector = nil)
