@@ -88,10 +88,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
                           .config_url(@string)
                           .build
 
-    refute_nil config
-    assert(config.config_url == @string)
-    assert(config.event_url == @string)
-
+    assert_modified(config)
   end
 
   private
@@ -119,6 +116,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def assert_modified(config)
+
+    refute_nil config
 
     assert(config.get_frequency == @number)
     assert(config.config_url == @string)
