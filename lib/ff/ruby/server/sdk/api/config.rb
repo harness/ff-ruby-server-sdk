@@ -162,6 +162,4 @@ class Config
       "\tstore = " + @store.to_s
   end
 
-  # TODO: Getters
-
 end
