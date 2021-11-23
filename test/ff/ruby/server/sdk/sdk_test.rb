@@ -72,19 +72,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     config.debug = !@bool
     config.metrics_service_acceptable_duration = @number
 
-    assert(config.get_frequency == @number)
-    assert(config.config_url == @string)
-    assert(config.event_url == @string)
-    assert(!config.stream_enabled)
-    assert(!config.analytics_enabled)
-    assert(config.frequency == @number)
-    assert(config.all_attributes_private)
-    assert(config.private_attributes == Set[@string])
-    assert(config.connection_timeout == @number)
-    assert(config.read_timeout == @number)
-    assert(config.write_timeout == @number)
-    assert(config.debug)
-    assert(config.metrics_service_acceptable_duration == @number)
+    assert_modified(config)
   end
 
   def test_config_builder
@@ -128,5 +116,22 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.metrics_service_acceptable_duration == config.connection_timeout)
 
     # TODO: Assert cache and storage
+  end
+
+  def assert_modified(config)
+
+    assert(config.get_frequency == @number)
+    assert(config.config_url == @string)
+    assert(config.event_url == @string)
+    assert(!config.stream_enabled)
+    assert(!config.analytics_enabled)
+    assert(config.frequency == @number)
+    assert(config.all_attributes_private)
+    assert(config.private_attributes == Set[@string])
+    assert(config.connection_timeout == @number)
+    assert(config.read_timeout == @number)
+    assert(config.write_timeout == @number)
+    assert(config.debug)
+    assert(config.metrics_service_acceptable_duration == @number)
   end
 end
