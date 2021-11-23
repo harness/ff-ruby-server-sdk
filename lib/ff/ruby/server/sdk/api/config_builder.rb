@@ -1,5 +1,3 @@
-require "config"
-
 class ConfigBuilder
 
   def build

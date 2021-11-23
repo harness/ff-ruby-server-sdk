@@ -7,9 +7,13 @@ require "minitest/autorun"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
-  @bool = false
-  @number = 100
-  @string = "test"
+  def initialize(name)
+    super
+
+    @bool = false
+    @number = 100
+    @string = "test"
+  end
 
   def test_version_number
 
@@ -32,8 +36,9 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     instance_with = Client.new(test_string)
     instance_with_no_config = Client.new(test_string, test_string)
 
-    assert(instance_with != nil)
-    assert(instance_with_no_config != nil)
+    refute_nil instance_with
+    refute_nil instance_with_no_config
+
     assert(instance_with != instance_with_no_config)
   end
 
@@ -42,8 +47,9 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     config = Config.new
     config_not_equal = Config.new
 
-    assert(config != nil)
-    assert(config_not_equal != nil)
+    refute_nil config != nil
+    refute_nil config_not_equal != nil
+
     assert(config != config_not_equal)
   end
 
@@ -84,17 +90,19 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   def test_config_builder
 
     builder = ConfigBuilder.new
+    refute_nil builder
+
     config = builder.build
     assert_defaults(config)
 
-    # config = ConfigBuilder.new
-    #                       .event_url(@string)
-    #                       .config_url(@string)
-    #                       .build
+    config = ConfigBuilder.new
+                          .event_url(@string)
+                          .config_url(@string)
+                          .build
 
-    # assert(config != nil)
-    # assert(config.config_url == @string)
-    # assert(config.event_url == @string)
+    refute_nil config
+    assert(config.config_url == @string)
+    assert(config.event_url == @string)
 
   end
 
@@ -102,7 +110,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def assert_defaults(config)
 
-    assert(config != nil)
+    refute_nil config != nil
+
     assert(Config.min_frequency >= 0)
     assert(config.get_frequency == Config.min_frequency)
     assert(config.config_url == "https://config.ff.harness.io/api/1.0")
