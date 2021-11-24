@@ -2,10 +2,13 @@ require_relative '../lib/ff/ruby/server/sdk/api/cf_client'
 require_relative '../lib/ff/ruby/server/sdk/api/inner_client'
 require_relative '../lib/ff/ruby/server/sdk/api/config'
 require_relative '../lib/ff/ruby/server/sdk/api/config_builder'
+require_relative '../lib/ff/ruby/server/sdk/api/default_cache'
 
 bool = false
 number = 100
 string = "test"
+
+cache = DefaultCache.new
 
 config = ConfigBuilder.new
                       .event_url(string)
@@ -22,6 +25,7 @@ config = ConfigBuilder.new
                       .write_timeout(number)
                       .debug(!bool)
                       .metrics_service_acceptable_duration(number)
+                      .cache(cache)
                       .build
 
 puts config.describe

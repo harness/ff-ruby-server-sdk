@@ -1,4 +1,6 @@
-class LibCache < Cache
+require "libcache"
+
+class DefaultCache < Cache
 
   def initialize
     super
@@ -21,6 +23,6 @@ class LibCache < Cache
 
   def verify
 
-    @cache != null && @filesystem != nil
+    @in_memory != nil && @filesystem != nil
   end
 end

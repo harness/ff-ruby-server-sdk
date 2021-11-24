@@ -115,11 +115,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_lib_cache
 
-    cache = LibCache.new
+    cache = DefaultCache.new
 
     refute_nil cache
 
-    assert(!cache.verify)
+    assert(cache.verify)
 
   end
 

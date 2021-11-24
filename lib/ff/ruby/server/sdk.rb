@@ -8,7 +8,7 @@ require_relative "sdk/api/cf_client"
 require_relative "sdk/api/inner_client"
 require_relative "sdk/api/config"
 require_relative "sdk/api/config_builder"
-require_relative "sdk/api/lib_cache"
+require_relative "sdk/api/default_cache"
 
 module Ff
   module Ruby
