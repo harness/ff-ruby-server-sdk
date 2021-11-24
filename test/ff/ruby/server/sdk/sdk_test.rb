@@ -121,6 +121,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     assert(cache.verify)
 
+    refute_nil cache.keys
+
   end
 
   private
