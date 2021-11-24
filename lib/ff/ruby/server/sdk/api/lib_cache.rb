@@ -1,0 +1,3 @@
+class LibCache < Cache
+
+end

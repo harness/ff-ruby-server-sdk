@@ -155,4 +155,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.debug)
     assert(config.metrics_service_acceptable_duration == @number)
   end
+
+  def test_lib_cache
+
+    cache = LibCache.new
+    refute_nil cache
+
+  end
 end
