@@ -12,3 +12,5 @@ gem "minitest", "~> 5.0"
 gem "standard", "~> 1.3"
 
 gem "openapi_client", "~> 1.0.0"
+
+gem "libcache"
