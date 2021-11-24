@@ -7,15 +7,17 @@ class DefaultCache < Cache
 
     @capacity = 10 * 1000
 
+    lambda = lambda { |*key| puts "Retrieved #{key}" }
+
     @in_memory = CacheBuilder.with(Cache)
                              .set_max(@capacity)
-                             .set_post_get(lambda { |*key| puts "Retrieved #{key}" })
+                             .set_post_get(lambda)
                              .build
 
     @filesystem = CacheBuilder.with(FileCache)
                               .set_store("sdk/cache")
                               .set_max(@capacity)
-                              .set_post_get(lambda { |*key| puts "Retrieved #{key}" })
+                              .set_post_get(lambda)
                               .build
   end
 
