@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 require_relative "sdk/version"
+require_relative "sdk/common/cache"
+require_relative "sdk/common/storage"
+require_relative "sdk/common/destroyable"
 require_relative "sdk/api/cf_client"
 require_relative "sdk/api/inner_client"
 require_relative "sdk/api/config"
 require_relative "sdk/api/config_builder"
+require_relative "sdk/api/lib_cache"
 
 module Ff
   module Ruby
