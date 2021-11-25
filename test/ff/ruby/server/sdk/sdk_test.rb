@@ -13,6 +13,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     @bool = false
     @number = 100
     @string = "test"
+    @counter = 5
   end
 
   def test_version_number
@@ -23,7 +24,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   def test_client_singleton_inst
 
     instance = CfClient.instance
-    (0..5).each {
+    (0..@counter).each {
 
       compare_equal = CfClient.instance
       compare_not_equal = CfClient.new
@@ -122,6 +123,15 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(cache.verify)
 
     refute_nil cache.keys
+
+    (0..@counter).each { |i|
+
+      cache.set("key_int_" + i.to_s, i)
+      cache.set("key_str_" + i.to_s, i.to_s)
+      cache.set("key_bool_" + i.to_s, i % 2 == 0)
+    }
+
+
 
   end
 
