@@ -1,4 +1,5 @@
 require "set"
+require "fileutils"
 require "libcache"
 
 class DefaultCache < Cache
@@ -11,8 +12,18 @@ class DefaultCache < Cache
 
     lambda = lambda { |*key| puts "Retrieved #{key}" }
 
+    cache_dir = "./cache"
+    unless directory_exists?(cache_dir)
+
+      FileUtils.mkdir_p cache_dir
+      unless directory_exists?(cache_dir)
+
+        raise "Failed to initialize filesystem cache at: " + cache_dir
+      end
+    end
+
     @filesystem = CacheBuilder.with(FileCache)
-                              .set_store("sdk/cache")
+                              .set_store(cache_dir)
                               .set_max(@capacity)
                               .set_post_get(lambda)
                               .build
@@ -60,5 +71,12 @@ class DefaultCache < Cache
   def keys
 
     @keys
+  end
+
+  private
+
+  def directory_exists?(directory)
+
+    File.directory?(directory)
   end
 end

@@ -19,3 +19,4 @@
 *.gem
 Gemfile.lock
 generated
+cache
