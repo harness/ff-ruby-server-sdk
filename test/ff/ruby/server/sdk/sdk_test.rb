@@ -124,14 +124,25 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil cache.keys
 
-    (0..@counter).each { |i|
+    (0..@counter).each do |i|
 
       cache.set("key_int_" + i.to_s, i)
       cache.set("key_str_" + i.to_s, i.to_s)
       cache.set("key_bool_" + i.to_s, i % 2 == 0)
-    }
 
+    end
 
+    (0..@counter).each do |i|
+
+      value_int = cache.get("key_int_" + i.to_s)
+      assert_equal(i, value_int)
+
+      value_str = cache.get("key_str_" + i.to_s)
+      assert_equal(i.to_s, value_str)
+
+      value_bool = cache.get("key_bool_" + i.to_s)
+      assert_equal(i % 2 == 0, value_bool)
+    end
 
   end
 
