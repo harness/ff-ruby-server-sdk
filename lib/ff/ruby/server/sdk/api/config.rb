@@ -46,8 +46,7 @@ class Config
 
     @metrics_service_acceptable_duration = 10 * 1000
 
-    # TODO: Cache goes here
-    @cache = nil
+    @cache = DefaultCache.new
 
     # TODO: Storage goes here
     @store = nil

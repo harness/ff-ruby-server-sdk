@@ -8,6 +8,7 @@ class ConfigBuilder
   def initialize
 
     @config = Config.new
+    @config.cache = DefaultCache.new
   end
 
   def config_url(config_url)

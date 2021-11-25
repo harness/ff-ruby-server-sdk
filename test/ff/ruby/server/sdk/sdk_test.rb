@@ -82,6 +82,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     config.write_timeout = @number
     config.debug = !@bool
     config.metrics_service_acceptable_duration = @number
+    config.cache = DefaultCache.new
 
     assert_modified(config)
   end
@@ -93,6 +94,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     config = builder.build
     assert_defaults(config)
+
+    cache = DefaultCache.new
 
     config = ConfigBuilder.new
                           .event_url(@string)
@@ -109,6 +112,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
                           .write_timeout(@number)
                           .debug(!@bool)
                           .metrics_service_acceptable_duration(@number)
+                          .cache(cache)
                           .build
 
     assert_modified(config)
@@ -129,7 +133,6 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
       cache.set("key_int_" + i.to_s, i)
       cache.set("key_str_" + i.to_s, i.to_s)
       cache.set("key_bool_" + i.to_s, i % 2 == 0)
-
     end
 
     (0..@counter).each do |i|
@@ -167,7 +170,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(!config.debug)
     assert(config.metrics_service_acceptable_duration == config.connection_timeout)
 
-    # TODO: Assert cache and storage
+    refute_nil config.cache
+    assert(config.cache.verify)
   end
 
   def assert_modified(config)
@@ -187,5 +191,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.write_timeout == @number)
     assert(config.debug)
     assert(config.metrics_service_acceptable_duration == @number)
+
+    refute_nil config.cache
+    assert(config.cache.verify)
   end
 end
