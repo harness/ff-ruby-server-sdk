@@ -21,8 +21,6 @@ class DefaultCache < Cache
                              .set_max(@capacity)
                              .set_post_get(lambda)
                              .build
-
-    # TODO: Populate in-memory cache
   end
 
   def verify
@@ -33,20 +31,30 @@ class DefaultCache < Cache
   def set(key, value)
 
     keys.add(key)
-
-    # TODO: Implement
+    @in_memory.put(key, value)
+    @filesystem.put(key, value)
   end
 
   def get(key)
 
-    raise @tbe
+    value = @in_memory.get(key)
+
+    if value == nil
+
+      value = @filesystem.get(key)
+      if value != nil
+
+        @in_memory.put(key, value)
+      end
+    end
+    value
   end
 
   def delete(key)
 
     keys.delete(key)
-
-    # TODO: Implement
+    @in_memory.delete(key)
+    @filesystem.delete(key)
   end
 
   def keys
