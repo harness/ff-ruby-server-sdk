@@ -4,4 +4,8 @@ class AuthService
 
 
   end
+
+  def start_async
+
+  end
 end
