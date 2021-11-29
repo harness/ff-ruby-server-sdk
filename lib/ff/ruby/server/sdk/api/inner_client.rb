@@ -1,4 +1,6 @@
-class InnerClient
+require_relative "auth_callback"
+
+class InnerClient < AuthCallback
 
   def initialize(sdk_key = nil, config = nil, connector = nil)
 

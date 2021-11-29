@@ -13,6 +13,11 @@ class AuthService
 
     unless @callback == nil
 
+      unless @callback.kind_of?(AuthCallback)
+
+        raise "Expected '" + AuthCallback.to_s + "' data type for the callback"
+      end
+
       @callback.on_auth_success
     end
   end
