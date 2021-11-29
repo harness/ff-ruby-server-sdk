@@ -30,7 +30,7 @@ class InnerClient
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            "to be ready."
 
-    @auth_service = AuthService.new(@connector, @config.poll_interval_in_seconds)
+    @auth_service = AuthService.new(@connector, poll_interval_in_sec = @config.poll_interval_in_seconds)
 
   end
 end
