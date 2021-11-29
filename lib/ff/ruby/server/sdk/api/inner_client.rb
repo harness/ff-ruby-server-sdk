@@ -2,6 +2,8 @@ class InnerClient
 
   def initialize(sdk_key = nil, config = nil, connector = nil)
 
+    @closing = false
+
     if config == nil
 
       @config = ConfigBuilder.new.build
@@ -26,6 +28,12 @@ class InnerClient
 
     puts "SDK successfully logged in"
 
+    if @closing
+
+      return
+    end
+
+    # run services only after token is processed
 
   end
 
