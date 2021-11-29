@@ -22,6 +22,13 @@ class InnerClient
     setup
   end
 
+  def on_auth_success
+
+    puts "SDK successfully logged in"
+
+
+  end
+
   protected
 
   def setup
@@ -35,8 +42,14 @@ class InnerClient
       raise "The 'config' parameter must be of '" + Config.to_s + "' data type"
     end
 
-    @auth_service = AuthService.new(@connector, poll_interval_in_sec = @config.poll_interval_in_seconds)
+    @auth_service = AuthService.new(
+
+      connector = @connector,
+      poll_interval_in_sec = @config.poll_interval_in_seconds,
+      callback = self
+    )
 
     @auth_service.start_async
   end
+
 end
