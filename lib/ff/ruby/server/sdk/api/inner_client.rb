@@ -6,6 +6,11 @@ class InnerClient < AuthCallback
   def initialize(sdk_key = nil, config = nil, connector = nil)
 
     @closing = false
+    @failure = false
+    @initialized = false
+    @poller_ready = false
+    @stream_ready = false
+    @metric_ready = false
 
     if config == nil
 
