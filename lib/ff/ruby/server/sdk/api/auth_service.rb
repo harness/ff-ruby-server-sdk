@@ -32,6 +32,10 @@ class AuthService
 
 
     end
+
+    puts "Job: " + @job.to_s
+
+
   end
 
   def close

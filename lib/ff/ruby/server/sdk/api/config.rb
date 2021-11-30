@@ -1,3 +1,6 @@
+require_relative "default_cache"
+require_relative "../common/cache"
+
 class Config
 
   attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
