@@ -1,5 +1,4 @@
 require_relative "default_cache"
-require_relative "../common/cache"
 
 class Config
 
