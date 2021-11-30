@@ -19,22 +19,25 @@ class AuthService
 
   def start_async
 
-    puts "Starting async: " + self .to_s
+    puts "Async starting: " + self.to_s
 
     @ready = true
 
-    @fiber = Fiber.new do
+    @thread = Thread.new do
 
       while @ready do
 
-        puts "Async"
+        puts "Async iteration"
 
-        Fiber.yield(@poll_interval_in_sec)
+        # TODO: Implement API communication here
 
-
+        sleep(@poll_interval_in_sec)
       end
     end
 
+    puts "Async started: " + self.to_s
+
+    @thread.run
   end
 
   def close
@@ -60,7 +63,12 @@ class AuthService
   def stop_async
 
     @ready = false
-    @fiber = nil
+
+    if @thread != nil
+
+      @thread.exit
+      @thread = nil
+    end
   end
 
 end
