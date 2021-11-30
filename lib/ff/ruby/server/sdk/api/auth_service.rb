@@ -1,5 +1,3 @@
-require "rufus-scheduler"
-
 class AuthService
 
   def initialize(connector = nil, poll_interval_in_sec = 60, callback = nil)
@@ -23,18 +21,19 @@ class AuthService
 
     puts "Starting async: " + self .to_s
 
-    @scheduler = Rufus::Scheduler.new
+    @ready = true
 
-    @job = @scheduler.in @poll_interval_in_sec.to_s + "s" do
+    @fiber = Fiber.new do
 
-      puts "Iteration"
+      while @ready do
+
+        puts "Async"
+
+        Fiber.yield(@poll_interval_in_sec)
 
 
-
+      end
     end
-
-    puts "Job: " + @job.to_s
-
 
   end
 
@@ -60,10 +59,8 @@ class AuthService
 
   def stop_async
 
-    if @job != nil
-
-      @job.kill
-    end
+    @ready = false
+    @fiber = nil
   end
 
 end
