@@ -60,12 +60,22 @@ class InnerClient < AuthCallback
       callback = self
     )
 
+    # TODO: Init. processors
+
     @auth_service.start_async
   end
 
   def on_authorized
 
-    raise "To be implemented"
+    if @closing
+
+      return
+    end
+
+    @auth_service.start_async
+
+    # TODO: Stop processors
+
   end
 
 end
