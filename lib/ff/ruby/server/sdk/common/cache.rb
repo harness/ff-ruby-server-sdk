@@ -2,7 +2,7 @@ class Cache
 
   def initialize
 
-    @tbe = "to be implemented"
+    @tbe = "To be implemented"
   end
 
   def set(key, value)
