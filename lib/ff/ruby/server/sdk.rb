@@ -11,6 +11,7 @@ require_relative "sdk/api/config_builder"
 require_relative "sdk/api/default_cache"
 require_relative "sdk/api/auth_service"
 require_relative "sdk/api/auth_callback"
+require_relative "sdk/connector/connector"
 
 module Ff
   module Ruby
