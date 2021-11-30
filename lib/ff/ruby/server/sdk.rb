@@ -3,6 +3,7 @@
 require_relative "sdk/version"
 require_relative "sdk/common/cache"
 require_relative "sdk/common/storage"
+require_relative "sdk/common/runnable"
 require_relative "sdk/common/destroyable"
 require_relative "sdk/api/cf_client"
 require_relative "sdk/api/inner_client"
