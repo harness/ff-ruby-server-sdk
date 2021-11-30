@@ -5,12 +5,10 @@ class InnerClient < AuthCallback
 
   def initialize(sdk_key = nil, config = nil, connector = nil)
 
-    @closing = false
-    @failure = false
-    @initialized = false
-    @poller_ready = false
-    @stream_ready = false
-    @metric_ready = false
+    if sdk_key == nil || sdk_key.empty?
+
+      raise "SDK key is not provided"
+    end
 
     if config == nil
 
@@ -39,6 +37,13 @@ class InnerClient < AuthCallback
       @connector = connector
     end
 
+    @closing = false
+    @failure = false
+    @initialized = false
+    @poller_ready = false
+    @stream_ready = false
+    @metric_ready = false
+
     setup
   end
 
@@ -55,6 +60,23 @@ class InnerClient < AuthCallback
 
     # TODO: Start processors
 
+  end
+
+  def close
+
+    puts "Closing the client: " + self.to_s
+
+    @closing = true
+
+    off
+
+    # TODO: Close all
+
+  end
+
+  def off
+
+    # TODO: Implement
   end
 
   protected

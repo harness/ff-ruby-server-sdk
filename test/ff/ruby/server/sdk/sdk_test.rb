@@ -27,7 +27,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     (0..@counter).each {
 
       compare_equal = CfClient.instance
-      compare_not_equal = CfClient.new
+      compare_not_equal = CfClient.new("test")
 
       refute_nil compare_equal
       refute_nil compare_not_equal
@@ -150,6 +150,15 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
       assert_equal(i % 2 == 0, value_bool)
     end
 
+  end
+
+  def test_client_destroy
+
+    client = CfClient.instance
+
+    refute_nil client
+
+    client.destroy
   end
 
   private

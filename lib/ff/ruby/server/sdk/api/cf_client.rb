@@ -28,6 +28,19 @@ class CfClient
     end
   end
 
+  def destroy
+
+    close
+  end
+
+  def close
+
+    if @client != nil
+
+      @client.close
+    end
+  end
+
   def hello
 
     puts "Hello from the FF Ruby Server SDK: " + self.to_s
