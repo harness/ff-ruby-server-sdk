@@ -38,6 +38,8 @@ class InnerClient < AuthCallback
 
     # run services only after token is processed
 
+    # TODO: Start processors
+
   end
 
   protected
