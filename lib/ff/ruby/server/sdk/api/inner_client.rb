@@ -1,3 +1,4 @@
+require_relative "auth_service"
 require_relative "auth_callback"
 require_relative "../connector/harness_connector"
 
