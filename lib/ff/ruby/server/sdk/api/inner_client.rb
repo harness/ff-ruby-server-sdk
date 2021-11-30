@@ -1,4 +1,5 @@
 require_relative "auth_callback"
+require_relative "../connector/harness_connector"
 
 class InnerClient < AuthCallback
 
@@ -16,7 +17,7 @@ class InnerClient < AuthCallback
 
     if connector == nil
 
-      # TODO: Connector init
+      @connector = HarnessConnector.new(sdk_key, config = @config, on_authorized = self)
 
     else
 
@@ -60,6 +61,11 @@ class InnerClient < AuthCallback
     )
 
     @auth_service.start_async
+  end
+
+  def on_authorized
+
+    raise "To be implemented"
   end
 
 end

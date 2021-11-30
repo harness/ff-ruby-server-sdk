@@ -1,4 +1,6 @@
-class AuthCallback
+require_relative "../connector/on_authorized"
+
+class AuthCallback < OnAuthorized
 
   def on_auth_success
 

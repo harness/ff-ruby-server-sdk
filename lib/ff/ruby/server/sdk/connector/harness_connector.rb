@@ -5,12 +5,12 @@ class HarnessConnector < Connector
   def initialize(
 
     sdk_key,
-    options = nil,
+    config = nil,
     on_authorized
   )
 
     @sdk_key = sdk_key
-    @options = options
+    @options = config
     @on_authorized = on_authorized
 
     # TODO: Init API
