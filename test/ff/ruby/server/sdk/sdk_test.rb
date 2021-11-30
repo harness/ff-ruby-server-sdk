@@ -39,11 +39,13 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_client_constructor_inst
 
-    config = ConfigBuilder.new.build
     test_string = "test"
+    config = ConfigBuilder.new.build
+    connector = HarnessConnector.new(test_string, config)
+
     instance_with_no_config = CfClient.new(test_string)
     instance_with_config = CfClient.new(test_string, config)
-    instance_with_connector = CfClient.new(test_string, config, test_string)
+    instance_with_connector = CfClient.new(test_string, config, connector)
 
     refute_nil instance_with_config
     refute_nil instance_with_connector

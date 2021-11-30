@@ -17,6 +17,11 @@ class InnerClient < AuthCallback
       @config = ConfigBuilder.new.build
     else
 
+      unless config.kind_of?(Config)
+
+        raise "The 'config' parameter must be of '" + Config.to_s + "' data type"
+      end
+
       @config = config
     end
 
@@ -25,6 +30,11 @@ class InnerClient < AuthCallback
       @connector = HarnessConnector.new(sdk_key, config = @config, on_authorized = self)
 
     else
+
+      unless connector.kind_of?(Connector)
+
+        raise "The 'connector' parameter must be of '" + Connector.to_s + "' data type"
+      end
 
       @connector = connector
     end
@@ -54,11 +64,6 @@ class InnerClient < AuthCallback
     puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
-
-    unless @config.kind_of?(Config)
-
-      raise "The 'config' parameter must be of '" + Config.to_s + "' data type"
-    end
 
     @auth_service = AuthService.new(
 
