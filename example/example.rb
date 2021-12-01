@@ -10,7 +10,7 @@ config = ConfigBuilder.new.build
 
 client.init(
 
-  sdk_key = key,
+  api_key = key,
   config = config
 )
 

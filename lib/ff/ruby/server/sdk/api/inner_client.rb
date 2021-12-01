@@ -4,9 +4,9 @@ require_relative "../connector/harness_connector"
 
 class InnerClient < AuthCallback
 
-  def initialize(sdk_key = nil, config = nil, connector = nil)
+  def initialize(api_key = nil, config = nil, connector = nil)
 
-    if sdk_key == nil || sdk_key.empty?
+    if api_key == nil || api_key.empty?
 
       raise "SDK key is not provided"
     end
@@ -26,7 +26,7 @@ class InnerClient < AuthCallback
 
     if connector == nil
 
-      @connector = HarnessConnector.new(sdk_key, config = @config, on_unauthorized = self)
+      @connector = HarnessConnector.new(api_key, config = @config, on_unauthorized = self)
 
     else
 

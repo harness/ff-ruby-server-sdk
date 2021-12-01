@@ -3,9 +3,9 @@ require_relative "../version"
 
 class HarnessConnector < Connector
 
-  def initialize(sdk_key, config, on_unauthorized)
+  def initialize(api_key, config, on_unauthorized)
 
-    @sdk_key = sdk_key
+    @api_key = api_key
     @options = config
     @on_unauthorized = on_unauthorized
     @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
@@ -18,6 +18,11 @@ class HarnessConnector < Connector
   end
 
   def authenticate
+
+    request = OpenapiClient::AuthenticationRequest.new
+    request.api_key = @api_key
+
+    puts "Request: " + request.to_s
 
     false
   end
