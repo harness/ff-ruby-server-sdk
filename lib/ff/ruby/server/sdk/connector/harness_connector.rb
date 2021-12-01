@@ -1,4 +1,5 @@
 require_relative "connector"
+require_relative "../version"
 
 class HarnessConnector < Connector
 
@@ -7,6 +8,7 @@ class HarnessConnector < Connector
     @sdk_key = sdk_key
     @options = config
     @on_authorized = on_authorized
+    @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
 
     @api = make_api_client
     @metrics_api = make_metrics_api_client
@@ -58,8 +60,8 @@ class HarnessConnector < Connector
 
     api_client = OpenapiClient::ApiClient.new
 
-    config = ConfigBuilder.new.build
-    api_client.config = config
+    api_client.config = @options
+    api_client.user_agent = @user_agent
 
     api_client
   end
@@ -68,8 +70,8 @@ class HarnessConnector < Connector
 
     api_client = OpenapiClient::ApiClient.new
 
-    config = ConfigBuilder.new.build
-    api_client.config = config
+    api_client.config = @options
+    api_client.user_agent = @user_agent
 
     api_client
   end
