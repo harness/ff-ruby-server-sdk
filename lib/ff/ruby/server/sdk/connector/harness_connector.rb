@@ -22,7 +22,15 @@ class HarnessConnector < Connector
     request = OpenapiClient::AuthenticationRequest.new
     request.api_key = @api_key
 
-    puts "Request: " + request.to_s
+    begin
+
+      response = @api.authenticate
+      @token = response.auth_token
+
+    rescue OpenapiClient::ApiError => e
+
+      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    end
 
     false
   end

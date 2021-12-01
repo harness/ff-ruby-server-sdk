@@ -85,7 +85,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     config.connection_timeout = @number
     config.read_timeout = @number
     config.write_timeout = @number
-    config.debug = !@bool
+    config.debugging = !@bool
     config.metrics_service_acceptable_duration = @number
     config.cache = DefaultCache.new
 
@@ -115,7 +115,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
                           .connection_timeout(@number)
                           .read_timeout(@number)
                           .write_timeout(@number)
-                          .debug(!@bool)
+                          .debugging(!@bool)
                           .metrics_service_acceptable_duration(@number)
                           .cache(cache)
                           .build
@@ -198,7 +198,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.connection_timeout == 10 * 1000)
     assert(config.read_timeout == (Config.min_frequency * 1000) / 2)
     assert(config.write_timeout == config.connection_timeout)
-    assert(!config.debug)
+    assert(!config.debugging)
     assert(config.metrics_service_acceptable_duration == config.connection_timeout)
 
     refute_nil config.cache
@@ -220,7 +220,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.connection_timeout == @number)
     assert(config.read_timeout == @number)
     assert(config.write_timeout == @number)
-    assert(config.debug)
+    assert(config.debugging)
     assert(config.metrics_service_acceptable_duration == @number)
 
     refute_nil config.cache

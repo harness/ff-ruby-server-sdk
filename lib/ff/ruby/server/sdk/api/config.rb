@@ -2,9 +2,11 @@ require_relative "default_cache"
 
 class Config
 
+  attr_writer   :base_url
+
   attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
                 :frequency, :buffer_size, :all_attributes_private, :private_attributes, :connection_timeout,
-                :read_timeout, :write_timeout, :debug, :metrics_service_acceptable_duration, :cache, :store
+                :read_timeout, :write_timeout, :debugging, :metrics_service_acceptable_duration, :cache, :store
 
   # Static:
   class << self
@@ -21,7 +23,8 @@ class Config
   def initialize
     super
 
-    @config_url = "https://config.ff.harness.io/api/1.0"
+    @base_url = "https://config.ff.harness.io/api/1.0"
+    @config_url = @base_url
     @event_url = "https://events.ff.harness.io/api/1.0"
 
     @stream_enabled = true
@@ -44,7 +47,7 @@ class Config
 
     @write_timeout = 10 * 1000
 
-    @debug = false
+    @debugging = false
 
     @metrics_service_acceptable_duration = 10 * 1000
 
@@ -59,10 +62,52 @@ class Config
     [@frequency, @@min_frequency].max
   end
 
+  def base_url(args)
+
+    puts "Ignoring args: " + args.to_s
+    @base_url
+  end
+
+  def verify_ssl_host
+
+    true
+  end
+
+  def params_encoding
+
+    nil
+  end
+
+  def timeout
+
+    @connection_timeout
+  end
+
+  def verify_ssl
+
+    nil
+  end
+
+  def cert_file
+
+    nil
+  end
+
+  def key_file
+
+    nil
+  end
+
+  def ssl_ca_cert
+
+    nil
+  end
+
   def describe
 
     to_s + "\n" +
       "\tmin_frequency = " + @@min_frequency.to_s + "\n" +
+      "\tbase_url = " + @base_url + "\n" +
       "\tconfig_url = " + @config_url + "\n" +
       "\tevent_url = " + @event_url + "\n" +
       "\tstream_enabled = " + @stream_enabled.to_s + "\n" +
@@ -76,7 +121,7 @@ class Config
       "\tconnection_timeout = " + @connection_timeout.to_s + "\n" +
       "\tread_timeout = " + @read_timeout.to_s + "\n" +
       "\twrite_timeout = " + @write_timeout.to_s + "\n" +
-      "\tdebug = " + @debug.to_s + "\n" +
+      "\tdebug = " + @debugging.to_s + "\n" +
       "\tmetrics_service_acceptable_duration = " + @metrics_service_acceptable_duration.to_s + "\n" +
       "\tcache = " + @cache.to_s + "\n" +
       "\tstore = " + @store.to_s
