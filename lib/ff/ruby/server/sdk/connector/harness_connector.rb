@@ -3,7 +3,7 @@ require_relative "../version"
 
 class HarnessConnector < Connector
 
-  def initialize(sdk_key, config = nil, on_authorized)
+  def initialize(sdk_key, config, on_authorized)
 
     @sdk_key = sdk_key
     @options = config
@@ -18,8 +18,6 @@ class HarnessConnector < Connector
   end
 
   def authenticate
-
-
 
     false
   end
@@ -63,15 +61,30 @@ class HarnessConnector < Connector
     api_client.config = @options
     api_client.user_agent = @user_agent
 
+
+    # TODO: Interceptor
+
     api_client
   end
 
   def make_metrics_api_client
 
+    max_timeout = 30 * 60 * 1000
+
     api_client = OpenapiClient::ApiClient.new
 
-    api_client.config = @options
+    config = @options.clone
+
+    # TODO: Check base path
+
+    config.connection_timeout = max_timeout
+    config.read_timeout = max_timeout
+    config.write_timeout = max_timeout
+
+    api_client.config = config
     api_client.user_agent = @user_agent
+
+    # TODO: Interceptor
 
     api_client
   end

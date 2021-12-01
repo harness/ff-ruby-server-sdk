@@ -5,6 +5,8 @@ $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
+require_relative "wrapper"
+
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def initialize(name)
@@ -41,7 +43,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     test_string = "test"
     config = ConfigBuilder.new.build
-    connector = HarnessConnector.new(test_string, config)
+    connector = HarnessConnector.new(test_string, config, nil)
 
     instance_with_no_config = CfClient.new(test_string)
     instance_with_config = CfClient.new(test_string, config)
@@ -159,6 +161,23 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     refute_nil client
 
     client.destroy
+  end
+
+  def test_config_wrapping
+
+    config = ConfigBuilder.new.build
+
+    w1 = Wrapper.new(config)
+    w2 = Wrapper.new(config)
+    w3 = Wrapper.new(config.clone)
+
+    w1.wrapped.config_url = "test1"
+    w2.wrapped.config_url = "test2"
+    w3.wrapped.config_url = "test3"
+
+    assert(w1.wrapped.config_url == w2.wrapped.config_url)
+    assert(w1.wrapped.config_url != w3.wrapped.config_url)
+    assert(w2.wrapped.config_url != w3.wrapped.config_url)
   end
 
   private
