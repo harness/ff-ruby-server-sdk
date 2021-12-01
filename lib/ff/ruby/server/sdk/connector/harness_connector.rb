@@ -2,23 +2,24 @@ require_relative "connector"
 
 class HarnessConnector < Connector
 
-  def initialize(
-
-    sdk_key,
-    config = nil,
-    on_authorized
-  )
+  def initialize(sdk_key, config = nil, on_authorized)
 
     @sdk_key = sdk_key
     @options = config
     @on_authorized = on_authorized
 
-    # TODO: Init API
+    @api = OpenapiClient::ClientApi.new
+    @metrics_api = OpenapiClient::MetricsApi.new
+
+    puts "Api: " + @api.to_s
+    puts "Metrics api: " + @metrics_api.to_s
   end
 
   def authenticate
 
-    raise @tbe
+
+
+    false
   end
 
   def get_flags
