@@ -26,7 +26,7 @@ class InnerClient < AuthCallback
 
     if connector == nil
 
-      @connector = HarnessConnector.new(sdk_key, config = @config, on_authorized = self)
+      @connector = HarnessConnector.new(sdk_key, config = @config, on_unauthorized = self)
 
     else
 
@@ -100,7 +100,7 @@ class InnerClient < AuthCallback
     @auth_service.start_async
   end
 
-  def on_authorized
+  def on_unauthorized
 
     if @closing
 

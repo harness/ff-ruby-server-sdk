@@ -3,11 +3,11 @@ require_relative "../version"
 
 class HarnessConnector < Connector
 
-  def initialize(sdk_key, config, on_authorized)
+  def initialize(sdk_key, config, on_unauthorized)
 
     @sdk_key = sdk_key
     @options = config
-    @on_authorized = on_authorized
+    @on_unauthorized = on_unauthorized
     @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
 
     @api = make_api_client
