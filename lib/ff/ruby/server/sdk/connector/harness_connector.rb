@@ -8,8 +8,8 @@ class HarnessConnector < Connector
     @options = config
     @on_authorized = on_authorized
 
-    @api = OpenapiClient::ClientApi.new
-    @metrics_api = OpenapiClient::MetricsApi.new
+    @api = make_api_client
+    @metrics_api = make_metrics_api_client
 
     puts "Api: " + @api.to_s
     puts "Metrics api: " + @metrics_api.to_s
@@ -50,5 +50,21 @@ class HarnessConnector < Connector
   def stream(updater)
 
     raise @tbe
+  end
+
+  protected
+
+  def make_api_client
+
+    api_client = OpenapiClient::ApiClient.new
+
+    api_client
+  end
+
+  def make_metrics_api_client
+
+    api_client = OpenapiClient::ApiClient.new
+
+    api_client
   end
 end
