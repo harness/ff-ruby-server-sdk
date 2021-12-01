@@ -10,8 +10,8 @@ class HarnessConnector < Connector
     @on_unauthorized = on_unauthorized
     @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
 
-    @api = make_api_client
-    @metrics_api = make_metrics_api_client
+    @api = OpenapiClient::ClientApi.new(make_api_client)
+    @metrics_api = OpenapiClient::MetricsApi.new(make_metrics_api_client)
 
     puts "Api: " + @api.to_s
     puts "Metrics api: " + @metrics_api.to_s
@@ -61,6 +61,7 @@ class HarnessConnector < Connector
     api_client.config = @options
     api_client.user_agent = @user_agent
 
+    api_client
 
     # TODO: Interceptor
 
