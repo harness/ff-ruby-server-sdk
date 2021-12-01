@@ -29,7 +29,15 @@ class AuthService
 
         puts "Async iteration"
 
-        # TODO: Implement API communication here
+        if @connector.authenticate
+
+          @callback.on_auth_success
+          stop_async
+          puts "Stopping Auth service"
+        else
+
+          puts "Exception while authenticating, retry in " + @poll_interval_in_sec.to_s + " seconds"
+        end
 
         sleep(@poll_interval_in_sec)
       end
