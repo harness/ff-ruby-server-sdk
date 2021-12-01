@@ -58,12 +58,18 @@ class HarnessConnector < Connector
 
     api_client = OpenapiClient::ApiClient.new
 
+    config = ConfigBuilder.new.build
+    api_client.config = config
+
     api_client
   end
 
   def make_metrics_api_client
 
     api_client = OpenapiClient::ApiClient.new
+
+    config = ConfigBuilder.new.build
+    api_client.config = config
 
     api_client
   end
