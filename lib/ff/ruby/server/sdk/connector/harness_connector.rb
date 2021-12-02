@@ -124,9 +124,15 @@ class HarnessConnector < Connector
 
     decoded_token = JWT.decode @token, nil, false
 
-    @environment = decoded_token[0]["environment"]
-    @cluster = decoded_token[0]["clusterIdentifier"]
+    if decoded_token != nil && !decoded_token.empty?
 
-    puts "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
+      @environment = decoded_token[0]["environment"]
+      @cluster = decoded_token[0]["clusterIdentifier"]
+
+      puts "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
+    else
+
+      puts "ERROR: Could not obtain the environment and cluster data from the token"
+    end
   end
 end
