@@ -31,6 +31,7 @@ class HarnessConnector < Connector
       @token = response.auth_token
 
       puts "Token has been obtained: " + @token
+      process_token
       return true
 
     rescue OpenapiClient::ApiError => e
@@ -107,5 +108,16 @@ class HarnessConnector < Connector
     # TODO: Interceptor
 
     api_client
+  end
+
+  def process_token
+
+    headers = {
+
+      "Authorization" => "Bearer " + @token
+    }
+
+    @api.api_client.default_headers.merge(headers)
+    @metrics_api.api_client.default_headers.merge(headers)
   end
 end
