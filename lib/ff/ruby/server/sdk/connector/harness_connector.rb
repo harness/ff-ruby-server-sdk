@@ -19,9 +19,6 @@ class HarnessConnector < Connector
 
   def authenticate
 
-    request = OpenapiClient::AuthenticationRequest.new
-    request.api_key = @api_key
-
     begin
 
       options = {
@@ -34,6 +31,7 @@ class HarnessConnector < Connector
       @token = response.auth_token
 
       puts "Token has been obtained: " + @token
+      return true
 
     rescue OpenapiClient::ApiError => e
 
