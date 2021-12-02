@@ -1,3 +1,5 @@
+require "jwt"
+
 require_relative "connector"
 require_relative "../version"
 
@@ -119,5 +121,12 @@ class HarnessConnector < Connector
 
     @api.api_client.default_headers.merge(headers)
     @metrics_api.api_client.default_headers.merge(headers)
+
+    decoded_token = JWT.decode @token, nil, false
+
+    @environment = decoded_token[0]["environment"]
+    @cluster = decoded_token[0]["clusterIdentifier"]
+
+    puts "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
   end
 end
