@@ -24,8 +24,16 @@ class HarnessConnector < Connector
 
     begin
 
-      response = @api.authenticate
+      options = {
+        :'authentication_request' => {
+          :'apiKey' => @api_key
+        }
+      }
+
+      response = @api.authenticate(opts = options)
       @token = response.auth_token
+
+      puts "Token has been obtained: " + @token
 
     rescue OpenapiClient::ApiError => e
 
