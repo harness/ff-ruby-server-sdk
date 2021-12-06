@@ -1,5 +1,6 @@
 require_relative "auth_service"
 require_relative "client_callback"
+require_relative "storage_repository"
 require_relative "../connector/harness_connector"
 
 class InnerClient < ClientCallback
@@ -87,6 +88,8 @@ class InnerClient < ClientCallback
     puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
+
+    @repository = StorageRepository.new(@config.cache, @config.store, self)
 
     @auth_service = AuthService.new(
 
