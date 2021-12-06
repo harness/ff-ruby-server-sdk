@@ -46,32 +46,32 @@ class HarnessConnector < Connector
 
   def get_flags
 
-    raise @tbe
+    raise @tbi
   end
 
   def get_flag(identifier)
 
-    raise @tbe
+    raise @tbi
   end
 
   def get_segments
 
-    raise @tbe
+    raise @tbi
   end
 
   def get_segment(identifier)
 
-    raise @tbe
+    raise @tbi
   end
 
   def post_metrics(metrics)
 
-    raise @tbe
+    raise @tbi
   end
 
   def stream(updater)
 
-    raise @tbe
+    raise @tbi
   end
 
   protected

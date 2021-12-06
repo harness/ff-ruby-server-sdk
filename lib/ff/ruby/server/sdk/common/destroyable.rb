@@ -2,11 +2,11 @@ class Destroyable
 
   def initialize
 
-    @tbe = "to be implemented"
+    @tbi = "to be implemented"
   end
 
   def destroy
 
-    raise @tbe
+    raise @tbi
   end
 end
