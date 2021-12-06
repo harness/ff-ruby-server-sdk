@@ -10,22 +10,30 @@ class FileMapStore < Storage
 
   def set(key, value)
 
-    raise @tbe
+    check_init
+
+    @store[key] = value
   end
 
   def get(key)
 
-    raise @tbe
+    check_init
+
+    @store[key]
   end
 
   def delete(key)
 
-    raise @tbe
+    check_init
+
+    @store.delete(key)
   end
 
   def keys
 
-    raise @tbe
+    check_init
+
+    raise @store.keys
   end
 
   def close
@@ -33,6 +41,16 @@ class FileMapStore < Storage
     if @store != nil
 
       @store.close
+    end
+  end
+
+  private
+
+  def check_init
+
+    if @store == nil
+
+      raise "Not initialized"
     end
   end
 end
