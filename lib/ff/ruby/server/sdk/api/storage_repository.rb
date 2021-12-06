@@ -2,6 +2,13 @@ require_relative "../common/repository"
 
 class StorageRepository < Repository
 
+  def initialize(cache, store = nil, callback)
+
+    @cache = cache
+    @store = store
+    @callback = callback
+  end
+
   def get_flag(identifier)
 
     # TODO: Override
