@@ -1,10 +1,11 @@
+require "moneta"
 require_relative "../common/storage"
 
 class FileMapStore < Storage
 
   def initialize
 
-    @tbe = "To be implemented"
+    @store = Moneta.new(:File, dir: "moneta")
   end
 
   def set(key, value)
@@ -29,6 +30,9 @@ class FileMapStore < Storage
 
   def close
 
-    super
+    if @store != nil
+
+      @store.close
+    end
   end
 end

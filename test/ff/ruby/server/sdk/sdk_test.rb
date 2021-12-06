@@ -180,6 +180,22 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(w2.wrapped.config_url != w3.wrapped.config_url)
   end
 
+  def test_moneta_init
+
+    store = FileMapStore.new
+    refute_nil store
+
+    config = ConfigBuilder.new
+                          .store(store)
+                          .build
+
+    refute_nil config
+
+    refute_nil config.store
+
+    config.store.close
+  end
+
   private
 
   def assert_defaults(config)
