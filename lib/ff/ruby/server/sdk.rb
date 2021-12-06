@@ -5,6 +5,7 @@ require_relative "sdk/version"
 require_relative "sdk/common/cache"
 require_relative "sdk/common/storage"
 require_relative "sdk/common/closeable"
+require_relative "sdk/common/repository"
 require_relative "sdk/common/destroyable"
 
 require_relative "sdk/api/config"
