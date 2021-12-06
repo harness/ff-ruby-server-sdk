@@ -191,9 +191,25 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil config
 
-    refute_nil config.store
+    moneta = config.store
+    refute_nil moneta
 
-    config.store.close
+    (0..@counter).each do |i|
+
+      key = i.to_s
+      moneta.set(key, i)
+      check = moneta.get(key)
+
+      assert(i == check)
+    end
+
+    refute_nil moneta.keys
+
+    assert(moneta.keys.size == @counter + 1)
+
+    moneta.close
+
+    assert(moneta.keys.size == 0)
   end
 
   private

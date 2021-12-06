@@ -41,9 +41,9 @@ class DefaultCache < Cache
 
   def set(key, value)
 
-    keys.add(key)
     @in_memory.put(key, value)
     @filesystem.put(key, value)
+    keys.add(key)
   end
 
   def get(key)
@@ -63,9 +63,9 @@ class DefaultCache < Cache
 
   def delete(key)
 
-    keys.delete(key)
     @in_memory.delete(key)
     @filesystem.delete(key)
+    keys.delete(key)
   end
 
   def keys
