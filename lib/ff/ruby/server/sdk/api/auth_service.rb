@@ -1,4 +1,6 @@
-class AuthService
+require_relative "../common/closeable"
+
+class AuthService < Closeable
 
   def initialize(connector = nil, poll_interval_in_sec = 60, callback = nil)
 
@@ -7,9 +9,9 @@ class AuthService
       raise "The 'connector' parameter must be of '" + Connector.to_s + "' data type"
     end
 
-    unless callback.kind_of?(AuthCallback)
+    unless callback.kind_of?(ClientCallback)
 
-      raise "The 'callback' parameter must be of '" + AuthCallback.to_s + "' data type"
+      raise "The 'callback' parameter must be of '" + ClientCallback.to_s + "' data type"
     end
 
     @callback = callback
@@ -57,9 +59,9 @@ class AuthService
 
     unless @callback == nil
 
-      unless @callback.kind_of?(AuthCallback)
+      unless @callback.kind_of?(ClientCallback)
 
-        raise "Expected '" + AuthCallback.to_s + "' data type for the callback"
+        raise "Expected '" + ClientCallback.to_s + "' data type for the callback"
       end
 
       @callback.on_auth_success

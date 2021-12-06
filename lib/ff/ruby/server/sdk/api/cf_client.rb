@@ -1,8 +1,9 @@
 require "openapi_client"
 
 require_relative "inner_client"
+require_relative "../common/closeable"
 
-class CfClient
+class CfClient < Closeable
 
   # Static:
   class << self

@@ -1,8 +1,8 @@
 require_relative "auth_service"
-require_relative "auth_callback"
+require_relative "client_callback"
 require_relative "../connector/harness_connector"
 
-class InnerClient < AuthCallback
+class InnerClient < ClientCallback
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
