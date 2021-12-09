@@ -9,6 +9,7 @@ require_relative "sdk/common/repository"
 require_relative "sdk/common/destroyable"
 
 require_relative "sdk/api/config"
+require_relative "sdk/api/operators"
 require_relative "sdk/api/cf_client"
 require_relative "sdk/api/inner_client"
 require_relative "sdk/api/auth_service"

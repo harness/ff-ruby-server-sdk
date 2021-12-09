@@ -1,3 +1,4 @@
+require_relative "operators"
 require_relative "../common/repository"
 
 class StorageRepository < Repository
@@ -9,7 +10,7 @@ class StorageRepository < Repository
     @callback = callback
   end
 
-  def get_flag(identifier, cacheable)
+  def get_flag(identifier, cacheable = true)
 
     flag_key = format_flag_key(identifier)
     flag = @cache.get(flag_key)
@@ -59,7 +60,34 @@ class StorageRepository < Repository
 
   def find_flags_by_segment(identifier)
 
-    # TODO: Override
+    result = []
+    keys = @cache.keys
+
+    if @store != nil
+
+      keys = @store.keys
+    end
+
+    keys.each  do |key|
+
+      flag = get_flag(key)
+
+      if flag != nil && !flag.rules.length > 0
+
+        flag.rules.each  do |rule|
+
+          rule.clauses.each  do |clause|
+
+            if clause.op == Operators.SEGMENT_MATCH && clause.values.include(identifier)
+
+              result.push(flag.feature)
+            end
+          end
+        end
+      end
+    end
+
+    result
   end
 
   def set_flag(identifier, feature_config)

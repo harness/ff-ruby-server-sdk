@@ -8,12 +8,12 @@ class Repository < Closeable
     @tbi = "To be implemented"
   end
 
-  def get_flag(identifier, cacheable)
+  def get_flag(identifier, cacheable = true)
 
     raise @tbi
   end
 
-  def get_segment(identifier, cacheable)
+  def get_segment(identifier, cacheable = true)
 
     raise @tbi
   end
