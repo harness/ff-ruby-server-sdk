@@ -127,7 +127,36 @@ class StorageRepository < Repository
 
   def set_segment(identifier, segment)
 
-    # TODO: Override
+    if is_segment_outdated(identifier, segment)
+
+      puts "Segment " + identifier + " already exists"
+      return
+    end
+
+    segment_key = format_segment_key(identifier)
+
+    if @store != nil
+
+      @store.set(segment_key, segment)
+      @cache.delete(segment_key)
+
+      puts "Segment " + identifier + " successfully stored and cache invalidated"
+    else
+
+      @cache.set(segment_key, segment)
+
+      puts "Segment " + identifier + " successfully cached"
+    end
+
+    if @callback != nil
+
+      unless @callback.kind_of?(RepositoryCallback)
+
+        raise "The 'callback' parameter must be of '" + RepositoryCallback.to_s + "' data type"
+      end
+
+      @callback.on_segment_stored(identifier)
+    end
   end
 
   def delete_flag(identifier)
