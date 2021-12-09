@@ -19,6 +19,7 @@ require_relative "sdk/api/file_map_store"
 require_relative "sdk/api/client_callback"
 require_relative "sdk/api/storage_repository"
 require_relative "sdk/api/repository_callback"
+require_relative "sdk/api/inner_client_repository_callback"
 
 require_relative "sdk/connector/connector"
 require_relative "sdk/connector/event_source"
