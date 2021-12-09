@@ -1,4 +1,5 @@
 require_relative "operators"
+require_relative "repository_callback"
 require_relative "../common/repository"
 
 class StorageRepository < Repository
@@ -68,15 +69,15 @@ class StorageRepository < Repository
       keys = @store.keys
     end
 
-    keys.each  do |key|
+    keys.each do |key|
 
       flag = get_flag(key)
 
       if flag != nil && !flag.rules.length > 0
 
-        flag.rules.each  do |rule|
+        flag.rules.each do |rule|
 
-          rule.clauses.each  do |clause|
+          rule.clauses.each do |clause|
 
             if clause.op == Operators.SEGMENT_MATCH && clause.values.include(identifier)
 
@@ -92,7 +93,36 @@ class StorageRepository < Repository
 
   def set_flag(identifier, feature_config)
 
-    # TODO: Override
+    if is_flag_outdated(identifier, feature_config)
+
+      puts "Flag " + identifier + " already exists"
+      return
+    end
+
+    flag_key = format_flag_key(identifier)
+
+    if @store != nil
+
+      @store.set(flag_key, feature_config)
+      @cache.delete(flag_key)
+
+      puts "Flag " + identifier + " successfully stored and cache invalidated"
+    else
+
+      @cache.set(flag_key, feature_config)
+
+      puts "Flag " + identifier + " successfully cached"
+    end
+
+    if @callback != nil
+
+      unless @callback.kind_of?(RepositoryCallback)
+
+        raise "The 'callback' parameter must be of '" + RepositoryCallback.to_s + "' data type"
+      end
+
+      @callback.on_flag_stored(identifier)
+    end
   end
 
   def set_segment(identifier, segment)
@@ -119,6 +149,28 @@ class StorageRepository < Repository
   end
 
   protected
+
+  def is_flag_outdated(identifier, new_feature_config)
+
+    flag = get_flag(identifier, false)
+    if flag != nil && flag.version != new_feature_config.version
+
+      return flag.version >= new_feature_config.version
+    end
+
+    false
+  end
+
+  def is_segment_outdated(identifier, new_segment)
+
+    segment = get_segment(identifier, false)
+    if segment != nil && segment.version != new_segment.version
+
+      return segment.version >= new_segment.version
+    end
+
+    false
+  end
 
   def format_flag_key(identifier)
 

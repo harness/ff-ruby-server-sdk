@@ -16,7 +16,7 @@ class Cache
   end
 
   def delete(key)
-
+    
     raise @tbi
   end
 

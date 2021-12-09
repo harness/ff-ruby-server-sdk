@@ -153,6 +153,24 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
       assert_equal(i % 2 == 0, value_bool)
     end
 
+    (0..@counter).each do |i|
+
+      cache.delete("key_int_" + i.to_s)
+      cache.delete("key_str_" + i.to_s)
+      cache.delete("key_bool_" + i.to_s)
+    end
+
+    (0..@counter).each do |i|
+
+      value_int = cache.get("key_int_" + i.to_s)
+      assert_nil(value_int)
+
+      value_str = cache.get("key_str_" + i.to_s)
+      assert_nil(value_str)
+
+      value_bool = cache.get("key_bool_" + i.to_s)
+      assert_nil(value_bool)
+    end
   end
 
   def test_client_destroy

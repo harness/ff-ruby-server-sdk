@@ -63,8 +63,8 @@ class DefaultCache < Cache
 
   def delete(key)
 
-    @in_memory.delete(key)
-    @filesystem.delete(key)
+    @in_memory.invalidate(key)
+    @filesystem.invalidate(key)
     keys.delete(key)
   end
 
