@@ -9,9 +9,28 @@ class StorageRepository < Repository
     @callback = callback
   end
 
-  def get_flag(identifier)
+  def get_flag(identifier, cacheable)
 
-    # TODO: Override
+    flag_key = format_flag_key(identifier)
+    flag = @cache.get(flag_key)
+
+    if flag != nil
+
+      return flag
+    end
+
+    if @store != nil
+
+      flag = @store.get(flag_key)
+      if flag != nil && cacheable
+
+        @cache.set(flag_key, flag)
+      end
+
+      return flag
+    end
+
+    nil
   end
 
   def get_segment(identifier)
@@ -42,5 +61,25 @@ class StorageRepository < Repository
   def delete_segment(identifier)
 
     # TODO: Override
+  end
+
+  def close
+
+    if @store != nil
+
+      @store.close
+    end
+  end
+
+  protected
+
+  def format_flag_key(identifier)
+
+    "flags/" + identifier
+  end
+
+  def format_segment_key(identifier)
+
+    "segments/" + identifier
   end
 end

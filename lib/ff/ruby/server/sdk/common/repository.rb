@@ -8,7 +8,7 @@ class Repository < Closeable
     @tbi = "To be implemented"
   end
 
-  def get_flag(identifier)
+  def get_flag(identifier, cacheable)
 
     raise @tbi
   end
