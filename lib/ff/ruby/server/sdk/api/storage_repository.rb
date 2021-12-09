@@ -33,9 +33,28 @@ class StorageRepository < Repository
     nil
   end
 
-  def get_segment(identifier)
+  def get_segment(identifier, cacheable)
 
-    # TODO: Override
+    segment_key = format_segment_key(identifier)
+    segment = @cache.get(segment_key)
+
+    if segment != nil
+
+      return segment
+    end
+
+    if @store != nil
+
+      segment = @store.get(segment_key)
+      if segment != nil && cacheable
+
+        @cache.set(segment_key, segment)
+      end
+
+      return segment
+    end
+
+    nil
   end
 
   def find_flags_by_segment(identifier)

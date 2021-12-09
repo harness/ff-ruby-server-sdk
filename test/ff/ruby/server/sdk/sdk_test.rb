@@ -2,6 +2,7 @@
 
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 
+require "securerandom"
 require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
@@ -194,9 +195,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     moneta = config.store
     refute_nil moneta
 
+    prefix = SecureRandom.uuid.to_s
+
     (0..@counter).each do |i|
 
-      key = i.to_s
+      key = prefix + i.to_s
       moneta.set(key, i)
       check = moneta.get(key)
 

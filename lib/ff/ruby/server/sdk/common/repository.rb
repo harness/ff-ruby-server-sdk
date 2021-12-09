@@ -13,7 +13,7 @@ class Repository < Closeable
     raise @tbi
   end
 
-  def get_segment(identifier)
+  def get_segment(identifier, cacheable)
 
     raise @tbi
   end
