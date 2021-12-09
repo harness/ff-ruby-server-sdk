@@ -48,7 +48,7 @@ class InnerClient < ClientCallback
     @stream_ready = false
     @metric_ready = false
 
-    @repository_callback = InnerClientRepositoryCallback.new(@repository)
+    @repository_callback = InnerClientRepositoryCallback.new
 
     setup
   end
