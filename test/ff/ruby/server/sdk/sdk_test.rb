@@ -233,6 +233,12 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(moneta.keys.size == 0)
   end
 
+  def test_repository
+
+    # TODO: Test repo.
+    raise "Not implemented"
+  end
+
   private
 
   def assert_defaults(config)
