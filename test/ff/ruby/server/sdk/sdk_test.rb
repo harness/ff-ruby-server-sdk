@@ -241,9 +241,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     repository = StorageRepository.new(config.cache, nil, @repository_callback)
 
-    refute_nil repository
-
-    repository.close
+    assert_repository(repository)
 
     file_map_store = FileMapStore.new
 
@@ -255,10 +253,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     repository = StorageRepository.new(config.cache, config.store, @repository_callback)
 
-    refute_nil repository
-
-    repository.close
-
+    assert_repository(repository)
   end
 
   private
@@ -306,5 +301,14 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil config.cache
     assert(config.cache.verify)
+  end
+
+  def assert_repository(repository)
+
+    refute_nil repository
+
+    # TODO
+
+    repository.close
   end
 end
