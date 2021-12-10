@@ -187,7 +187,28 @@ class StorageRepository < Repository
 
   def delete_segment(identifier)
 
-    # TODO: Override
+    segment_key = format_segment_key(identifier)
+
+    if @store != nil
+
+      @store.delete(segment_key)
+
+      puts "Segment " + identifier + " successfully deleted from store"
+    end
+
+    @cache.delete(segment_key)
+
+    puts "Segment " + identifier + " successfully deleted from cache"
+
+    if @callback != nil
+
+      unless @callback.kind_of?(RepositoryCallback)
+
+        raise "The 'callback' parameter must be of '" + RepositoryCallback.to_s + "' data type"
+      end
+
+      @callback.on_segment_deleted(identifier)
+    end
   end
 
   def close
