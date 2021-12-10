@@ -7,6 +7,7 @@ require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
 require_relative "wrapper"
+require_relative "repository_test_callback"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
@@ -126,6 +127,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_lib_cache
 
+    prefix = SecureRandom.uuid.to_s + "_"
+
     cache = DefaultCache.new
 
     refute_nil cache
@@ -136,39 +139,39 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     (0..@counter).each do |i|
 
-      cache.set("key_int_" + i.to_s, i)
-      cache.set("key_str_" + i.to_s, i.to_s)
-      cache.set("key_bool_" + i.to_s, i % 2 == 0)
+      cache.set(prefix + "key_int_" + i.to_s, i)
+      cache.set(prefix + "key_str_" + i.to_s, i.to_s)
+      cache.set(prefix + "key_bool_" + i.to_s, i % 2 == 0)
     end
 
     (0..@counter).each do |i|
 
-      value_int = cache.get("key_int_" + i.to_s)
+      value_int = cache.get(prefix + "key_int_" + i.to_s)
       assert_equal(i, value_int)
 
-      value_str = cache.get("key_str_" + i.to_s)
+      value_str = cache.get(prefix + "key_str_" + i.to_s)
       assert_equal(i.to_s, value_str)
 
-      value_bool = cache.get("key_bool_" + i.to_s)
+      value_bool = cache.get(prefix + "key_bool_" + i.to_s)
       assert_equal(i % 2 == 0, value_bool)
     end
 
     (0..@counter).each do |i|
 
-      cache.delete("key_int_" + i.to_s)
-      cache.delete("key_str_" + i.to_s)
-      cache.delete("key_bool_" + i.to_s)
+      cache.delete(prefix + "key_int_" + i.to_s)
+      cache.delete(prefix + "key_str_" + i.to_s)
+      cache.delete(prefix + "key_bool_" + i.to_s)
     end
 
     (0..@counter).each do |i|
 
-      value_int = cache.get("key_int_" + i.to_s)
+      value_int = cache.get(prefix + "key_int_" + i.to_s)
       assert_nil(value_int)
 
-      value_str = cache.get("key_str_" + i.to_s)
+      value_str = cache.get(prefix + "key_str_" + i.to_s)
       assert_nil(value_str)
 
-      value_bool = cache.get("key_bool_" + i.to_s)
+      value_bool = cache.get(prefix + "key_bool_" + i.to_s)
       assert_nil(value_bool)
     end
   end
@@ -239,9 +242,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil config
 
-    repository = StorageRepository.new(config.cache, nil, @repository_callback)
+    callback = RepositoryTestCallback.new
 
-    assert_repository(repository)
+    repository = StorageRepository.new(config.cache, nil, callback)
+
+    assert_repository(repository, callback)
 
     file_map_store = FileMapStore.new
 
@@ -251,9 +256,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil config
 
-    repository = StorageRepository.new(config.cache, config.store, @repository_callback)
+    callback = RepositoryTestCallback.new
 
-    assert_repository(repository)
+    repository = StorageRepository.new(config.cache, config.store, callback)
+
+    assert_repository(repository, callback)
   end
 
   private
@@ -303,9 +310,15 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(config.cache.verify)
   end
 
-  def assert_repository(repository)
+  def assert_repository(repository, callback)
 
+    refute_nil callback
     refute_nil repository
+
+    assert(0, callback.on_flag_stored_count)
+    assert(0, callback.on_flag_deleted_count)
+    assert(0, callback.on_segment_stored_count)
+    assert(0, callback.on_segment_deleted_count)
 
     # TODO
 
