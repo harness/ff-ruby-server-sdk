@@ -35,7 +35,7 @@ class StorageRepository < Repository
     nil
   end
 
-  def get_segment(identifier, cacheable)
+  def get_segment(identifier, cacheable = true)
 
     segment_key = format_segment_key(identifier)
     segment = @cache.get(segment_key)
