@@ -161,7 +161,28 @@ class StorageRepository < Repository
 
   def delete_flag(identifier)
 
-    # TODO: Override
+    flag_key = format_flag_key(identifier)
+
+    if @store != nil
+
+      @store.delete(flag_key)
+
+      puts "Flag " + identifier + " successfully deleted from store"
+    end
+
+    @cache.delete(flag_key)
+
+    puts "Flag " + identifier + " successfully deleted from cache"
+
+    if @callback != nil
+
+      unless @callback.kind_of?(RepositoryCallback)
+
+        raise "The 'callback' parameter must be of '" + RepositoryCallback.to_s + "' data type"
+      end
+
+      @callback.on_flag_deleted(identifier)
+    end
   end
 
   def delete_segment(identifier)
