@@ -245,11 +245,11 @@ class StorageRepository < Repository
 
   def format_flag_key(identifier)
 
-    "flags/" + identifier
+    "flags_" + identifier
   end
 
   def format_segment_key(identifier)
 
-    "segments/" + identifier
+    "segments_" + identifier
   end
 end

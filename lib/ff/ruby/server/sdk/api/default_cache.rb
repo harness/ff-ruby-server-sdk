@@ -41,9 +41,16 @@ class DefaultCache < Cache
 
   def set(key, value)
 
-    @in_memory.put(key, value)
-    @filesystem.put(key, value)
-    keys.add(key)
+    begin
+      @in_memory.put(key, value)
+      @filesystem.put(key, value)
+      keys.add(key)
+
+    rescue ArgumentError => e
+
+      puts "ERROR: " + e.to_s
+      raise "Invalid arguments passed to the 'set' method: key='" + key.to_s + "', value='" + value.to_s + "'"
+    end
   end
 
   def get(key)
@@ -63,9 +70,22 @@ class DefaultCache < Cache
 
   def delete(key)
 
-    @in_memory.invalidate(key)
-    @filesystem.invalidate(key)
-    keys.delete(key)
+    if key == nil
+
+      raise "Key is nil"
+    end
+
+    if @in_memory.exists?(key)
+
+      @in_memory.invalidate(key)
+    end
+
+    if @filesystem.exists?(key)
+
+      @filesystem.invalidate(key)
+    end
+
+    @keys.delete(key)
   end
 
   def keys

@@ -320,8 +320,31 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert(0, callback.on_segment_stored_count)
     assert(0, callback.on_segment_deleted_count)
 
-    # TODO
+    flag_identifier = SecureRandom.uuid.to_s + "_flag"
+
+    flag = OpenapiClient::FeatureConfig.new
+
+    flag.feature = flag_identifier
+
+    refute_nil flag
+
+    repository.set_flag(flag_identifier, flag)
+
+    flag = repository.get_flag(flag_identifier)
+
+    refute_nil flag
+
+    assert_equal(flag_identifier, flag.feature)
+
+    repository.delete_flag(flag_identifier)
 
     repository.close
+
+    flag = repository.get_flag(flag_identifier)
+
+    assert_nil flag
+
+    assert_equal(1, callback.on_flag_stored_count)
+    assert_equal(1, callback.on_flag_deleted_count)
   end
 end
