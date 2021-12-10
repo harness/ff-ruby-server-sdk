@@ -235,8 +235,30 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_repository
 
-    # TODO: Test repo.
-    raise "Not implemented"
+    config = ConfigBuilder.new.build
+
+    refute_nil config
+
+    repository = StorageRepository.new(config.cache, nil, @repository_callback)
+
+    refute_nil repository
+
+    repository.close
+
+    file_map_store = FileMapStore.new
+
+    refute_nil file_map_store
+
+    config = ConfigBuilder.new.store(file_map_store).build
+
+    refute_nil config
+
+    repository = StorageRepository.new(config.cache, config.store, @repository_callback)
+
+    refute_nil repository
+
+    repository.close
+
   end
 
   private
