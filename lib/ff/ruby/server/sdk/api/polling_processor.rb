@@ -11,10 +11,10 @@ class PollingProcessor < Closeable
     callback
   )
 
+    @callback = callback
     @connector = connector
     @repository = repository
     @poll_interval_in_sec = poll_interval_in_sec
-    @callback = callback
   end
 
   def retrieve_flags
