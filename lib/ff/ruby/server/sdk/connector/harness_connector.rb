@@ -46,16 +46,17 @@ class HarnessConnector < Connector
 
   def get_flags
 
+    puts "To be implemented: get_flags"
+    []
+  end
 
+  def get_segments
+
+    puts "To be implemented: get_segments"
     []
   end
 
   def get_flag(identifier)
-
-    raise @tbi
-  end
-
-  def get_segments
 
     raise @tbi
   end

@@ -19,7 +19,7 @@ class PollingProcessor < Closeable
 
   def retrieve_flags
 
-    feature_configs = []
+    flags = []
 
     begin
 
@@ -32,7 +32,7 @@ class PollingProcessor < Closeable
           if fc != nil
 
             @repository.set_flag(fc.feature, fc)
-            feature_configs.push(fc)
+            flags.push(fc)
           end
         }
 
@@ -43,14 +43,36 @@ class PollingProcessor < Closeable
       puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
     end
 
-    feature_configs
+    flags
   end
 
   def retrieve_segments
 
-    # TODO:
-    puts "To be implemented"
-    []
+    segments = []
+
+    begin
+
+      puts "Fetching segments started"
+
+      @connector
+        .get_segments
+        .each { |s|
+
+          if s != nil
+
+            @repository.set_flag(s.identifier, s)
+            flags.push(s)
+          end
+        }
+
+      puts "Fetching segments finished"
+
+    rescue :ConnectorException => e
+
+      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    end
+
+    segments
   end
 
   def start_async
