@@ -29,7 +29,7 @@ class AuthService < Closeable
 
       while @ready do
 
-        puts "Async iteration"
+        puts "Async auth iteration"
 
         if @connector.authenticate
 

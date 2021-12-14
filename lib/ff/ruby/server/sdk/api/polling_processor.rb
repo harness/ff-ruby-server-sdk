@@ -30,12 +30,48 @@ class PollingProcessor < Closeable
     []
   end
 
+  def start_async
+
+    puts "Async starting: " + self.to_s
+
+    @ready = true
+
+    @thread = Thread.new do
+
+      while @ready do
+
+        puts "Async poll iteration"
+
+        # TODO: Implement
+
+        sleep(@poll_interval_in_sec)
+      end
+    end
+
+    puts "Async started: " + self.to_s
+
+    @thread.run
+  end
+
+  def stop_async
+
+    @ready = false
+  end
+
   def start
 
+    puts "Starting PollingProcessor with request interval: " + @poll_interval_in_sec.to_s
+    start_async
   end
 
   def stop
 
+    puts "Stopping PollingProcessor"
+    stop_async
+    unless @ready
+
+      puts "PollingProcessor stopped"
+    end
   end
 
   def close
