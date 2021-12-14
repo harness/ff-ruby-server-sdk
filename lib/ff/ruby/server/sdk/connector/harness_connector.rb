@@ -46,7 +46,8 @@ class HarnessConnector < Connector
 
   def get_flags
 
-    raise @tbi
+
+    []
   end
 
   def get_flag(identifier)

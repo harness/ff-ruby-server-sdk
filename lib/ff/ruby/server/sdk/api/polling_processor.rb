@@ -1,4 +1,5 @@
 require_relative "../common/closeable"
+require_relative "../connector/connector_exception"
 
 class PollingProcessor < Closeable
 
@@ -18,9 +19,31 @@ class PollingProcessor < Closeable
 
   def retrieve_flags
 
-    # TODO:
-    puts "To be implemented"
-    []
+    feature_configs = []
+
+    begin
+
+      puts "Fetching flags started"
+
+      @connector
+        .get_flags
+        .each { |fc|
+
+          if fc != nil
+
+            @repository.set_flag(fc.feature, fc)
+            feature_configs.push(fc)
+          end
+        }
+
+      puts "Fetching flags finished"
+
+    rescue :ConnectorException => e
+
+      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    end
+
+    feature_configs
   end
 
   def retrieve_segments
