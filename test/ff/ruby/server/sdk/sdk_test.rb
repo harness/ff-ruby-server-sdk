@@ -7,6 +7,7 @@ require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
 require_relative "wrapper"
+require_relative "stub_connector"
 require_relative "poller_test_callback"
 require_relative "repository_test_callback"
 
@@ -276,7 +277,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     assert_repository(repository, callback)
 
-    connector = HarnessConnector.new("test", config, nil)
+    connector = StubConnector.new
 
     refute_nil connector
 
