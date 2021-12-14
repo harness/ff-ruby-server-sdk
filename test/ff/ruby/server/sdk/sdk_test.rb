@@ -263,6 +263,33 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert_repository(repository, callback)
   end
 
+  def test_polling_processor
+
+    config = ConfigBuilder.new.build
+
+    refute_nil config
+
+    callback = RepositoryTestCallback.new
+
+    repository = StorageRepository.new(config.cache, nil, callback)
+
+    assert_repository(repository, callback)
+
+    connector = HarnessConnector.new("test", config, nil)
+
+    refute_nil connector
+
+    processor = PollingProcessor.new(
+
+      connector,
+      repository,
+      config.poll_interval_in_seconds,
+      callback = nil
+    )
+
+    refute_nil processor
+  end
+
   private
 
   def assert_defaults(config)

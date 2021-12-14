@@ -1,5 +1,6 @@
 require_relative "auth_service"
 require_relative "client_callback"
+require_relative "polling_processor"
 require_relative "storage_repository"
 require_relative "inner_client_repository_callback"
 
@@ -98,6 +99,14 @@ class InnerClient < ClientCallback
     @auth_service = AuthService.new(
 
       connector = @connector,
+      poll_interval_in_sec = @config.poll_interval_in_seconds,
+      callback = self
+    )
+
+    @poll_processor = PollingProcessor.new(
+
+      connector = @connector,
+      repository = @repository,
       poll_interval_in_sec = @config.poll_interval_in_seconds,
       callback = self
     )
