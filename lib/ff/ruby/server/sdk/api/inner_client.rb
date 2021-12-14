@@ -65,6 +65,7 @@ class InnerClient < ClientCallback
 
     # run services only after token is processed
 
+    @poll_processor.start
     # TODO: Start processors
 
   end
@@ -78,6 +79,8 @@ class InnerClient < ClientCallback
     off
 
     # TODO: Close all
+
+    @poll_processor.close
 
   end
 
@@ -125,6 +128,8 @@ class InnerClient < ClientCallback
 
     @auth_service.start_async
 
+    @poll_processor.stop
+
     # TODO: Stop processors
 
   end
@@ -137,6 +142,17 @@ class InnerClient < ClientCallback
   def on_poller_error(e)
 
     puts "Poller error: " + e.to_s
+  end
+
+  # TODO: SSE
+  def on_connected
+
+    @poll_processor.stop
+  end
+
+  def on_disconnected
+
+    @poll_processor.start
   end
 
   private
