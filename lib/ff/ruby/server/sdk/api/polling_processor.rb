@@ -83,6 +83,7 @@ class PollingProcessor < Closeable
   def stop_async
 
     @ready = false
+    @initialized = false
   end
 
   def start
@@ -107,4 +108,8 @@ class PollingProcessor < Closeable
     puts "Closing PollingProcessor"
   end
 
+  def is_ready
+
+    @ready && @initialized
+  end
 end

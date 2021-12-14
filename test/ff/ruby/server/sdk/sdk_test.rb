@@ -304,6 +304,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     processor.close
 
+    assert(!processor.is_ready)
   end
 
   private
