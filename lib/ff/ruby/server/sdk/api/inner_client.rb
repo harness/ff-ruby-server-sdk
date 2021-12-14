@@ -129,4 +129,41 @@ class InnerClient < ClientCallback
 
   end
 
+  def on_poller_ready(poller)
+
+    on_processor_ready(poller)
+  end
+
+  def on_poller_error(e)
+
+    puts "Poller error: " + e.to_s
+  end
+
+  private
+
+  def on_processor_ready(processor)
+
+    if @closing
+
+      return
+    end
+
+    if processor == @poll_processor
+
+      @poller_ready = true
+      puts "PollingProcessor ready"
+    end
+
+    if (@config.stream_enabled && !@stream_ready) ||
+      (@config.analytics_enabled && !@metric_ready) ||
+      !@poller_ready
+
+      return
+    end
+
+    @initialized = true
+    # TODO: notify
+    # TODO: notify_consumers
+    puts "Initialization is complete"
+  end
 end

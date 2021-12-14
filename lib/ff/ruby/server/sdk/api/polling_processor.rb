@@ -42,7 +42,30 @@ class PollingProcessor < Closeable
 
         puts "Async poll iteration"
 
-        # TODO: Implement
+        begin
+
+          retrieve_flags
+          retrieve_segments
+
+          unless @initialized
+
+            @initialized = true
+            puts "PollingProcessor initialized"
+
+            if callback != nil
+
+              callback.on_poller_ready(self)
+            end
+          end
+
+        rescue OpenapiClient::ApiError => e
+
+          if callback != nil
+
+            callback.on_poller_error(e)
+          end
+        end
+
 
         sleep(@poll_interval_in_sec)
       end
