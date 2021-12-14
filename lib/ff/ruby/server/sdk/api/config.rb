@@ -103,6 +103,11 @@ class Config
     nil
   end
 
+  def client_side_validation
+
+    nil
+  end
+
   def describe
 
     to_s + "\n" +

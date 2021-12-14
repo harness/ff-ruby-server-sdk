@@ -1,6 +1,7 @@
 require "jwt"
 
 require_relative "connector"
+require_relative "connector_exception"
 require_relative "../version"
 
 class HarnessConnector < Connector
@@ -38,7 +39,7 @@ class HarnessConnector < Connector
 
     rescue OpenapiClient::ApiError => e
 
-      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+      log_error(e)
     end
 
     false
@@ -46,14 +47,26 @@ class HarnessConnector < Connector
 
   def get_flags
 
-    puts "To be implemented: get_flags"
-    []
+    begin
+
+      return @api.get_feature_config(@environment, @cluster)
+
+    rescue OpenapiClient::ApiError => e
+
+      log_error(e)
+    end
   end
 
   def get_segments
 
-    puts "To be implemented: get_segments"
-    []
+    begin
+
+      return @api.get_all_segments(@environment, @cluster)
+
+    rescue OpenapiClient::ApiError => e
+
+      log_error(e)
+    end
   end
 
   def get_flag(identifier)
@@ -136,5 +149,12 @@ class HarnessConnector < Connector
 
       puts "ERROR: Could not obtain the environment and cluster data from the token"
     end
+  end
+
+  private
+
+  def log_error(e)
+
+    puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
   end
 end

@@ -21,27 +21,20 @@ class PollingProcessor < Closeable
 
     flags = []
 
-    begin
+    puts "Fetching flags started"
 
-      puts "Fetching flags started"
+    @connector
+      .get_flags
+      .each { |fc|
 
-      @connector
-        .get_flags
-        .each { |fc|
+        if fc != nil
 
-          if fc != nil
+          @repository.set_flag(fc.feature, fc)
+          flags.push(fc)
+        end
+      }
 
-            @repository.set_flag(fc.feature, fc)
-            flags.push(fc)
-          end
-        }
-
-      puts "Fetching flags finished"
-
-    rescue :ConnectorException => e
-
-      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
-    end
+    puts "Fetching flags finished"
 
     flags
   end
@@ -50,27 +43,20 @@ class PollingProcessor < Closeable
 
     segments = []
 
-    begin
+    puts "Fetching segments started"
 
-      puts "Fetching segments started"
+    @connector
+      .get_segments
+      .each { |s|
 
-      @connector
-        .get_segments
-        .each { |s|
+        if s != nil
 
-          if s != nil
+          @repository.set_flag(s.identifier, s)
+          flags.push(s)
+        end
+      }
 
-            @repository.set_flag(s.identifier, s)
-            flags.push(s)
-          end
-        }
-
-      puts "Fetching segments finished"
-
-    rescue :ConnectorException => e
-
-      puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
-    end
+    puts "Fetching segments finished"
 
     segments
   end

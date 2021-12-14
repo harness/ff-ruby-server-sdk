@@ -25,6 +25,7 @@ require_relative "sdk/api/inner_client_repository_callback"
 require_relative "sdk/connector/connector"
 require_relative "sdk/connector/event_source"
 require_relative "sdk/connector/harness_connector"
+require_relative "sdk/connector/connector_exception"
 
 module Ff
   module Ruby
