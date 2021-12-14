@@ -7,6 +7,7 @@ require "ff/ruby/server/sdk"
 require "minitest/autorun"
 
 require_relative "wrapper"
+require_relative "poller_test_callback"
 require_relative "repository_test_callback"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
@@ -265,7 +266,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_polling_processor
 
-    config = ConfigBuilder.new.build
+    config = ConfigBuilder.new.poll_interval_in_seconds(0.1).build
 
     refute_nil config
 
@@ -279,15 +280,30 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil connector
 
+    callback = PollerTestCallback.new
+
+    refute_nil callback
+
     processor = PollingProcessor.new(
 
       connector,
       repository,
       config.poll_interval_in_seconds,
-      callback = nil
+      callback = callback
     )
 
     refute_nil processor
+
+    processor.start
+
+    sleep(1)
+
+    assert_equal(1, callback.on_poller_ready_count)
+    assert_equal(0, callback.on_poller_error_count)
+    assert_equal(10, callback.on_poller_iteration_count)
+
+    processor.close
+
   end
 
   private

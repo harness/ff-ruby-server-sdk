@@ -42,6 +42,11 @@ class PollingProcessor < Closeable
 
         puts "Async poll iteration"
 
+        if @callback != nil
+
+          @callback.on_poller_iteration(self)
+        end
+
         begin
 
           retrieve_flags
@@ -65,7 +70,6 @@ class PollingProcessor < Closeable
             @callback.on_poller_error(e)
           end
         end
-
 
         sleep(@poll_interval_in_sec)
       end

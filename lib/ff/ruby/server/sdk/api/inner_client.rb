@@ -114,6 +114,11 @@ class InnerClient < ClientCallback
     puts "Poller error: " + e.to_s
   end
 
+  def on_poller_iteration(poller)
+
+    puts "Poller iterated" + poller.to_s
+  end
+
   # TODO: SSE
   def on_connected
 
