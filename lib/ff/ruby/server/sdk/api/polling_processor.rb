@@ -52,17 +52,17 @@ class PollingProcessor < Closeable
             @initialized = true
             puts "PollingProcessor initialized"
 
-            if callback != nil
+            if @callback != nil
 
-              callback.on_poller_ready(self)
+              @callback.on_poller_ready(self)
             end
           end
 
         rescue OpenapiClient::ApiError => e
 
-          if callback != nil
+          if @callback != nil
 
-            callback.on_poller_error(e)
+            @callback.on_poller_error(e)
           end
         end
 

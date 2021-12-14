@@ -89,36 +89,6 @@ class InnerClient < ClientCallback
     # TODO: Implement
   end
 
-  protected
-
-  def setup
-
-    puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
-           " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
-           " to be ready."
-
-    @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
-
-    @auth_service = AuthService.new(
-
-      connector = @connector,
-      poll_interval_in_sec = @config.poll_interval_in_seconds,
-      callback = self
-    )
-
-    @poll_processor = PollingProcessor.new(
-
-      connector = @connector,
-      repository = @repository,
-      poll_interval_in_sec = @config.poll_interval_in_seconds,
-      callback = self
-    )
-
-    # TODO: Init. processors
-
-    @auth_service.start_async
-  end
-
   def on_unauthorized
 
     if @closing
@@ -153,6 +123,36 @@ class InnerClient < ClientCallback
   def on_disconnected
 
     @poll_processor.start
+  end
+
+  protected
+
+  def setup
+
+    puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
+           " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
+           " to be ready."
+
+    @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
+
+    @auth_service = AuthService.new(
+
+      connector = @connector,
+      poll_interval_in_sec = @config.poll_interval_in_seconds,
+      callback = self
+    )
+
+    @poll_processor = PollingProcessor.new(
+
+      connector = @connector,
+      repository = @repository,
+      poll_interval_in_sec = @config.poll_interval_in_seconds,
+      callback = self
+    )
+
+    # TODO: Init. processors
+
+    @auth_service.start_async
   end
 
   private
