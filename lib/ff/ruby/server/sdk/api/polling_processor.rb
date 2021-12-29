@@ -23,9 +23,11 @@ class PollingProcessor < Closeable
 
     puts "Fetching flags started"
 
-    @connector
-      .get_flags
-      .each { |fc|
+    result = @connector.get_flags
+
+    if result != nil
+
+      result.each { |fc|
 
         if fc != nil
 
@@ -33,6 +35,7 @@ class PollingProcessor < Closeable
           flags.push(fc)
         end
       }
+    end
 
     puts "Fetching flags finished"
 
@@ -45,9 +48,11 @@ class PollingProcessor < Closeable
 
     puts "Fetching segments started"
 
-    @connector
-      .get_segments
-      .each { |s|
+    result = @connector.get_segments
+
+    if result != nil
+
+      result.each { |s|
 
         if s != nil
 
@@ -55,6 +60,7 @@ class PollingProcessor < Closeable
           flags.push(s)
         end
       }
+    end
 
     puts "Fetching segments finished"
 

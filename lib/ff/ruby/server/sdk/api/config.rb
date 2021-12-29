@@ -108,6 +108,11 @@ class Config
     nil
   end
 
+  def auth_settings
+
+    {}
+  end
+
   def describe
 
     to_s + "\n" +

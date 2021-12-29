@@ -49,7 +49,11 @@ class HarnessConnector < Connector
 
     begin
 
-      return @api.get_feature_config(@environment, @cluster)
+      return @api.get_feature_config(
+
+        environment_uuid = @environment,
+        opts=get_query_params
+      )
 
     rescue OpenapiClient::ApiError => e
 
@@ -61,7 +65,11 @@ class HarnessConnector < Connector
 
     begin
 
-      return @api.get_all_segments(@environment, @cluster)
+      return @api.get_all_segments(
+
+        environment_uuid = @environment,
+        opts=get_query_params
+      )
 
     rescue OpenapiClient::ApiError => e
 
@@ -134,8 +142,8 @@ class HarnessConnector < Connector
       "Authorization" => "Bearer " + @token
     }
 
-    @api.api_client.default_headers.merge(headers)
-    @metrics_api.api_client.default_headers.merge(headers)
+    @api.api_client.default_headers = @api.api_client.default_headers.merge(headers)
+    @metrics_api.api_client.default_headers = @metrics_api.api_client.default_headers.merge(headers)
 
     decoded_token = JWT.decode @token, nil, false
 
@@ -152,6 +160,16 @@ class HarnessConnector < Connector
   end
 
   private
+
+  def get_query_params
+
+    {
+      :'query_params' => {
+
+        :'cluster' => @cluster
+      }
+    }
+  end
 
   def log_error(e)
 
