@@ -27,6 +27,8 @@ class PollingProcessor < Closeable
 
     if result != nil
 
+      puts "Fetching flags result: " + result.to_s
+
       result.each { |fc|
 
         if fc != nil
@@ -51,6 +53,8 @@ class PollingProcessor < Closeable
     result = @connector.get_segments
 
     if result != nil
+
+      puts "Fetching segments result: " + result.to_s
 
       result.each { |s|
 
