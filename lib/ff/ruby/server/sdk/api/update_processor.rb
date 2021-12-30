@@ -16,10 +16,36 @@ class UpdateProcessor < Closeable
 
   def start
 
+    puts "Starting updater (EventSource)"
+
+    if @updater != nil
+
+      unless @updater.kind_of?(Updater)
+
+        raise "The 'callback' parameter must be of '" + Updater.to_s + "' data type"
+      end
+    end
+
+    if @connector != nil
+
+      unless @connector.kind_of?(Connector)
+
+        raise "The 'connector' must be of '" + Connector.to_s + "' data type"
+      end
+
+      @stream = @connector.stream(@updater)
+      @stream.start
+    end
   end
 
   def stop
 
+    if @stream != nil
+
+      @stream.stop
+    end
+
+    # TODO: Shutdown the executor
   end
 
   def update(message)

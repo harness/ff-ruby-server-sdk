@@ -1,4 +1,6 @@
-class EventSource
+require_relative './service'
+
+class EventSource < Service
 
 
 end
