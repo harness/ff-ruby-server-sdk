@@ -38,6 +38,11 @@ class EventSource < Service
       self.method(:on_closed)
     )
 
+    @sse.message(
+
+      self.method(:on_message)
+    )
+
     @updater.on_ready
   end
 
@@ -70,8 +75,11 @@ class EventSource < Service
     @updater.on_disconnected
   end
 
-  def on_message
+  def on_message(message)
+
+    puts "EventSource message received " + message.to_s
 
     # TODO
+
   end
 end
