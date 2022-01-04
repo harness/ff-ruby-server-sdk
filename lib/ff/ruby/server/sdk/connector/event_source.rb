@@ -25,7 +25,7 @@ class EventSource < Service
 
       url = url,
       headers = headers,
-      query = {}
+      query = {} # TODO: Cluster parameter ?
     )
 
     @sse.open(
@@ -35,7 +35,7 @@ class EventSource < Service
 
     @sse.error(
 
-      self.method(:on_closed)
+      self.method(:on_error)
     )
 
     @sse.message(
@@ -56,6 +56,8 @@ class EventSource < Service
 
     puts "Stopping EventSource service"
     @sse.stop
+
+    on_closed
   end
 
   def close
@@ -67,6 +69,14 @@ class EventSource < Service
 
     puts "EventSource connected"
     @updater.on_connected
+  end
+
+  def on_error
+
+    puts "EventSource error"
+    @updater.on_error
+
+    stop
   end
 
   def on_closed

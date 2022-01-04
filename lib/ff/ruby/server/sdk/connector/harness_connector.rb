@@ -94,7 +94,17 @@ class HarnessConnector < Connector
 
   def stream(updater)
 
-    raise @tbi
+    if @event_source != nil
+
+      @event_source.close
+      @event_source = nil
+    end
+
+    url = ""
+    headers = []
+
+    @event_source = EventSource(url, headers, updater)
+    @event_source
   end
 
   protected
