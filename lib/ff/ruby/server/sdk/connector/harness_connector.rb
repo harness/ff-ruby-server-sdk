@@ -100,8 +100,13 @@ class HarnessConnector < Connector
       @event_source = nil
     end
 
-    url = ""
-    headers = []
+    url = @options.config_url + "/stream?cluster=" + @cluster.to_s
+
+    headers = {
+
+      "Authorization" => "Bearer " + @token,
+      "API-Key" => @api_key
+    }
 
     @event_source = EventSource(url, headers, updater)
     @event_source

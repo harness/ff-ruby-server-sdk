@@ -24,8 +24,7 @@ class EventSource < Service
     @sse = EventSource(
 
       url = url,
-      headers = headers,
-      query = {} # TODO: Cluster parameter ?
+      headers = headers
     )
 
     @sse.open(
