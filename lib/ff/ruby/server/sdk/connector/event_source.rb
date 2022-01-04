@@ -28,6 +28,16 @@ class EventSource < Service
       query = {}
     )
 
+    @sse.open(
+
+
+    )
+
+    @sse.error(
+
+
+    )
+
     @updater.on_ready
   end
 
@@ -43,4 +53,8 @@ class EventSource < Service
     @sse.stop
   end
 
+  def close
+
+    stop
+  end
 end
