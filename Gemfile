@@ -19,4 +19,5 @@ gem "jwt"
 gem "moneta"
 
 # SSE support:
+gem "restclient"
 gem "sse-client"
