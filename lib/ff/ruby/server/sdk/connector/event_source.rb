@@ -30,12 +30,12 @@ class EventSource < Service
 
     @sse.open(
 
-
+      self.method(:on_open)
     )
 
     @sse.error(
 
-
+      self.method(:on_closed)
     )
 
     @updater.on_ready
