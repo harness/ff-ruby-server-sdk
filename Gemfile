@@ -17,3 +17,6 @@ gem "rufus-scheduler"
 gem "libcache"
 gem "jwt"
 gem "moneta"
+
+# SSE support:
+gem "sse-client"
