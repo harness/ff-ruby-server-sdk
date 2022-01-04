@@ -57,4 +57,21 @@ class EventSource < Service
 
     stop
   end
+
+  def on_open
+
+    puts "EventSource connected"
+    @updater.on_connected
+  end
+
+  def on_closed
+
+    puts "EventSource disconnected"
+    @updater.on_disconnected
+  end
+
+  def on_message
+
+    # TODO
+  end
 end
