@@ -81,6 +81,7 @@ class InnerClient < ClientCallback
     # TODO: Close all
 
     @poll_processor.close
+    @connector.close
 
   end
 

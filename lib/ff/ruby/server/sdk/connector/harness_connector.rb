@@ -112,6 +112,15 @@ class HarnessConnector < Connector
     @event_source
   end
 
+  def close
+
+    if @event_source != nil
+
+      @event_source.close
+      @event_source = nil
+    end
+  end
+
   protected
 
   def make_api_client

@@ -1,4 +1,6 @@
-class Connector
+require_relative '../common/closeable'
+
+class Connector < Closeable
 
   def initialize
 
