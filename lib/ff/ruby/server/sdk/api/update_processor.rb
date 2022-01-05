@@ -40,6 +40,8 @@ class UpdateProcessor < Closeable
 
   def stop
 
+    puts "Stopping updater (EventSource)"
+
     if @stream != nil
 
       @stream.stop

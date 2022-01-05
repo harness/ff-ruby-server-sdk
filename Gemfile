@@ -19,5 +19,8 @@ gem "jwt"
 gem "moneta"
 
 # SSE support:
-gem "restclient"
+gem "rest-client"
 gem "sse-client"
+
+# Concurrency support:
+gem "concurrent-ruby", require: "concurrent"
