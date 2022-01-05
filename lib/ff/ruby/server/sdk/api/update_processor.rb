@@ -44,11 +44,17 @@ class UpdateProcessor < Closeable
 
       @stream.stop
     end
+  end
 
-    # TODO: Shutdown the executor
+  def close
+
+    puts "Closing UpdateProcessor"
+
+    stop
   end
 
   def update(message)
+
 
   end
 
@@ -62,22 +68,5 @@ class UpdateProcessor < Closeable
   def process_segment(message)
 
     nil
-  end
-
-  public def close
-
-    puts "Closing UpdateProcessor"
-
-    stop
-
-    if @stream != nil
-
-      unless @stream.kind_of?(Closeable)
-
-        raise "The 'stream' must be of '" + Closeable.to_s + "' data type"
-      end
-
-      @stream.close
-    end
   end
 end
