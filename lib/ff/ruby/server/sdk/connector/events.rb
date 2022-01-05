@@ -3,7 +3,7 @@ require "sse-client"
 
 require_relative './service'
 
-class EventSource < Service
+class Events < Service
 
   def initialize(
 
