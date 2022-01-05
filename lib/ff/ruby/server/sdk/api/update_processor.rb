@@ -1,3 +1,5 @@
+require "concurrent-ruby"
+
 require_relative "../common/closeable"
 
 class UpdateProcessor < Closeable
@@ -12,6 +14,7 @@ class UpdateProcessor < Closeable
     @connector = connector
     @repository = repository
     @updater = callback
+    @executor = Concurrent::FixedThreadPool.new(100)
   end
 
   def start
@@ -46,6 +49,9 @@ class UpdateProcessor < Closeable
 
       @stream.stop
     end
+
+    @executor.shutdown
+    @executor.wait_for_termination
   end
 
   def close
