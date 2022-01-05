@@ -1,3 +1,4 @@
+require "json"
 require "sse-client"
 
 require_relative './service'
@@ -88,7 +89,7 @@ class EventSource < Service
 
     puts "EventSource message received " + message.to_s
 
-    # TODO
-
+    msg = JSON.parse(message)
+    @updater.update(msg)
   end
 end
