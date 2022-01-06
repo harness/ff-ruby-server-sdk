@@ -1,5 +1,7 @@
 class Message
 
+  attr_accessor :event, :domain, :identifier, :version
+
   def initialize
     super
 

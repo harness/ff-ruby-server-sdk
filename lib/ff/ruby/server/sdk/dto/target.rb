@@ -1,5 +1,7 @@
 class Target
 
+  attr_accessor :name, :identifier, :attributes, :is_private
+
   def initialize(
 
     name,

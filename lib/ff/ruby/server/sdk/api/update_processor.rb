@@ -86,13 +86,38 @@ class UpdateProcessor < Closeable
 
   def process_flag(message)
 
-    # TODO:
-    nil
+    config = @connector.get_flag(message.identifier)
+
+    if config != nil
+
+      if message.event == "create" || message.event == "patch"
+
+        @repository.set_flag(message.identifier, config)
+      else
+        if message.event == "delete"
+
+          @repository.delete_flag(message.identifier)
+        end
+      end
+    end
+
   end
 
   def process_segment(message)
 
-    # TODO:
-    nil
+    segment = @connector.get_segment(message.identifier)
+
+    if segment != nil
+
+      if message.event == "create" || message.event == "patch"
+
+        @repository.set_segment(message.identifier, segment)
+      else
+        if message.event == "delete"
+
+          @repository.delete_segment(message.identifier)
+        end
+      end
+    end
   end
 end
