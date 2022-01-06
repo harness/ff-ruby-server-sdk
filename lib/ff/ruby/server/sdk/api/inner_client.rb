@@ -63,10 +63,14 @@ class InnerClient < ClientCallback
       return
     end
 
-    # run services only after token is processed
-
     @poll_processor.start
-    # TODO: Start processors
+
+    if @config.stream_enabled
+
+      @update_processor.start
+    end
+
+    # TODO: Metrics processor
 
   end
 
@@ -78,11 +82,14 @@ class InnerClient < ClientCallback
 
     off
 
-    # TODO: Close all
-
+    @auth_service.close
+    @repository.close
     @poll_processor.close
-    @connector.close
+    @update_processor.close
 
+    # TODO: Close metrics
+
+    @connector.close
   end
 
   def off
@@ -97,12 +104,14 @@ class InnerClient < ClientCallback
       return
     end
 
-    @auth_service.start_async
-
     @poll_processor.stop
 
-    # TODO: Stop processors
+    if @config.stream_enabled
 
+      @update_processor.stop
+    end
+
+    @auth_service.start_async
   end
 
   def on_poller_ready(poller)
@@ -156,7 +165,14 @@ class InnerClient < ClientCallback
       callback = self
     )
 
-    # TODO: Init. processors
+    # TODO: Init. metrics processor
+
+    @update_processor = UpdateProcessor(
+
+      connector = @connector,
+      repository = @repository,
+      callback = self # TODO: < ----
+    )
 
     @auth_service.start_async
   end
