@@ -63,18 +63,20 @@ class UpdateProcessor < Closeable
 
   def update(message)
 
-
+    # TODO:
   end
 
   protected
 
   def process_flag(message)
 
+    # TODO:
     nil
   end
 
   def process_segment(message)
 
+    # TODO:
     nil
   end
 end

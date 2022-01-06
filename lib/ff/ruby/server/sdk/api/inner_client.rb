@@ -171,7 +171,7 @@ class InnerClient < ClientCallback
 
       connector = @connector,
       repository = @repository,
-      callback = self # TODO: < ----
+      callback = self # TODO: <----
     )
 
     @auth_service.start_async
