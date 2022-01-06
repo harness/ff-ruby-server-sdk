@@ -2,13 +2,39 @@ require_relative "../common/closeable"
 
 class ClientCallback < Closeable
 
+  def initialize
+    super
+
+    @tbi = "To be implemented"
+  end
+
   def on_auth_success
 
-    raise "Not implemented"
+    raise @tbi
   end
 
   def on_authorized
 
-    raise "To be implemented"
+    raise @tbi
+  end
+
+  def is_closing
+
+    raise @tbi
+  end
+
+  def on_processor_ready(processor)
+
+    raise @tbi
+  end
+
+  def on_update_processor_ready
+
+    raise @tbi
+  end
+
+  def update(message, manual)
+
+    raise @tbi
   end
 end

@@ -25,6 +25,7 @@ require_relative "sdk/api/polling_processor"
 require_relative "sdk/api/storage_repository"
 require_relative "sdk/api/repository_callback"
 require_relative "sdk/api/inner_client_repository_callback"
+require_relative "sdk/api/inner_client_updater"
 
 require_relative "sdk/connector/updater"
 require_relative "sdk/connector/service"

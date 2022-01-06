@@ -2,6 +2,7 @@ require_relative "auth_service"
 require_relative "client_callback"
 require_relative "polling_processor"
 require_relative "storage_repository"
+require_relative "inner_client_updater"
 require_relative "inner_client_repository_callback"
 
 require_relative "../connector/harness_connector"
@@ -92,6 +93,11 @@ class InnerClient < ClientCallback
     @connector.close
   end
 
+  def is_closing
+
+    @closing
+  end
+
   def off
 
     # TODO: Implement
@@ -129,17 +135,6 @@ class InnerClient < ClientCallback
     puts "Poller iterated" + poller.to_s
   end
 
-  # TODO: SSE
-  def on_connected
-
-    @poll_processor.stop
-  end
-
-  def on_disconnected
-
-    @poll_processor.start
-  end
-
   protected
 
   def setup
@@ -167,17 +162,36 @@ class InnerClient < ClientCallback
 
     # TODO: Init. metrics processor
 
+    @updater = InnerClientUpdater.new(
+
+      poll_processor = @poll_processor,
+      client_callback = self
+    )
+
     @update_processor = UpdateProcessor(
 
       connector = @connector,
       repository = @repository,
-      callback = self # TODO: <----
+      callback = @updater
     )
 
     @auth_service.start_async
   end
 
-  private
+  def update(message, manual)
+
+    if @config.stream_enabled && manual
+
+      puts "You run the update method manually with the stream enabled. Please turn off the stream in this case."
+    end
+
+    @update_processor.update(message)
+  end
+
+  def on_update_processor_ready
+
+    on_processor_ready(@update_processor)
+  end
 
   def on_processor_ready(processor)
 
@@ -192,6 +206,12 @@ class InnerClient < ClientCallback
       puts "PollingProcessor ready"
     end
 
+    if processor == @update_processor
+
+      @stream_ready = true
+      puts "Updater ready"
+    end
+
     if (@config.stream_enabled && !@stream_ready) ||
       (@config.analytics_enabled && !@metric_ready) ||
       !@poller_ready
@@ -200,8 +220,10 @@ class InnerClient < ClientCallback
     end
 
     @initialized = true
+
     # TODO: notify
     # TODO: notify_consumers
+
     puts "Initialization is complete"
   end
 end

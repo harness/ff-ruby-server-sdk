@@ -20,11 +20,6 @@ class Updater
     raise @tbi
   end
 
-  def on_failure
-
-    raise @tbi
-  end
-
   def on_error
 
     raise @tbi
