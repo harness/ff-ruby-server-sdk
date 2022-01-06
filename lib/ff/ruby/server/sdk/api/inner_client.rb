@@ -1,5 +1,6 @@
 require_relative "auth_service"
 require_relative "client_callback"
+require_relative "update_processor"
 require_relative "polling_processor"
 require_relative "storage_repository"
 require_relative "inner_client_updater"
@@ -168,7 +169,7 @@ class InnerClient < ClientCallback
       client_callback = self
     )
 
-    @update_processor = UpdateProcessor(
+    @update_processor = UpdateProcessor.new(
 
       connector = @connector,
       repository = @repository,

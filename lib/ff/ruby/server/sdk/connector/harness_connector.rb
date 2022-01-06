@@ -1,7 +1,9 @@
 require "jwt"
 
+require_relative "events"
 require_relative "connector"
 require_relative "connector_exception"
+
 require_relative "../version"
 
 class HarnessConnector < Connector
@@ -108,7 +110,7 @@ class HarnessConnector < Connector
       "API-Key" => @api_key
     }
 
-    @event_source = Events(url, headers, updater)
+    @event_source = Events.new(url, headers, updater)
     @event_source
   end
 

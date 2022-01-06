@@ -22,7 +22,7 @@ class Events < Service
 
     @updater = updater
 
-    @sse = EventSource(
+    @sse = EventSource.new(
 
       url = url,
       headers = headers
