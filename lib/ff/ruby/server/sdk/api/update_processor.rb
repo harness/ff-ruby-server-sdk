@@ -63,7 +63,23 @@ class UpdateProcessor < Closeable
 
   def update(message)
 
-    # TODO:
+    if message.domain == "flag"
+
+      @executor.post do
+
+        process_flag(message)
+      end
+
+      return
+    end
+
+    if message.domain == "target-segment"
+
+      @executor.post do
+
+        process_segment(message)
+      end
+    end
   end
 
   protected
