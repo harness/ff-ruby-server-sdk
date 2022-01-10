@@ -22,7 +22,7 @@ class Events < Service
 
     @updater = updater
 
-    @sse = EventSource.new(
+    @sse = SSE::EventSource.new(
 
       url = url,
       headers = headers
