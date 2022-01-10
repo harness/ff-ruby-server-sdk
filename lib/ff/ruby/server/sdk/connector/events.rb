@@ -49,6 +49,11 @@ class Events < Service
       on_message(message)
     end
 
+    @sse.on("*") do |message|
+
+      on_message(message)
+    end
+
     @updater.on_ready
   end
 
