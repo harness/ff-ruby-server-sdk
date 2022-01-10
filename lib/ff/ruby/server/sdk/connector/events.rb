@@ -30,17 +30,17 @@ class Events < Service
 
     @sse.open(
 
-      self.method(:on_open)
+      # self.method(:on_open)
     )
 
     @sse.error(
 
-      self.method(:on_error)
+      # self.method(:on_error)
     )
 
     @sse.message(
 
-      self.method(:on_message)
+      # self.method(:on_message)
     )
 
     @updater.on_ready
