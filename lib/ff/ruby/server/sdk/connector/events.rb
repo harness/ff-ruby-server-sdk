@@ -28,20 +28,20 @@ class Events < Service
       headers = headers
     )
 
-    @sse.open(
+    @sse.open do
 
-      # self.method(:on_open)
-    )
+      on_open
+    end
 
-    @sse.error(
+    @sse.error do
 
-      # self.method(:on_error)
-    )
+      on_error
+    end
 
-    @sse.message(
+    @sse.message do |message|
 
-      # self.method(:on_message)
-    )
+      on_message(message)
+    end
 
     @updater.on_ready
   end
@@ -55,7 +55,9 @@ class Events < Service
   def stop
 
     puts "Stopping EventSource service"
-    @sse.stop
+
+    # TODO: This method is private !?
+    # @sse.stop
 
     on_closed
   end
