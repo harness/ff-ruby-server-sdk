@@ -27,7 +27,7 @@ class PollingProcessor < Closeable
 
     if result != nil
 
-      puts "Fetching flags result: " + result.to_s
+      puts "Flags are fetched"
 
       result.each { |fc|
 
@@ -54,7 +54,7 @@ class PollingProcessor < Closeable
 
     if result != nil
 
-      puts "Fetching segments result: " + result.to_s
+      puts "Segments are fetched"
 
       result.each { |s|
 
