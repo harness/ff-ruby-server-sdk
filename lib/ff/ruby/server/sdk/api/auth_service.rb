@@ -80,5 +80,4 @@ class AuthService < Closeable
       @thread = nil
     end
   end
-
 end

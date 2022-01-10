@@ -25,6 +25,7 @@ class Events < Service
     @sse = SSE::EventSource.new(
 
       url = url,
+      query = {},
       headers = headers
     )
 
@@ -33,7 +34,12 @@ class Events < Service
       on_open
     end
 
-    @sse.error do
+    @sse.error do |error|
+
+      if error != nil
+
+        puts "SSE ERROR: " + error.body
+      end
 
       on_error
     end

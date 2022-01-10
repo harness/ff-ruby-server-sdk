@@ -110,7 +110,13 @@ class HarnessConnector < Connector
       "API-Key" => @api_key
     }
 
-    @event_source = Events.new(url, headers, updater)
+    @event_source = Events.new(
+
+      url,
+      headers,
+      updater
+    )
+
     @event_source
   end
 
