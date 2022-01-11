@@ -63,7 +63,7 @@ class UpdateProcessor < Closeable
 
   def update(message)
 
-    if message.domain == "flag"
+    if message["domain"] == "flag"
 
       @executor.post do
 
@@ -73,7 +73,7 @@ class UpdateProcessor < Closeable
       return
     end
 
-    if message.domain == "target-segment"
+    if message["domain"] == "target-segment"
 
       @executor.post do
 
@@ -86,36 +86,43 @@ class UpdateProcessor < Closeable
 
   def process_flag(message)
 
-    config = @connector.get_flag(message.identifier)
+    puts "Processing message: " + message.to_s
+
+    config = @connector.get_flag(message["identifier"])
 
     if config != nil
 
-      if message.event == "create" || message.event == "patch"
+      if message["event"] == "create" || message["event"] == "patch"
 
-        @repository.set_flag(message.identifier, config)
+        @repository.set_flag(message["identifier"], config)
+
       else
-        if message.event == "delete"
 
-          @repository.delete_flag(message.identifier)
+        if message["event"] == "delete"
+
+          @repository.delete_flag(message["identifier"])
         end
       end
     end
-
   end
 
   def process_segment(message)
 
-    segment = @connector.get_segment(message.identifier)
+    puts "Processing message: " + message.to_s
+
+    segment = @connector.get_segment(message["identifier"])
 
     if segment != nil
 
-      if message.event == "create" || message.event == "patch"
+      if message["event"] == "create" || message["event"] == "patch"
 
         @repository.set_segment(message.identifier, segment)
-      else
-        if message.event == "delete"
 
-          @repository.delete_segment(message.identifier)
+      else
+
+        if message["event"] == "delete"
+
+          @repository.delete_segment(message["identifier"])
         end
       end
     end
