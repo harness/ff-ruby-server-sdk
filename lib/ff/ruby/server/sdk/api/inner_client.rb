@@ -173,7 +173,8 @@ class InnerClient < ClientCallback
     end
 
     if (@config.stream_enabled && !@stream_ready) ||
-      (@config.analytics_enabled && !@metric_ready) ||
+      # TODO: Metrics:
+      # (@config.analytics_enabled && !@metric_ready) ||
       !@poller_ready
 
       return
@@ -184,15 +185,26 @@ class InnerClient < ClientCallback
     # TODO: notify
     # TODO: notify_consumers
 
-    puts "Initialization is complete"
+    puts "Initialization is completed"
   end
 
   def wait_for_initialization
 
     synchronize do
 
-      puts "Waiting for the initialization"
+      puts "Waiting for the initialization to finish"
 
+      until @initialized
+
+        sleep(1)
+      end
+
+      if @failure
+
+        raise "Initialization failed"
+      end
+
+      puts "Waiting for the initialization completed"
     end
   end
 
