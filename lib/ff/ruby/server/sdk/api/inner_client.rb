@@ -185,6 +185,11 @@ class InnerClient < ClientCallback
     puts "Initialization is complete"
   end
 
+  def wait_for_initialization
+
+
+  end
+
   protected
 
   def setup

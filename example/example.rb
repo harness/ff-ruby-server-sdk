@@ -17,5 +17,7 @@ client.init(
   config = config
 )
 
+client.wait_for_initialization
+
 sleep
 

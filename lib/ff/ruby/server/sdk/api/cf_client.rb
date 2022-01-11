@@ -33,6 +33,14 @@ class CfClient < Closeable
     end
   end
 
+  def wait_for_initialization
+
+    if @client != nil
+
+      @client.wait_for_initialization
+    end
+  end
+
   def destroy
 
     close
