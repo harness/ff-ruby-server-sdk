@@ -51,6 +51,8 @@ class InnerClient < ClientCallback
     @stream_ready = false
     @metric_ready = false
 
+    @my_mutex = Mutex.new
+
     @repository_callback = InnerClientRepositoryCallback.new
 
     setup
@@ -187,7 +189,11 @@ class InnerClient < ClientCallback
 
   def wait_for_initialization
 
+    synchronize do
 
+      puts "Waiting for the initialization"
+
+    end
   end
 
   protected
@@ -231,5 +237,12 @@ class InnerClient < ClientCallback
     )
 
     @auth_service.start_async
+  end
+
+  private
+
+  def synchronize(&block)
+
+    @my_mutex.synchronize(&block)
   end
 end
