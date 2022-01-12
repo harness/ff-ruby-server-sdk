@@ -1,3 +1,4 @@
+require_relative "evaluation"
 require_relative "auth_service"
 require_relative "client_callback"
 require_relative "update_processor"
