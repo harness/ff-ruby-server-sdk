@@ -1,3 +1,4 @@
+require_relative "evaluator"
 require_relative "evaluation"
 require_relative "auth_service"
 require_relative "client_callback"
@@ -218,6 +219,7 @@ class InnerClient < ClientCallback
            " to be ready."
 
     @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
+    @evaluator = Evaluator.new(@repository)
 
     @auth_service = AuthService.new(
 
