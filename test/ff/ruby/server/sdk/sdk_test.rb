@@ -8,6 +8,7 @@ require "minitest/autorun"
 
 require_relative "wrapper"
 require_relative "stub_connector"
+require_relative "stub_evaluator"
 require_relative "poller_test_callback"
 require_relative "repository_test_callback"
 
@@ -306,6 +307,30 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     processor.close
 
     assert(!processor.is_ready)
+  end
+
+  def test_evaluator_murmur_hashing
+
+    evaluator = StubEvaluator.new
+
+    refute_nil evaluator
+
+    {
+
+      "test" => "test",
+      "1" => "test",
+      "test2" => "1",
+      "12" => "1",
+      "" => "1",
+      "13" => "",
+      "-" => "",
+      "-2" => "-"
+
+    }.each do |key, value|
+
+      result = evaluator.get_normalized_number_exposed(key, value)
+      assert result > 0
+    end
   end
 
   private

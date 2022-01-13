@@ -1,4 +1,5 @@
 require "json"
+require "murmurhash3"
 
 require_relative "evaluation"
 require_relative "../common/repository"
@@ -11,8 +12,6 @@ class Evaluator < Evaluation
 
       raise "The 'repository' parameter must be of '" + Repository.to_s + "' data type"
     end
-
-    @one_hundred = 100
 
     @repository = repository
   end
@@ -151,7 +150,12 @@ class Evaluator < Evaluation
     nil
   end
 
-  def get_normalized_number(property, bucket_by) end
+  def get_normalized_number(property, bucket_by)
+
+    joined = property.to_s + ":" + bucket_by.to_s
+    hash = MurmurHash3::V32.str_hash(joined, joined.length)
+    (hash % 100) + 1
+  end
 
   def is_enabled(target, bucket_by, percentage) end
 

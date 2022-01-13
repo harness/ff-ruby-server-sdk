@@ -24,3 +24,6 @@ gem "sse-client"
 
 # Concurrency support:
 gem "concurrent-ruby", require: "concurrent"
+
+# Evaluator dependencies:
+gem "murmurhash3"
