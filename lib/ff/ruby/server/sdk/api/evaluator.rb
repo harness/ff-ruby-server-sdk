@@ -135,7 +135,21 @@ class Evaluator < Evaluation
     nil
   end
 
-  def find_variation(variations, identifier) end
+  def find_variation(variations, identifier)
+
+    if identifier != nil && !identifier.empty?
+
+      variations.each do |v|
+
+        if v.identifier == identifier
+
+          return v
+        end
+      end
+    end
+
+    nil
+  end
 
   def get_normalized_number(property, bucket_by) end
 
