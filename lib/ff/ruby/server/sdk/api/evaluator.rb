@@ -72,68 +72,65 @@ class Evaluator < Evaluation
       raise "The 'callback' parameter must be of '" + FlagEvaluateCallback.to_s + "' data type"
     end
 
+    val flag = @repository.get_flag(identifier)
 
+    if flag != nil && flag.kind == expected
+
+      unless flag.prerequisites.empty
+
+        pre_req = check_pre_requisite(flag, target)
+
+        unless pre_req
+
+          return find_variation(flag.variations, flag.off_variation)
+        end
+      end
+
+      variation = evaluate_flag(flag, target)
+
+      if variation != nil
+
+        if callback != nil
+
+          callback.process_evaluation(flag, target, variation)
+        end
+
+        return variation
+      end
+    end
+
+    nil
   end
 
   protected
 
-  def get_attr_value(target, attribute)
+  def get_attr_value(target, attribute) end
 
+  def find_variation(variations, identifier) end
 
-  end
+  def get_normalized_number(property, bucket_by) end
 
-  def find_variation(variations, identifier)
+  def is_enabled(target, bucket_by, percentage) end
 
+  def evaluate_distribution(distribution, target) end
 
-  end
+  def evaluate_clauses(clauses, target) end
 
-  def get_normalized_number(property, bucket_by)
+  def evaluate_clause(clause, target) end
 
-  end
+  def is_target_included_or_excluded_in_segment(segment_list, target) end
 
-  def is_enabled(target, bucket_by, percentage)
+  def evaluate_rules(serving_rules, target) end
 
-  end
+  def evaluate_rule(serving_rule, target) end
 
-  def evaluate_distribution(distribution, target)
+  def evaluate_variation_map(variation_maps, target) end
 
-  end
+  def evaluate_flag(feature_config, target) end
 
-  def evaluate_clauses(clauses, target)
-
-  end
-
-  def evaluate_clause(clause, target)
-
-  end
-
-  def is_target_included_or_excluded_in_segment(segment_list, target)
-
-  end
-
-  def evaluate_rules(serving_rules, target)
-
-  end
-
-  def evaluate_rule(serving_rule, target)
-
-  end
-
-  def evaluate_variation_map(variation_maps, target)
-
-  end
-
-  def evaluate_flag(feature_config, target)
-
-  end
-
-  def check_requisite(parent_feature_config, target)
-
-  end
+  def check_pre_requisite(parent_feature_config, target) end
 
   private
 
-  def is_target_in_list(target, list_of_target)
-
-  end
+  def is_target_in_list(target, list_of_target) end
 end
