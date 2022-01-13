@@ -104,7 +104,36 @@ class Evaluator < Evaluation
 
   protected
 
-  def get_attr_value(target, attribute) end
+  def get_attr_value(target, attribute)
+
+    if attribute != nil && !attribute.empty?
+
+      if target.respond_to?(:'' + attribute, :include_private)
+
+        puts "The attribute " + attribute.to_s + " exists (1)"
+
+        return target.send(:'' + attribute)
+      else
+
+        result = target.attributes.key?(attribute)
+
+        if result == nil
+
+          puts "The attribute " + attribute.to_s + " does not exist"
+
+        else
+
+          puts "The attribute " + attribute.to_s + " exists (2)"
+        end
+
+        return result
+      end
+    end
+
+    puts "The passed attribute is empty"
+
+    nil
+  end
 
   def find_variation(variations, identifier) end
 
