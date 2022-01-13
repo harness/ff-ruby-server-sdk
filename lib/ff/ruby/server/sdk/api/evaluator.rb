@@ -171,7 +171,27 @@ class Evaluator < Evaluation
     false
   end
 
-  def evaluate_distribution(distribution, target) end
+  def evaluate_distribution(distribution, target)
+
+    if distribution != nil
+
+      variation = ""
+
+      distribution.variations.each do |weighted_variation|
+
+        variation = weighted_variation.variation
+
+        if is_enabled(target, distribution.bucket_by, weighted_variation.weight)
+
+          return variation
+        end
+      end
+
+      return variation
+    end
+
+    nil
+  end
 
   def evaluate_clauses(clauses, target) end
 
