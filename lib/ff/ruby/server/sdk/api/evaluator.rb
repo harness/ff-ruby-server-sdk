@@ -157,7 +157,19 @@ class Evaluator < Evaluation
     (hash % 100) + 1
   end
 
-  def is_enabled(target, bucket_by, percentage) end
+  def is_enabled(target, bucket_by, percentage)
+
+    property = get_attr_value(target, bucket_by)
+
+    if property != nil
+
+      bucket_id = get_normalized_number(property, bucket_by)
+
+      return percentage > 0 && bucket_id <= percentage
+    end
+
+    false
+  end
 
   def evaluate_distribution(distribution, target) end
 
