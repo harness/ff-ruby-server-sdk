@@ -193,11 +193,90 @@ class Evaluator < Evaluation
     nil
   end
 
-  def evaluate_clauses(clauses, target) end
+  def evaluate_clauses(clauses, target)
 
-  def evaluate_clause(clause, target) end
+    clauses.each do |clause|
 
-  def is_target_included_or_excluded_in_segment(segment_list, target) end
+      unless evaluate_clause(clause, target)
+
+        return false
+      end
+    end
+
+    true
+  end
+
+  def evaluate_clause(clause, target)
+
+    if clause == nil
+
+      return false
+    end
+
+    operator = clause.op
+
+    if operator == nil || operator.empty?
+
+      return false
+    end
+
+    attr_value = get_attr_value(target, clause.attribute)
+
+    if attr_value == nil
+
+      return false
+    end
+
+    object = attr_value.to_s
+    value = clause.values[0]
+
+    if operator == "starts_with"
+
+      return object.start_with?(value)
+    end
+
+    if operator == "ends_with"
+
+      return object.end_with?(value)
+    end
+
+    if operator == "match"
+
+      match = object.match?(value)
+      return match != nil && !match.empty?
+    end
+
+    if operator == "contains"
+
+      return object.include?(value)
+    end
+
+    if operator == "equal"
+
+      return object.casecmp?(value)
+    end
+
+    if operator == "equal_sensitive"
+
+      return object == value
+    end
+
+    if operator == "in"
+
+      return object.include?(value)
+    end
+
+    if operator == "segmentMatch"
+
+      return is_target_included_or_excluded_in_segment(clause.values, target)
+    end
+
+    false
+  end
+
+  def is_target_included_or_excluded_in_segment(segment_list, target)
+
+  end
 
   def evaluate_rules(serving_rules, target) end
 
