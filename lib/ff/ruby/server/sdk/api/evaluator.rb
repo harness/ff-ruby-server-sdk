@@ -276,11 +276,74 @@ class Evaluator < Evaluation
 
   def is_target_included_or_excluded_in_segment(segment_list, target)
 
+    segment_list.each do |segment_identifier|
+
+      segment = @repository.get_segment(segment_identifier)
+
+      if segment != nil
+
+        if is_target_in_list(target, segment.excluded)
+
+          puts "Target " + target.name + " excluded from segment " + segment.name + " via exclude list"
+
+          return false
+        end
+
+        if is_target_in_list(target, segment.included)
+
+          puts "Target " + target.name + " included in segment " + segment.name + " via include list"
+
+          return true
+        end
+
+        rules = segment.rules
+
+        if rules != nil && !rules.empty? && evaluate_clauses(rules, target)
+
+          puts "Target " + target.name + " included in segment " + segment.name + " via rules"
+
+          return true
+        end
+      end
+    end
+
+    false
   end
 
-  def evaluate_rules(serving_rules, target) end
+  def evaluate_rules(serving_rules, target)
 
-  def evaluate_rule(serving_rule, target) end
+    if target == nil || serving_rules == nil
+
+      return nil
+    end
+
+    sorted = serving_rules.sort do |a, b|
+
+      b.priority <=> a.priority
+    end
+
+    sorted.each do |rule|
+
+      next unless evaluate_rule(rule, target)
+
+      if rule.serve.distribution != nil
+
+        return evaluate_distribution(rule.serve.distribution, target)
+      end
+
+      if rule.serve.variation != nil
+
+        return rule.serve.variation
+      end
+    end
+
+    nil
+  end
+
+  def evaluate_rule(serving_rule, target)
+
+    evaluate_clauses(serving_rule.clauses, target)
+  end
 
   def evaluate_variation_map(variation_maps, target) end
 
