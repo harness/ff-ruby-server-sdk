@@ -284,14 +284,14 @@ class Evaluator < Evaluation
 
         if is_target_in_list(target, segment.excluded)
 
-          puts "Target " + target.name + " excluded from segment " + segment.name + " via exclude list"
+          puts "Target " + target.name.to_s + " excluded from segment " + segment.name.to_s + " via exclude list"
 
           return false
         end
 
         if is_target_in_list(target, segment.included)
 
-          puts "Target " + target.name + " included in segment " + segment.name + " via include list"
+          puts "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via include list"
 
           return true
         end
@@ -300,7 +300,7 @@ class Evaluator < Evaluation
 
         if rules != nil && !rules.empty? && evaluate_clauses(rules, target)
 
-          puts "Target " + target.name + " included in segment " + segment.name + " via rules"
+          puts "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via rules"
 
           return true
         end
@@ -429,7 +429,7 @@ class Evaluator < Evaluation
 
     if prerequisites != nil && !prerequisites.empty?
 
-      puts "Checking pre requisites " + prerequisites + " of parent feature " + parent_feature_config.feature
+      puts "Checking pre requisites " + prerequisites.to_s + " of parent feature " + parent_feature_config.feature.to_s
 
       prerequisites.each do |pqs|
 
@@ -439,7 +439,7 @@ class Evaluator < Evaluation
 
         if pre_req_feature_config == nil
 
-          puts "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature
+          puts "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature.to_s
 
           return true
         end
@@ -448,7 +448,7 @@ class Evaluator < Evaluation
 
         if pre_req_evaluated_variation == nil
 
-          puts "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature
+          puts "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature.to_s
 
           return true
         end
