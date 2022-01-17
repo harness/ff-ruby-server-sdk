@@ -423,7 +423,67 @@ class Evaluator < Evaluation
     nil
   end
 
-  def check_pre_requisite(parent_feature_config, target) end
+  def check_pre_requisite(parent_feature_config, target)
+
+    prerequisites = parent_feature_config.prerequisites
+
+    if prerequisites != nil && !prerequisites.empty?
+
+      puts "Checking pre requisites " + prerequisites + " of parent feature " + parent_feature_config.feature
+
+      prerequisites.each do |pqs|
+
+        pre_req_feature = pqs.feature
+
+        pre_req_feature_config = @repository.get_flag(pre_req_feature)
+
+        if pre_req_feature_config == nil
+
+          puts "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature
+
+          return true
+        end
+
+        pre_req_evaluated_variation = evaluate_flag(pre_req_feature_config, target)
+
+        if pre_req_evaluated_variation == nil
+
+          puts "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature
+
+          return true
+        end
+
+        puts "Pre requisite flag " + pre_req_feature_config.feature + " has variation " +
+               pre_req_evaluated_variation.to_s + " for target " + target.to_s
+
+        valid_pre_req_variations = pqs.variations
+
+        puts "Pre requisite flag " + pre_req_feature_config.to_s + " should have the variations " +
+               valid_pre_req_variations.to_s
+
+        none_match = true
+
+        valid_pre_req_variations.each do |element|
+
+          if element.contains(pre_req_evaluated_variation.value)
+
+            none_match = false
+            break
+          end
+        end
+
+        if none_match
+
+          return false
+        else
+
+          return check_pre_requisite(pre_req_feature_config, target)
+        end
+      end
+    end
+
+    true
+  end
 
   private
 
