@@ -388,7 +388,39 @@ class Evaluator < Evaluation
 
   def evaluate_flag(feature_config, target)
 
+    variation = feature_config.off_variation
 
+    if feature_config.state == OpenapiClient::FeatureState::ON
+
+      variation = nil
+
+      if feature_config.variation_to_target_map != nil
+
+        variation = evaluate_variation_map(feature_config.variation_to_target_map, target)
+      end
+
+      if variation == nil
+
+        variation = evaluate_rules(feature_config.rules, target)
+      end
+
+      if variation == nil
+
+        variation = evaluate_distribution(feature_config.default_serve.distribution, target)
+      end
+
+      if variation == nil
+
+        variation = feature_config.default_serve.variation
+      end
+    end
+
+    if variation != nil
+
+      find_variation(feature_config.variations, variation)
+    end
+
+    nil
   end
 
   def check_pre_requisite(parent_feature_config, target) end
