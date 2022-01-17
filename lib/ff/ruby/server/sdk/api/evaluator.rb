@@ -345,7 +345,46 @@ class Evaluator < Evaluation
     evaluate_clauses(serving_rule.clauses, target)
   end
 
-  def evaluate_variation_map(variation_maps, target) end
+  def evaluate_variation_map(variation_maps, target)
+
+    if target == nil
+
+      return nil
+    end
+
+    variation_maps.each do |variation_map|
+
+      targets = variation_map.targets
+
+      if targets != nil
+
+        found = nil
+
+        targets.each do |t|
+
+          if t.identifier != nil && t.identifier == target.identifier
+
+            found = t
+            break
+          end
+        end
+
+        if found != nil
+
+          return variation_map.variation
+        end
+      end
+
+      segment_identifiers = variation_map.target_segments
+
+      if segment_identifiers != nil && is_target_included_or_excluded_in_segment(segment_identifiers, target)
+
+        return variation_map.variation
+      end
+    end
+
+    nil
+  end
 
   def evaluate_flag(feature_config, target) end
 
