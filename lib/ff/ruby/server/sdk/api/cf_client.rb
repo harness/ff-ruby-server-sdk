@@ -14,7 +14,9 @@ class CfClient < Closeable
 
       @@instance
     end
-  end # Static - End
+  end
+
+  # Static - End
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
@@ -39,6 +41,26 @@ class CfClient < Closeable
 
       @client.wait_for_initialization
     end
+  end
+
+  def bool_variation(identifier, target, default_value)
+
+    @client.bool_variation(identifier, target, default_value)
+  end
+
+  def string_variation(identifier, target, default_value)
+
+    @client.string_variation(identifier, target, default_value)
+  end
+
+  def number_variation(identifier, target, default_value)
+
+    @client.number_variation(identifier, target, default_value)
+  end
+
+  def json_variation(identifier, target, default_value)
+
+    @client.json_variation(identifier, target, default_value)
   end
 
   def destroy

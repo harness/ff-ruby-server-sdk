@@ -7,6 +7,7 @@ require_relative "polling_processor"
 require_relative "storage_repository"
 require_relative "inner_client_updater"
 require_relative "inner_client_repository_callback"
+require_relative "inner_client_flag_evaluate_callback"
 
 require_relative "../connector/harness_connector"
 
@@ -58,6 +59,26 @@ class InnerClient < ClientCallback
     @repository_callback = InnerClientRepositoryCallback.new
 
     setup
+  end
+
+  def bool_variation(identifier, target, default_value)
+
+    @evaluator.bool_variation(identifier, target, default_value, @evaluator_callback)
+  end
+
+  def string_variation(identifier, target, default_value)
+
+    @evaluator.string_variation(identifier, target, default_value, @evaluator_callback)
+  end
+
+  def number_variation(identifier, target, default_value)
+
+    @evaluator.number_variation(identifier, target, default_value, @evaluator_callback)
+  end
+
+  def json_variation(identifier, target, default_value)
+
+    @evaluator.json_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def on_auth_success
@@ -219,7 +240,9 @@ class InnerClient < ClientCallback
            " to be ready."
 
     @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
+
     @evaluator = Evaluator.new(@repository)
+    @evaluator_callback = InnerClientFlagEvaluateCallback.new
 
     @auth_service = AuthService.new(
 
