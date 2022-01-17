@@ -386,11 +386,28 @@ class Evaluator < Evaluation
     nil
   end
 
-  def evaluate_flag(feature_config, target) end
+  def evaluate_flag(feature_config, target)
+
+
+  end
 
   def check_pre_requisite(parent_feature_config, target) end
 
   private
 
-  def is_target_in_list(target, list_of_target) end
+  def is_target_in_list(target, list_of_targets)
+
+    if list_of_targets != nil
+
+      list_of_targets.each do |included_target|
+
+        if included_target.identifier.contains(target.identifier)
+
+          return true
+        end
+      end
+    end
+
+    false
+  end
 end
