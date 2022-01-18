@@ -34,7 +34,7 @@ while true do
 
   bool_result = client.bool_variation(bool_flag, target, false)
 
-  puts bool_flag.to_s + " has value of: " + bool_result.to_s
+  puts "'" + bool_flag.to_s + "' has the value of: " + bool_result.to_s
 
   sleep 10
 end
