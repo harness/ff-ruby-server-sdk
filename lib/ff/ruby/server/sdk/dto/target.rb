@@ -18,6 +18,6 @@ class Target
 
   def is_valid
 
-    @identifier != nil && !@identifier.strip.empty
+    @identifier != nil && !@identifier.strip.empty?
   end
 end

@@ -75,7 +75,7 @@ class Evaluator < Evaluation
 
     if flag != nil && flag.kind == expected
 
-      unless flag.prerequisites.empty
+      unless flag.prerequisites.empty?
 
         pre_req = check_pre_requisite(flag, target)
 
