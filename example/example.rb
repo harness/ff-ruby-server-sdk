@@ -37,8 +37,10 @@ while true do
   target = Target.new("ruby_target_1")
 
   bool_result = client.bool_variation(bool_flag, target, false)
+  number_result = client.number_variation(number_flag, target, -1)
 
   puts "'" + bool_flag.to_s + "' has the value of: " + bool_result.to_s
+  puts "'" + number_flag.to_s + "' has the value of: " + number_result.to_s
 
   sleep 10
 end
