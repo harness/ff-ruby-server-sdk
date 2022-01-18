@@ -336,7 +336,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
   def test_evaluator
 
-    integration_test = EvaluatorIntegrationTest.new
+    integration_test = EvaluatorIntegrationTest.new("Main_Evaluator_Integration_Test")
 
     assert integration_test.execute
   end

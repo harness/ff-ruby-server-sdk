@@ -1,0 +1,2 @@
+class EvaluatorTestModel
+end
