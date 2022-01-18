@@ -30,6 +30,10 @@ client.wait_for_initialization
 while true do
 
   bool_flag = "flag1"
+  number_flag = "flag2"
+  string_flag = "flag3"
+  json_flag = "flag4"
+
   target = Target.new("ruby_target_1")
 
   bool_result = client.bool_variation(bool_flag, target, false)
