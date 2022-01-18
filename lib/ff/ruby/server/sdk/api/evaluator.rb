@@ -417,7 +417,7 @@ class Evaluator < Evaluation
 
     if variation != nil
 
-      find_variation(feature_config.variations, variation)
+      return find_variation(feature_config.variations, variation)
     end
 
     nil
