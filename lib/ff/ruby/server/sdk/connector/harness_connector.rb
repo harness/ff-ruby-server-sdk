@@ -54,7 +54,7 @@ class HarnessConnector < Connector
       return @api.get_feature_config(
 
         environment_uuid = @environment,
-        opts=get_query_params
+        opts = get_query_params
       )
 
     rescue OpenapiClient::ApiError => e
@@ -70,7 +70,7 @@ class HarnessConnector < Connector
       return @api.get_all_segments(
 
         environment_uuid = @environment,
-        opts=get_query_params
+        opts = get_query_params
       )
 
     rescue OpenapiClient::ApiError => e
@@ -81,15 +81,27 @@ class HarnessConnector < Connector
 
   def get_flag(identifier)
 
-    raise @tbi
+      @api.get_feature_config_by_identifier(
+
+        identifier = identifier,
+        environment_uuid = @environment,
+        opts = get_query_params
+      )
   end
 
   def get_segment(identifier)
 
-    raise @tbi
+    @api.get_segment_by_identifier(
+
+      identifier = identifier,
+      environment_uuid = @environment,
+      opts = get_query_params
+    )
   end
 
   def post_metrics(metrics)
+
+    # TODO: Metrics
 
     raise @tbi
   end
