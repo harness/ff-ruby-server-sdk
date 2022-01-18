@@ -11,7 +11,7 @@ To sign up, https://app.harness.io/auth/#/signup/
 
 # Harness FFM Server-side SDK for Ruby
 
-Tbd.
+Tbd. Currently in the phase of the development.
 
 ## Cloning the project
 

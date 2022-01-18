@@ -18,7 +18,7 @@ class Evaluator < Evaluation
 
   def bool_variation(identifier, target, default_value, callback)
 
-    val variation = evaluate(identifier, target, "boolean", callback)
+    variation = evaluate(identifier, target, "boolean", callback)
 
     if variation != nil
 
@@ -30,7 +30,7 @@ class Evaluator < Evaluation
 
   def string_variation(identifier, target, default_value, callback)
 
-    val variation = evaluate(identifier, target, "string", callback)
+    variation = evaluate(identifier, target, "string", callback)
 
     if variation != nil
 
@@ -42,7 +42,7 @@ class Evaluator < Evaluation
 
   def number_variation(identifier, target, default_value, callback)
 
-    val variation = evaluate(identifier, target, "int", callback)
+    variation = evaluate(identifier, target, "int", callback)
 
     if variation != nil
 
@@ -54,7 +54,7 @@ class Evaluator < Evaluation
 
   def json_variation(identifier, target, default_value, callback)
 
-    val variation = evaluate(identifier, target, "json", callback)
+    variation = evaluate(identifier, target, "json", callback)
 
     if variation != nil
 
@@ -71,7 +71,7 @@ class Evaluator < Evaluation
       raise "The 'callback' parameter must be of '" + FlagEvaluateCallback.to_s + "' data type"
     end
 
-    val flag = @repository.get_flag(identifier)
+    flag = @repository.get_flag(identifier)
 
     if flag != nil && flag.kind == expected
 
