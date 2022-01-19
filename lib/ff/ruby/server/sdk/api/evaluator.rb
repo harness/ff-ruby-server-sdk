@@ -66,9 +66,12 @@ class Evaluator < Evaluation
 
   def evaluate(identifier, target, expected, callback)
 
-    unless callback.kind_of?(FlagEvaluateCallback)
+    if callback != nil
 
-      raise "The 'callback' parameter must be of '" + FlagEvaluateCallback.to_s + "' data type"
+      unless callback.kind_of?(FlagEvaluateCallback)
+
+        raise "The 'callback' parameter must be of '" + FlagEvaluateCallback.to_s + "' data type"
+      end
     end
 
     flag = @repository.get_flag(identifier)
@@ -107,11 +110,11 @@ class Evaluator < Evaluation
 
     if attribute != nil && !attribute.empty?
 
-      if target.respond_to?(:'' + attribute, :include_private)
+      if target.respond_to?(attribute, :include_private)
 
         puts "The attribute " + attribute.to_s + " exists (1)"
 
-        return target.send(:'' + attribute)
+        return target.send(attribute)
       else
 
         result = target.attributes.key?(attribute)
@@ -175,7 +178,7 @@ class Evaluator < Evaluation
 
     if distribution != nil
 
-      variation = ""
+      variation = nil
 
       distribution.variations.each do |weighted_variation|
 
@@ -465,7 +468,7 @@ class Evaluator < Evaluation
 
         valid_pre_req_variations.each do |element|
 
-          if element.contains(pre_req_evaluated_variation.value)
+          if element.include?(pre_req_evaluated_variation.value)
 
             none_match = false
             break
@@ -493,7 +496,7 @@ class Evaluator < Evaluation
 
       list_of_targets.each do |included_target|
 
-        if included_target.identifier.contains(target.identifier)
+        if included_target.identifier.include?(target.identifier)
 
           return true
         end

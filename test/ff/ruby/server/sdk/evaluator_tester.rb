@@ -19,14 +19,116 @@ class EvaluatorTester < Minitest::Test
 
     refute_nil flag_hash
 
-    flag_hash["default_serve"] = flag_hash["defaultServe"]
+    flag_hash["default_serve"] = OpenapiClient::Serve.new(flag_hash["defaultServe"])
     flag_hash.delete("defaultServe")
+
+    dist = flag_hash["default_serve"].distribution
+
+    if dist != nil
+
+      flag_hash["default_serve"].distribution = OpenapiClient::Distribution.new(dist)
+    end
 
     flag_hash["off_variation"] = flag_hash["offVariation"]
     flag_hash.delete("offVariation")
 
     flag_hash["variation_to_target_map"] = flag_hash["variationToTargetMap"]
     flag_hash.delete("variationToTargetMap")
+
+    flag_hash["state"] = OpenapiClient::FeatureState.build_from_hash(flag_hash["state"])
+
+    variations = []
+
+    flag_hash["variations"].each do |v|
+
+      variation = OpenapiClient::Variation.new(v)
+
+      refute_nil variation
+
+      variations.push(variation)
+
+      assert !variations.empty?
+    end
+
+    flag_hash["variations"] = variations
+
+    rules = []
+
+    flag_hash["rules"].each do |v|
+
+      refute_nil v
+
+      v["rule_id"] = v["ruleId"]
+      v.delete("ruleId")
+
+      clauses = []
+
+      if v["clauses"] != nil
+
+        v["clauses"].each do |c|
+
+          clause = OpenapiClient::Clause.new(c)
+
+          refute_nil clause
+
+          clauses.push(clause)
+
+          assert !clauses.empty?
+        end
+      end
+
+      v["clauses"] = clauses
+
+      v["serve"] = OpenapiClient::Serve.new(v["serve"])
+
+      rule = OpenapiClient::ServingRule.new(v)
+
+      refute_nil rule
+
+      rules.push(rule)
+
+      assert !rules.empty?
+    end
+
+    flag_hash["rules"] = rules
+
+    prerequisites = []
+
+    flag_hash["prerequisites"].each do |v|
+
+      prerequisite = OpenapiClient::Prerequisite.new(v)
+
+      refute_nil prerequisite
+
+      prerequisites.push(prerequisite)
+
+      assert !prerequisites.empty?
+    end
+
+    flag_hash["prerequisites"] = prerequisites
+
+    variation_to_target_map = []
+
+    if flag_hash["variation_to_target_map"] != nil
+
+      flag_hash["variation_to_target_map"].each do |v|
+
+        refute_nil v
+
+        v["target_segments"] = v["targetSegments"]
+        v.delete("targetSegments")
+
+        map = OpenapiClient::VariationMap.new(v)
+
+        refute_nil map
+
+        variation_to_target_map.push(map)
+
+        assert !variation_to_target_map.empty?
+      end
+    end
+
+    flag_hash["variation_to_target_map"] = variation_to_target_map
 
     flag = OpenapiClient::FeatureConfig.new(flag_hash)
 
@@ -41,6 +143,36 @@ class EvaluatorTester < Minitest::Test
       segments.each do |segment_hash|
 
         puts "Segment: " + segment_hash.to_s
+
+        excluded_segments = []
+        included_segments = []
+
+        if segment_hash["included"] != nil
+
+          segment_hash["included"].each do |v|
+
+            t = OpenapiClient::Target.new(v)
+
+            refute_nil t
+            included_segments.push(t)
+            assert !included_segments.empty?
+          end
+        end
+
+        if segment_hash["excluded"] != nil
+
+          segment_hash["excluded"].each do |v|
+
+            t = OpenapiClient::Target.new(v)
+
+            refute_nil t
+            excluded_segments.push(t)
+            assert !excluded_segments.empty?
+          end
+        end
+
+        segment_hash["included"] = included_segments
+        segment_hash["excluded"] = excluded_segments
 
         segment = OpenapiClient::Segment.new(segment_hash)
 
@@ -88,7 +220,7 @@ class EvaluatorTester < Minitest::Test
 
             if item != nil && item["identifier"] == result.target_identifier
 
-              target = item
+              target = OpenapiClient::Target.new(item)
               break
             end
           end
@@ -99,6 +231,26 @@ class EvaluatorTester < Minitest::Test
       kind = result.use_case["flag"]["kind"]
 
       refute_nil kind
+
+      case kind
+
+      when "boolean"
+        received = @evaluator.bool_variation(
+
+          result.use_case["flag"]["feature"],
+          target,
+          false,
+          nil
+        )
+      when "int"
+
+      when "string"
+
+      when "json"
+
+      else
+        raise "Unrecognized kind: " + kind.to_s
+      end
 
     end
 
