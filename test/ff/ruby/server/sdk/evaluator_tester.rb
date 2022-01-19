@@ -1,3 +1,5 @@
+require "json"
+
 require_relative "evaluator_test_result"
 
 class EvaluatorTester < Minitest::Test
@@ -128,11 +130,29 @@ class EvaluatorTester < Minitest::Test
           nil
         )
       when "int"
+        received = @evaluator.number_variation(
 
+          result.use_case["flag"].feature,
+          target,
+          0,
+          nil
+        )
       when "string"
+        received = @evaluator.string_variation(
 
+          result.use_case["flag"].feature,
+          target,
+          "",
+          nil
+        )
       when "json"
+        received = @evaluator.json_variation(
 
+          result.use_case["flag"].feature,
+          target,
+          JSON.parse("{}"),
+          nil
+        )
       else
         raise "Unrecognized kind: " + kind.to_s
       end
