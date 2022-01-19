@@ -111,7 +111,6 @@ class EvaluatorTester < Minitest::Test
         end
       end
 
-      received = nil
       kind = result.use_case["flag"].kind
 
       refute_nil kind
