@@ -157,6 +157,9 @@ class EvaluatorTester < Minitest::Test
         raise "Unrecognized kind: " + kind.to_s
       end
 
+      refute_nil received
+
+
     end
 
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
