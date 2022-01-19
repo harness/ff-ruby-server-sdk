@@ -1,3 +1,5 @@
+require_relative "evaluator_test_result"
+
 class EvaluatorTester < Minitest::Test
 
   def process(data)
@@ -34,7 +36,7 @@ class EvaluatorTester < Minitest::Test
 
     segments = data["segments"]
 
-    if segments!=nil
+    if segments != nil
 
       segments.each do |segment_hash|
 
@@ -52,7 +54,22 @@ class EvaluatorTester < Minitest::Test
 
       puts "Expected: " + key.to_s + " -> " + value.to_s
 
+      expected = data["expected"][key]
+
+      result = EvaluatorTestResult.new(
+
+        data["test_file"],
+        key,
+        expected,
+        data
+      )
+
+      refute_nil result
+
+      @results.push(result)
     end
+
+    assert !@results.empty?
 
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
 
