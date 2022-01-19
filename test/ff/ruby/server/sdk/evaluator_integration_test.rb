@@ -35,7 +35,25 @@ class EvaluatorIntegrationTest < Minitest::Test
 
   def prepare_test_data
 
-    raise "Not implemented"
+    @tests_location = Dir.pwd + "/test/cases/tests"
+
+    @files = Dir.children(@tests_location)
+
+    refute_nil @files
+
+    assert !@files.empty?
+
+    @test_data = []
+
+    @files.each do |file|
+
+      refute_nil file
+
+      puts "Processing file: " + file.to_s
+
+
+
+    end
   end
 
 end
