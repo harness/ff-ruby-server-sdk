@@ -1,5 +1,7 @@
+require "json"
+require "ostruct"
+
 require_relative "evaluator_tester"
-require_relative "evaluator_test_model"
 
 class EvaluatorIntegrationTest < Minitest::Test
 
@@ -63,13 +65,24 @@ class EvaluatorIntegrationTest < Minitest::Test
 
         assert !data.empty?
 
+        model = JSON.parse(data)
 
+        refute_nil model
+
+        model["test_file"] = file
+
+        feature = model["flag"]["feature"].to_s + file
+
+        model["flag"]["feature"] = feature
+
+        @test_data.push(model)
+
+        assert !@test_data.empty?
 
       else
 
         puts "Not able to access the file: " + file.to_s
       end
-
     end
   end
 
