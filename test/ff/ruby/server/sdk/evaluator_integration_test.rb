@@ -1,5 +1,4 @@
 require "json"
-require "ostruct"
 
 require_relative "evaluator_tester"
 
@@ -19,7 +18,7 @@ class EvaluatorIntegrationTest < Minitest::Test
 
     @test_data.each do |data|
 
-      puts msg +  "Processing: " + data.to_s
+      puts msg + "Processing: " + data.to_s
 
       unless @tester.process(data)
 
