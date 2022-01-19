@@ -15,8 +15,8 @@ class EvaluatorTester
 
   def process(data)
 
+    puts "Processing the test data '" + data["test_file"].to_s + "' started"
+
     raise "Not implemented"
   end
-
-
 end

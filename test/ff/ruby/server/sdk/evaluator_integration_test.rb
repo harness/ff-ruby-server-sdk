@@ -7,7 +7,7 @@ class EvaluatorIntegrationTest < Minitest::Test
   def execute
 
     @tester = EvaluatorTester.new
-    @test_data = prepare_test_data
+    prepare_test_data
 
     msg = "The evaluator integration test: "
 
@@ -18,11 +18,9 @@ class EvaluatorIntegrationTest < Minitest::Test
 
     @test_data.each do |data|
 
-      puts msg + "Processing: " + data.to_s
-
       unless @tester.process(data)
 
-        puts msg + "Failed: " + data.to_s
+        puts msg + "Failed: " + data["test_file"].to_s
 
         return false
       end
