@@ -6,7 +6,7 @@ class EvaluatorIntegrationTest < Minitest::Test
 
   def execute
 
-    @tester = EvaluatorTester.new
+    @tester = EvaluatorTester.new("Evaluator_Tester")
     prepare_test_data
 
     msg = "The evaluator integration test: "
@@ -68,7 +68,7 @@ class EvaluatorIntegrationTest < Minitest::Test
 
         model["test_file"] = file
 
-        feature = model["flag"]["feature"].to_s + file
+        feature = (model["flag"]["feature"].to_s + file).gsub("_", "").gsub(".", "").downcase
 
         model["flag"]["feature"] = feature
 
