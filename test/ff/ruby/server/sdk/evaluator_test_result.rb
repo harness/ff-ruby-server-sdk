@@ -1,6 +1,6 @@
 class EvaluatorTestResult
 
-  attr_writer :file, :target_identifier, :value, :use_case
+  attr_accessor :file, :target_identifier, :value, :use_case
 
   def initialize(
 

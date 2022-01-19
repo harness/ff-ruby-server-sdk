@@ -71,6 +71,15 @@ class EvaluatorTester < Minitest::Test
 
     assert !@results.empty?
 
+    @results.each do |result|
+
+      refute_nil result
+
+      "Use case '" + result.file.to_s + "' with target '" + result.target_identifier.to_s + "' and expected value '" +
+        result.value.to_s + "'"
+
+    end
+
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
 
     true
