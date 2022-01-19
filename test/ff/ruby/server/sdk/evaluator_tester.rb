@@ -78,6 +78,28 @@ class EvaluatorTester < Minitest::Test
       "Use case '" + result.file.to_s + "' with target '" + result.target_identifier.to_s + "' and expected value '" +
         result.value.to_s + "'"
 
+      target = nil
+
+      if @no_target != result.target_identifier
+
+        if result.use_case["targets"] != nil
+
+          result.use_case["targets"].each do |item|
+
+            if item != nil && item["identifier"] == result.target_identifier
+
+              target = item
+              break
+            end
+          end
+        end
+      end
+
+      received = nil
+      kind = result.use_case["flag"]["kind"]
+
+      refute_nil kind
+
     end
 
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
