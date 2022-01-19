@@ -6,13 +6,10 @@ class EvaluatorTester < Minitest::Test
 
   def process(data)
 
-    @no_target = "_no_target"
-
-    cache = DefaultCache.new
-
-    @repository = StorageRepository.new(cache, nil, nil)
-
     @results = []
+    @no_target = "_no_target"
+    @cache = DefaultCache.new
+    @repository = StorageRepository.new(@cache, nil, nil)
     @evaluator = Evaluator.new(@repository)
 
     puts "Processing the test data '" + data["test_file"].to_s + "' started"
@@ -122,6 +119,7 @@ class EvaluatorTester < Minitest::Test
       case kind
 
       when "boolean"
+
         received = @evaluator.bool_variation(
 
           result.use_case["flag"].feature,
@@ -130,6 +128,7 @@ class EvaluatorTester < Minitest::Test
           nil
         )
       when "int"
+
         received = @evaluator.number_variation(
 
           result.use_case["flag"].feature,
@@ -137,7 +136,9 @@ class EvaluatorTester < Minitest::Test
           0,
           nil
         )
+
       when "string"
+
         received = @evaluator.string_variation(
 
           result.use_case["flag"].feature,
@@ -145,7 +146,9 @@ class EvaluatorTester < Minitest::Test
           "",
           nil
         )
+
       when "json"
+
         received = @evaluator.json_variation(
 
           result.use_case["flag"].feature,
@@ -153,17 +156,20 @@ class EvaluatorTester < Minitest::Test
           JSON.parse("{}"),
           nil
         )
+
       else
+
         raise "Unrecognized kind: " + kind.to_s
       end
 
       refute_nil received
 
+      puts "Comparing: '" + result.value.to_s + "' to '" + received.to_s + "'"
 
+      return result.value == received
     end
 
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
-
     true
   end
 end
