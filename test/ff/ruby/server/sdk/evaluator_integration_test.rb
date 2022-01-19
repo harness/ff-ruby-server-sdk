@@ -8,20 +8,26 @@ class EvaluatorIntegrationTest < Minitest::Test
     @tester = EvaluatorTester.new
     @test_data = prepare_test_data
 
-    puts "The evaluator integration test: START"
+    msg = "The evaluator integration test: "
+
+    puts msg + "START"
 
     refute_nil @tester
     refute_nil @test_data
 
     @test_data.each do |data|
 
+      puts msg +  "Processing: " + data.to_s
+
       unless @tester.process(data)
+
+        puts msg + "Failed: " + data.to_s
 
         return false
       end
     end
 
-    puts "The evaluator integration test: END"
+    puts msg + "END"
     true
   end
 
