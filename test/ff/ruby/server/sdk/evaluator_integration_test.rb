@@ -49,9 +49,26 @@ class EvaluatorIntegrationTest < Minitest::Test
 
       refute_nil file
 
-      puts "Processing file: " + file.to_s
+      assert file.end_with?(".json")
+
+      puts "Loading the mock data file: " + file.to_s
+
+      the_file = File.new(@tests_location + "/" + file, "r")
+
+      if the_file
+
+        data = File.read(the_file.path)
+
+        refute_nil data
+
+        assert !data.empty?
 
 
+
+      else
+
+        puts "Not able to access the file: " + file.to_s
+      end
 
     end
   end
