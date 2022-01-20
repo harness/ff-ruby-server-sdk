@@ -7,8 +7,8 @@ class MetricsEvent
     variation
   )
 
-    @feature_config = feature_config
     @target = target
     @variation = variation
+    @feature_config = feature_config
   end
 end
