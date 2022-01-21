@@ -4,8 +4,10 @@ require_relative "auth_service"
 require_relative "client_callback"
 require_relative "update_processor"
 require_relative "polling_processor"
+require_relative "metrics_processor"
 require_relative "storage_repository"
 require_relative "inner_client_updater"
+require_relative "inner_client_metrics_callback"
 require_relative "inner_client_repository_callback"
 require_relative "inner_client_flag_evaluate_callback"
 
@@ -97,7 +99,10 @@ class InnerClient < ClientCallback
       @update_processor.start
     end
 
-    # TODO: Metrics processor
+    if @config.analytics_enabled
+
+      @metrics_processor.start
+    end
 
   end
 
@@ -113,9 +118,7 @@ class InnerClient < ClientCallback
     @repository.close
     @poll_processor.close
     @update_processor.close
-
-    # TODO: Close metrics
-
+    @metrics_processor.close
     @connector.close
   end
 
@@ -141,6 +144,11 @@ class InnerClient < ClientCallback
     if @config.stream_enabled
 
       @update_processor.stop
+    end
+
+    if @config.analytics_enabled
+
+      @metrics_processor.stop
     end
 
     @auth_service.start_async
@@ -196,8 +204,7 @@ class InnerClient < ClientCallback
     end
 
     if (@config.stream_enabled && !@stream_ready) ||
-      # TODO: Metrics:
-      # (@config.analytics_enabled && !@metric_ready) ||
+      (@config.analytics_enabled && !@metric_ready) ||
       !@poller_ready
 
       return
@@ -241,8 +248,11 @@ class InnerClient < ClientCallback
 
     @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
 
+    @metrics_callback = InnerClientMetricsCallback.new
+    @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)
+
     @evaluator = Evaluator.new(@repository)
-    @evaluator_callback = InnerClientFlagEvaluateCallback.new
+    @evaluator_callback = InnerClientFlagEvaluateCallback.new(@metrics_processor)
 
     @auth_service = AuthService.new(
 
@@ -258,8 +268,6 @@ class InnerClient < ClientCallback
       poll_interval_in_sec = @config.poll_interval_in_seconds,
       callback = self
     )
-
-    # TODO: Init. metrics processor
 
     @updater = InnerClientUpdater.new(
 
