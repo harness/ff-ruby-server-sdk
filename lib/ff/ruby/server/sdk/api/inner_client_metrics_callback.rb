@@ -4,16 +4,16 @@ class InnerClientMetricsCallback < MetricsCallback
 
   def on_metrics_ready
 
-    # TODO:
+    # TODO: Metrics
   end
 
   def on_metrics_error(error)
 
-    # TODO:
+    # TODO: Metrics
   end
 
   def on_metrics_failure
 
-    # TODO:
+    # TODO: Metrics
   end
 end
