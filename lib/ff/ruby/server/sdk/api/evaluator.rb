@@ -223,6 +223,17 @@ class Evaluator < Evaluation
       return false
     end
 
+    if operator == "segmentMatch"
+
+      return is_target_included_or_excluded_in_segment(clause.values, target)
+    end
+
+    if clause.values.empty?
+
+      return false
+    end
+
+    value = clause.values[0]
     attr_value = get_attr_value(target, clause.attribute)
 
     if attr_value == nil
@@ -231,7 +242,6 @@ class Evaluator < Evaluation
     end
 
     object = attr_value.to_s
-    value = clause.values[0]
 
     if operator == "starts_with"
 
