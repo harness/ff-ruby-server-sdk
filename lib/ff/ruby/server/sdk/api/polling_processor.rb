@@ -79,6 +79,8 @@ class PollingProcessor < Closeable
 
     @thread = Thread.new do
 
+      puts "Async started: " + self.to_s
+
       while @ready do
 
         puts "Async poll iteration"
@@ -115,8 +117,6 @@ class PollingProcessor < Closeable
         sleep(@poll_interval_in_sec)
       end
     end
-
-    puts "Async started: " + self.to_s
 
     @thread.run
   end

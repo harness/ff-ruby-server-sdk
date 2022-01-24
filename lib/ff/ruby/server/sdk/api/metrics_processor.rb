@@ -45,18 +45,46 @@ class MetricsProcessor < Closeable
 
   def run_one_iteration
 
+    puts "Async metrics iteration"
+
   end
 
-  def prepare_summary_metrics_body(data) end
+end
 
-  private
+def prepare_summary_metrics_body(data) end
 
-  def start_async
+private
 
+def start_async
+
+  puts "Async starting: " + self.to_s
+
+  @ready = true
+
+  @thread = Thread.new do
+
+    puts "Async started: " + self.to_s
+
+    while @ready do
+
+      unless @initialized
+
+        @initialized = true
+        puts "MetricsProcessor initialized"
+      end
+
+      sleep(@config.frequency)
+
+      run_one_iteration
+    end
+
+    @thread.run
   end
 
   def stop_async
 
+    @ready = false
+    @initialized = false
   end
 
   def prepare_summary_metrics_key(key) end

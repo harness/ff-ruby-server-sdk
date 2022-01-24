@@ -27,6 +27,8 @@ class AuthService < Closeable
 
     @thread = Thread.new do
 
+      puts "Async started: " + self.to_s
+
       while @ready do
 
         puts "Async auth iteration"
@@ -44,8 +46,6 @@ class AuthService < Closeable
         sleep(@poll_interval_in_sec)
       end
     end
-
-    puts "Async started: " + self.to_s
 
     @thread.run
   end
