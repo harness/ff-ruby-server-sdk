@@ -54,7 +54,7 @@ class InnerClient < ClientCallback
     @initialized = false
     @poller_ready = false
     @stream_ready = false
-    @metric_ready = false
+    @metrics_ready = false
 
     @my_mutex = Mutex.new
 
@@ -184,6 +184,11 @@ class InnerClient < ClientCallback
     on_processor_ready(@update_processor)
   end
 
+  def on_metrics_processor_ready
+
+    on_processor_ready(@metrics_processor)
+  end
+
   def on_processor_ready(processor)
 
     if @closing
@@ -203,8 +208,14 @@ class InnerClient < ClientCallback
       puts "Updater ready"
     end
 
+    if processor == @metrics_processor
+
+      @metrics_ready = true
+      puts "Metrics ready"
+    end
+
     if (@config.stream_enabled && !@stream_ready) ||
-      (@config.analytics_enabled && !@metric_ready) ||
+      (@config.analytics_enabled && !@metrics_ready) ||
       !@poller_ready
 
       return
@@ -212,8 +223,8 @@ class InnerClient < ClientCallback
 
     @initialized = true
 
-    # TODO: notify
-    # TODO: notify_consumers
+    # TODO: notify - Reactivity support
+    # TODO: notify_consumers - Reactivity support
 
     puts "Initialization is completed"
   end
@@ -248,7 +259,7 @@ class InnerClient < ClientCallback
 
     @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
 
-    @metrics_callback = InnerClientMetricsCallback.new
+    @metrics_callback = InnerClientMetricsCallback.new(self)
     @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)
 
     @evaluator = Evaluator.new(@repository)

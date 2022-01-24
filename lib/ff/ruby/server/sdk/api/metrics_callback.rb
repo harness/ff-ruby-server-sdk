@@ -16,9 +16,4 @@ class MetricsCallback
 
     raise @tbi
   end
-
-  def on_metrics_failure
-
-    raise @tbi
-  end
 end

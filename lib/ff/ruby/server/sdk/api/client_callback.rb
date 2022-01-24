@@ -33,6 +33,11 @@ class ClientCallback < Closeable
     raise @tbi
   end
 
+  def on_metrics_processor_ready
+
+    raise @tbi
+  end
+
   def update(message, manual)
 
     raise @tbi
