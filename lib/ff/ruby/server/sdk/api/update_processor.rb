@@ -36,8 +36,11 @@ class UpdateProcessor < Closeable
         raise "The 'connector' must be of '" + Connector.to_s + "' data type"
       end
 
-      @stream = @connector.stream(@updater)
-      @stream.start
+      @executor.post do
+
+        @stream = @connector.stream(@updater)
+        @stream.start
+      end
     end
   end
 

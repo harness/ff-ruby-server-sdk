@@ -16,7 +16,7 @@ class MetricsProcessor < Closeable
 
   def start
 
-    puts "Starting MetricsProcessor with request interval: " + @config.frequency
+    puts "Starting MetricsProcessor with request interval: " + @config.frequency.to_s
     start_async
   end
 
@@ -47,6 +47,8 @@ class MetricsProcessor < Closeable
 
     puts "Async metrics iteration"
 
+
+
   end
 
 end
@@ -64,6 +66,8 @@ def start_async
   @thread = Thread.new do
 
     puts "Async started: " + self.to_s
+
+    @callback.on_metrics_ready
 
     while @ready do
 

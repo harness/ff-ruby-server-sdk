@@ -25,7 +25,11 @@ client.init(
   config = config
 )
 
+puts "We will wait for the initialization"
+
 client.wait_for_initialization
+
+puts "Initialization is complete"
 
 while true do
 
