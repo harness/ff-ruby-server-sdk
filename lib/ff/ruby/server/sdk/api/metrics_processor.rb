@@ -14,52 +14,54 @@ class MetricsProcessor < Closeable
     @connector = connector
   end
 
+  def start
+
+    puts "Starting MetricsProcessor with request interval: " + @config.frequency
+    start_async
+  end
+
+  def stop
+
+    puts "Stopping MetricsProcessor"
+    stop_async
+  end
+
+  def close
+
+    stop
+    "Closing MetricsProcessor"
+  end
+
   def push_to_queue(
 
     target,
     feature_config,
     variation
-  )
+  ) end
 
-
-  end
-
-  def send_data_and_reset_cache(data)
-
-
-  end
-
-  def start
-
-  end
-
-  def stop
-
-  end
-
-  def close
-
-  end
+  def send_data_and_reset_cache(data) end
 
   protected
-
-  def prepare_summary_metrics_body(data)
-
-  end
 
   def run_one_iteration
 
   end
 
+  def prepare_summary_metrics_body(data) end
+
   private
 
-  def prepare_summary_metrics_key(key)
+  def start_async
 
   end
 
-  def add_target(metrics, target)
+  def stop_async
 
   end
+
+  def prepare_summary_metrics_key(key) end
+
+  def add_target(metrics, target) end
 
   def get_version
 
