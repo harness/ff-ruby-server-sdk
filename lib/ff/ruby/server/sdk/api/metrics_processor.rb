@@ -29,7 +29,7 @@ class MetricsProcessor < Closeable
   def close
 
     stop
-    "Closing MetricsProcessor"
+    puts "Closing MetricsProcessor"
   end
 
   def push_to_queue(
