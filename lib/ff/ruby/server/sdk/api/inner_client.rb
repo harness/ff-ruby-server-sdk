@@ -129,7 +129,7 @@ class InnerClient < ClientCallback
 
   def off
 
-    # TODO: Implement
+    # TODO: Implement - Reactivity support
   end
 
   def on_unauthorized
