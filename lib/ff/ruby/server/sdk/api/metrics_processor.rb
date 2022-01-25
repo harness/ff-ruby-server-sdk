@@ -22,6 +22,7 @@ class MetricsProcessor < Closeable
 
     @jar_version = ""
     @server = "server"
+    @queue = Queue.new
     @sdk_version = "SDK_VERSION"
     @sdk_language = "SDK_LANGUAGE"
     @global_target_name = "Global Target"
