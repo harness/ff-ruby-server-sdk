@@ -44,6 +44,8 @@ class MetricsProcessor < Closeable
     @variation_identifier_attribute = "variationIdentifier"
 
     @queue = SizedQueue.new(@config.buffer_size)
+
+    @callback.on_metrics_ready
   end
 
   def start
@@ -96,8 +98,6 @@ def start_async
   @thread = Thread.new do
 
     puts "Async started: " + self.to_s
-
-    @callback.on_metrics_ready
 
     while @ready do
 
