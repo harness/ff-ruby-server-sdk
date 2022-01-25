@@ -67,9 +67,6 @@ class Events < Service
 
     puts "Stopping EventSource service"
 
-    # TODO: This method is private !?
-    # @sse.stop
-
     on_closed
   end
 

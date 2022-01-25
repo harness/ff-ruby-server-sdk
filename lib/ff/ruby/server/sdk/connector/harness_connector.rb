@@ -81,12 +81,12 @@ class HarnessConnector < Connector
 
   def get_flag(identifier)
 
-      @api.get_feature_config_by_identifier(
+    @api.get_feature_config_by_identifier(
 
-        identifier = identifier,
-        environment_uuid = @environment,
-        opts = get_query_params
-      )
+      identifier = identifier,
+      environment_uuid = @environment,
+      opts = get_query_params
+    )
   end
 
   def get_segment(identifier)
@@ -101,13 +101,25 @@ class HarnessConnector < Connector
 
   def post_metrics(metrics)
 
-    # TODO: Metrics
+    begin
 
-    raise @tbi
+      options = {
+        :'metrics' => metrics
+      }
 
-    puts "Exception while posting metrics to the event server"
+      @metrics_api.post_metrics(
 
-    puts "Successfully sent analytics data to the server"
+        environment = @environment,
+        opts = options
+      )
+
+      puts "Successfully sent analytics data to the server"
+
+    rescue OpenapiClient::ApiError => e
+
+      log_error(e)
+      puts "Exception while posting metrics to the event server"
+    end
   end
 
   def stream(updater)
@@ -155,10 +167,6 @@ class HarnessConnector < Connector
     api_client.user_agent = @user_agent
 
     api_client
-
-    # TODO: Interceptor
-
-    api_client
   end
 
   def make_metrics_api_client
@@ -171,14 +179,12 @@ class HarnessConnector < Connector
 
     # TODO: Check base path
 
-    config.connection_timeout = max_timeout
     config.read_timeout = max_timeout
     config.write_timeout = max_timeout
+    config.connection_timeout = max_timeout
 
     api_client.config = config
     api_client.user_agent = @user_agent
-
-    # TODO: Interceptor
 
     api_client
   end

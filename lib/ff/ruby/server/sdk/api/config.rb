@@ -54,6 +54,7 @@ class Config
     @cache = DefaultCache.new
 
     # TODO: Storage goes here
+
     @store = nil
   end
 
