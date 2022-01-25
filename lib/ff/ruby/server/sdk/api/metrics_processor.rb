@@ -1,6 +1,7 @@
 require "time"
 require "concurrent-ruby"
 
+require_relative "../../sdk/version"
 require_relative "../common/closeable"
 
 class MetricsProcessor < Closeable
@@ -190,6 +191,6 @@ def start_async
 
   def get_version
 
-    nil
+    Ff::Ruby::Server::Sdk::VERSION
   end
 end
