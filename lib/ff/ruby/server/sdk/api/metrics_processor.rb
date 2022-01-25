@@ -134,6 +134,16 @@ class MetricsProcessor < Closeable
 
     puts "Async metrics iteration"
 
+    data = []
+
+    @queue.each do |item|
+
+      data.push(item)
+    end
+
+    @queue.clear
+
+    send_data_and_reset_cache(data)
   end
 
 end
