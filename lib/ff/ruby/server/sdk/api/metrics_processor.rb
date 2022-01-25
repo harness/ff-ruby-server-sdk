@@ -1,3 +1,4 @@
+require "time"
 require "concurrent-ruby"
 
 require_relative "../common/closeable"
@@ -83,7 +84,49 @@ class MetricsProcessor < Closeable
     end
   end
 
-  def send_data_and_reset_cache(data) end
+  def send_data_and_reset_cache(data)
+
+    puts "Reading from queue and building cache"
+
+    @jar_version = get_version
+
+    unless data.empty?
+
+      map = {}
+
+      data.each do |event|
+
+        new_value = 1
+        current = map[event]
+
+        if current != nil
+
+          new_value = current + 1
+        end
+
+        map[event] = new_value
+      end
+
+      metrics = prepare_summary_metrics_body(map)
+
+      if !metrics.metrics_data.empty? && !metrics.target_data.empty?
+
+        start_time = (Time.now.to_f * 1000).to_i
+
+        @connector.post_metrics(metrics)
+
+        end_time = (Time.now.to_f * 1000).to_i
+
+        if end_time - start_time > @config.metrics_service_acceptable_duration
+
+          puts "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+        end
+      end
+
+      @global_target_set.merge(@staging_target_set)
+      @staging_target_set.clear
+    end
+  end
 
   protected
 

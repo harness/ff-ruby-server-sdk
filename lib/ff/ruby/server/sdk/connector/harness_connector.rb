@@ -104,6 +104,10 @@ class HarnessConnector < Connector
     # TODO: Metrics
 
     raise @tbi
+
+    puts "Exception while posting metrics to the event server"
+
+    puts "Successfully sent analytics data to the server"
   end
 
   def stream(updater)
