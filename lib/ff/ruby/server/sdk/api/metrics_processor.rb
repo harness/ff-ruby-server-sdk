@@ -240,7 +240,48 @@ def start_async
     )
   end
 
-  def add_target_data(metrics, target) end
+  def add_target_data(metrics, target)
+
+    target_data = OpenapiClient::TargetData.new
+    private_attributes = target.private_attributes
+
+    if !@staging_target_set.include?(target) && !@global_target_set.include?(target) && !target.is_private
+
+      @staging_target_set.add(target)
+
+      attributes = target.attributes
+
+      attributes.each do |k, v|
+
+        key_value = OpenapiClient::KeyValue.new
+
+        if !private_attributes.empty?
+
+          unless private_attributes.include?(k)
+
+            key_value = OpenapiClient::KeyValue.new({ k => v.to_s })
+          end
+        else
+
+          key_value = OpenapiClient::KeyValue.new({ k => v.to_s })
+        end
+
+        target_data.attributes.push(key_value)
+      end
+
+      target_data.identifier = target.identifier
+
+      if target.name == nil || target.name == ""
+
+        target_data.name = target.identifier
+      else
+
+        target_data.name = target.name
+      end
+
+      metrics.target_data.push(target_data)
+    end
+  end
 
   def get_version
 
