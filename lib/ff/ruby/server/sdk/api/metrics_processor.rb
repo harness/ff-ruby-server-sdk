@@ -9,6 +9,21 @@ class MetricsProcessor < Closeable
     callback
   )
 
+    unless connector.kind_of?(Connector)
+
+      raise "The 'connector' must be of '" + Connector.to_s + "' data type"
+    end
+
+    unless callback.kind_of?(MetricsCallback)
+
+      raise "The 'callback' must be of '" + MetricsCallback.to_s + "' data type"
+    end
+
+    unless config.kind_of?(Config)
+
+      raise "The 'config' must be of '" + Config.to_s + "' data type"
+    end
+
     @config = config
     @callback = callback
     @connector = connector
@@ -22,12 +37,13 @@ class MetricsProcessor < Closeable
 
     @jar_version = ""
     @server = "server"
-    @queue = Queue.new
     @sdk_version = "SDK_VERSION"
     @sdk_language = "SDK_LANGUAGE"
     @global_target_name = "Global Target"
     @feature_name_attribute = "featureName"
     @variation_identifier_attribute = "variationIdentifier"
+
+    @queue = SizedQueue.new(@config.buffer_size)
   end
 
   def start
