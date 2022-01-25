@@ -4,6 +4,7 @@ require "concurrent-ruby"
 require_relative "../dto/target"
 require_relative "../../sdk/version"
 require_relative "../common/closeable"
+require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
 
@@ -229,7 +230,15 @@ def start_async
     @initialized = false
   end
 
-  def prepare_summary_metrics_key(key) end
+  def prepare_summary_metrics_key(key)
+
+    SummaryMetrics.new(
+
+      feature_name = key.feature_config.feature,
+      variation_identifier = key.variation.identifier,
+      variation_value = key.variation.value
+    )
+  end
 
   def add_target_data(metrics, target) end
 

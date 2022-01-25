@@ -1,5 +1,7 @@
 class MetricsEvent
 
+  attr_accessor :feature_config, :target, :variation
+
   def initialize(
 
     feature_config,
