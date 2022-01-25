@@ -1,6 +1,7 @@
 require "time"
 require "concurrent-ruby"
 
+require_relative "../dto/target"
 require_relative "../../sdk/version"
 require_relative "../common/closeable"
 
@@ -149,7 +150,50 @@ class MetricsProcessor < Closeable
 
 end
 
-def prepare_summary_metrics_body(data) end
+def prepare_summary_metrics_body(data)
+
+  summary_metrics_data = {}
+  metrics = OpenapiClient::Metrics.new
+
+  add_target_data(
+
+    metrics,
+    Target.new(
+
+      name = @global_target_name,
+      identifier = @global_target
+    )
+  )
+
+  data.each do |key, value|
+
+    target = key.target
+
+    add_target_data(metrics, target)
+
+    summary_metrics = prepare_summary_metrics_key(key)
+
+    summary_metrics_data[summary_metrics] = value
+  end
+
+  summary_metrics_data.each do |key, value|
+
+    metrics_data = OpenapiClient::MetricsData.new
+    metrics_data.timestamp = (Time.now.to_f * 1000).to_i
+    metrics_data.count = value
+    metrics_data.metrics_type = "FFMETRICS"
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@feature_name_attribute => key.feature_name}))
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@variation_identifier_attribute => key.variation_identifier}))
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@target_attribute => @global_target}))
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@sdk_type => @server}))
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@sdk_language => "ruby"}))
+    metrics_data.attributes.push(OpenapiClient::KeyValue.new({@sdk_version => @jar_version}))
+
+    metrics.metrics_data.push(metrics_data)
+  end
+
+  metrics
+end
 
 private
 
@@ -187,7 +231,7 @@ def start_async
 
   def prepare_summary_metrics_key(key) end
 
-  def add_target(metrics, target) end
+  def add_target_data(metrics, target) end
 
   def get_version
 
