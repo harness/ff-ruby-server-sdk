@@ -12,6 +12,21 @@ class MetricsProcessor < Closeable
     @config = config
     @callback = callback
     @connector = connector
+
+    @sdk_type = "SDK_TYPE"
+    @global_target_set = Set[]
+    @staging_target_set = Set[]
+    @target_attribute = "target"
+    @global_target = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
+    #                                             targets as a summary
+
+    @jar_version = ""
+    @server = "server"
+    @sdk_version = "SDK_VERSION"
+    @sdk_language = "SDK_LANGUAGE"
+    @global_target_name = "Global Target"
+    @feature_name_attribute = "featureName"
+    @variation_identifier_attribute = "variationIdentifier"
   end
 
   def start
@@ -46,8 +61,6 @@ class MetricsProcessor < Closeable
   def run_one_iteration
 
     puts "Async metrics iteration"
-
-
 
   end
 
