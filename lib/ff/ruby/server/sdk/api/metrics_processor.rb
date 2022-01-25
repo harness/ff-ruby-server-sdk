@@ -1,3 +1,5 @@
+require "concurrent-ruby"
+
 require_relative "../common/closeable"
 
 class MetricsProcessor < Closeable
@@ -44,6 +46,7 @@ class MetricsProcessor < Closeable
     @variation_identifier_attribute = "variationIdentifier"
 
     @queue = SizedQueue.new(@config.buffer_size)
+    @executor = Concurrent::FixedThreadPool.new(100)
 
     @callback.on_metrics_ready
   end
@@ -71,7 +74,14 @@ class MetricsProcessor < Closeable
     target,
     feature_config,
     variation
-  ) end
+  )
+
+    @executor.post do
+
+      event = MetricsEvent.new(feature_config, target, variation)
+      @queue.push(event)
+    end
+  end
 
   def send_data_and_reset_cache(data) end
 
