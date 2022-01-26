@@ -253,6 +253,8 @@ class InnerClient < ClientCallback
 
   def setup
 
+    puts "" # TODO: Log the SDK version
+
     puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
