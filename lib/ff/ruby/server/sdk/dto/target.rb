@@ -1,6 +1,6 @@
 class Target
 
-  attr_accessor :name, :identifier, :attributes, :is_privatem, :private_attributes
+  attr_accessor :name, :identifier, :attributes, :is_private, :private_attributes
 
   def initialize(
 

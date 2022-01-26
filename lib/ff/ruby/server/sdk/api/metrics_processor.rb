@@ -247,7 +247,7 @@ class MetricsProcessor < Closeable
   def add_target_data(metrics, target)
 
     target_data = OpenapiClient::TargetData.new
-    private_attributes = target.private_attributes ...
+    private_attributes = target.private_attributes
 
     if !@staging_target_set.include?(target) && !@global_target_set.include?(target) && !target.is_private
 
