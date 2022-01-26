@@ -82,10 +82,13 @@ class MetricsProcessor < Closeable
 
     @executor.post do
 
-      puts "Pushing to the metrics queue"
+      puts "Pushing to the metrics queue: START"
 
       event = MetricsEvent.new(feature_config, target, variation)
       @queue.push(event)
+
+      puts "Pushing to the metrics queue: END, queue size: " + @queue.size.to_s
+
     end
   end
 
