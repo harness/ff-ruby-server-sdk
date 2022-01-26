@@ -2,7 +2,6 @@ require "jwt"
 
 require_relative "events"
 require_relative "connector"
-require_relative "connector_exception"
 
 require_relative "../version"
 
