@@ -4,6 +4,7 @@ require "concurrent-ruby"
 require_relative "../dto/target"
 require_relative "../../sdk/version"
 require_relative "../common/closeable"
+require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
