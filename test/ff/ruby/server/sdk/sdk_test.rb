@@ -341,6 +341,30 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     assert integration_test.execute
   end
 
+  def test_sized_queue
+
+    count = 5
+    queue = SizedQueue.new(5)
+
+    (1..5).each do |x|
+
+      queue.push(x)
+    end
+
+    assert queue.size == count
+
+    all = []
+
+    until queue.empty?
+
+      item = queue.pop
+      all.push(item)
+    end
+
+    assert queue.empty?
+    assert all.size == count
+  end
+
   private
 
   def assert_defaults(config)

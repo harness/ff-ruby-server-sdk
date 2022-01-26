@@ -39,7 +39,6 @@ require_relative "sdk/connector/service"
 require_relative "sdk/connector/connector"
 require_relative "sdk/connector/events"
 require_relative "sdk/connector/harness_connector"
-require_relative "sdk/connector/connector_exception"
 
 module Ff
   module Ruby

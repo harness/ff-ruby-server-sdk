@@ -145,12 +145,11 @@ class MetricsProcessor < Closeable
 
     data = []
 
-    @queue.each do |item|
+    until @queue.empty?
 
+      item = @queue.pop
       data.push(item)
     end
-
-    @queue.clear
 
     send_data_and_reset_cache(data)
   end
