@@ -82,6 +82,8 @@ class MetricsProcessor < Closeable
 
     @executor.post do
 
+      puts "Pushing to the metrics queue"
+
       event = MetricsEvent.new(feature_config, target, variation)
       @queue.push(event)
     end
