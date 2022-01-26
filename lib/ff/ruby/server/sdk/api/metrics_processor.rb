@@ -157,7 +157,7 @@ class MetricsProcessor < Closeable
   def prepare_summary_metrics_body(data)
 
     summary_metrics_data = {}
-    metrics = OpenapiClient::Metrics.new
+    metrics = OpenapiClient::Metrics.new({ :target_data => [] })
 
     add_target_data(
 
