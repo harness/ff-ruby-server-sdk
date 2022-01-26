@@ -182,16 +182,16 @@ class MetricsProcessor < Closeable
 
     summary_metrics_data.each do |key, value|
 
-      metrics_data = OpenapiClient::MetricsData.new
+      metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
       metrics_data.count = value
       metrics_data.metrics_type = "FFMETRICS"
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @feature_name_attribute => key.feature_name }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @variation_identifier_attribute => key.variation_identifier }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @target_attribute => @global_target }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @sdk_type => @server }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @sdk_language => "ruby" }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ @sdk_version => @jar_version }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @feature_name_attribute, :value => key.feature_name }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @variation_identifier_attribute, :value => key.variation_identifier }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @target_attribute, :value => @global_target }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_type, :value => @server }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_language, :value => "ruby" }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
 
       metrics.metrics_data.push(metrics_data)
     end
@@ -263,11 +263,11 @@ class MetricsProcessor < Closeable
 
           unless private_attributes.include?(k)
 
-            key_value = OpenapiClient::KeyValue.new({ k => v.to_s })
+            key_value = OpenapiClient::KeyValue.new({ :key => k, :value => v.to_s })
           end
         else
 
-          key_value = OpenapiClient::KeyValue.new({ k => v.to_s })
+          key_value = OpenapiClient::KeyValue.new({ :key => k, :value => v.to_s })
         end
 
         target_data.attributes.push(key_value)
