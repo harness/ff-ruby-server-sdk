@@ -103,7 +103,12 @@ class HarnessConnector < Connector
     begin
 
       options = {
-        :'metrics' => metrics
+
+        :'metrics' => metrics,
+        :'query_params' => {
+
+          :'cluster' => @cluster
+        }
       }
 
       @metrics_api.post_metrics(
@@ -176,7 +181,7 @@ class HarnessConnector < Connector
 
     config = @options.clone
 
-    # TODO: Check base path
+    # TODO: Check the base path
 
     config.read_timeout = max_timeout
     config.write_timeout = max_timeout
