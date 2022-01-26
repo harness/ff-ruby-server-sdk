@@ -1,5 +1,4 @@
 require_relative "../common/closeable"
-require_relative "../connector/connector_exception"
 
 class PollingProcessor < Closeable
 
