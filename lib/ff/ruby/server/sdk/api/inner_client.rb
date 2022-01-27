@@ -271,7 +271,8 @@ class InnerClient < ClientCallback
 
       connector = @connector,
       poll_interval_in_sec = @config.poll_interval_in_seconds,
-      callback = self
+      callback = self,
+      logger = @config.logger
     )
 
     @poll_processor = PollingProcessor.new(

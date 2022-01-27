@@ -2,7 +2,7 @@ require_relative "../common/closeable"
 
 class AuthService < Closeable
 
-  def initialize(connector = nil, poll_interval_in_sec = 60, callback = nil)
+  def initialize(connector = nil, poll_interval_in_sec = 60, callback = nil, logger = nil)
 
     unless connector.kind_of?(Connector)
 
@@ -17,30 +17,38 @@ class AuthService < Closeable
     @callback = callback
     @connector = connector
     @poll_interval_in_sec = poll_interval_in_sec
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
   end
 
   def start_async
 
-    puts "Async starting: " + self.to_s
+    @logger.debug "Async starting: " + self.to_s
 
     @ready = true
 
     @thread = Thread.new do
 
-      puts "Async started: " + self.to_s
+      @logger.debug "Async started: " + self.to_s
 
       while @ready do
 
-        puts "Async auth iteration"
+        @logger.debug "Async auth iteration"
 
         if @connector.authenticate
 
           @callback.on_auth_success
           stop_async
-          puts "Stopping Auth service"
+          @logger.info "Stopping Auth service"
         else
 
-          puts "Exception while authenticating, retry in " + @poll_interval_in_sec.to_s + " seconds"
+          @logger.error "Exception while authenticating, retry in " + @poll_interval_in_sec.to_s + " seconds"
         end
 
         sleep(@poll_interval_in_sec)
