@@ -7,8 +7,9 @@ client = CfClient.instance
 
 # Non-Freemium:
 # key = "e22567cb-ccbd-4460-aa8a-751c24c7efda"
+
 # Freemium:
-# key = "b5701b02-76c0-45eb-a0fa-051b514f040d"
+# key = "76c48e81-674a-41a0-beee-838f44ee45b5"
 
 # UAT:
 key = "8b00e7d0-3415-4c1e-a75b-f2b449e39ccc"
