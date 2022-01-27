@@ -10,15 +10,15 @@ class HarnessConnector < Connector
   def initialize(api_key, config, on_unauthorized)
 
     @api_key = api_key
-    @options = config
+    @config = config
     @on_unauthorized = on_unauthorized
     @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
 
     @api = OpenapiClient::ClientApi.new(make_api_client)
     @metrics_api = OpenapiClient::MetricsApi.new(make_metrics_api_client)
 
-    puts "Api: " + @api.to_s
-    puts "Metrics api: " + @metrics_api.to_s
+    @config.logger.debug "Api: " + @api.to_s
+    @config.logger.debug "Metrics api: " + @metrics_api.to_s
   end
 
   def authenticate
@@ -34,7 +34,7 @@ class HarnessConnector < Connector
       response = @api.authenticate(opts = options)
       @token = response.auth_token
 
-      puts "Token has been obtained: " + @token
+      @config.logger.info "Token has been obtained: " + @token
       process_token
       return true
 
@@ -117,12 +117,12 @@ class HarnessConnector < Connector
         opts = options
       )
 
-      puts "Successfully sent analytics data to the server"
+      @config.logger.info "Successfully sent analytics data to the server"
 
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
-      puts "Exception while posting metrics to the event server"
+      @config.logger.error "Exception while posting metrics to the event server"
     end
   end
 
@@ -134,7 +134,7 @@ class HarnessConnector < Connector
       @event_source = nil
     end
 
-    url = @options.config_url + "/stream?cluster=" + @cluster.to_s
+    url = @config.config_url + "/stream?cluster=" + @cluster.to_s
 
     headers = {
 
@@ -167,7 +167,7 @@ class HarnessConnector < Connector
 
     api_client = OpenapiClient::ApiClient.new
 
-    api_client.config = @options
+    api_client.config = @config
     api_client.user_agent = @user_agent
 
     api_client
@@ -179,7 +179,7 @@ class HarnessConnector < Connector
 
     api_client = OpenapiClient::ApiClient.new
 
-    config = @options.clone
+    config = @config.clone
 
     config.read_timeout = max_timeout
     config.write_timeout = max_timeout
@@ -209,10 +209,10 @@ class HarnessConnector < Connector
       @environment = decoded_token[0]["environment"]
       @cluster = decoded_token[0]["clusterIdentifier"]
 
-      puts "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
+      @config.logger.debug "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
     else
 
-      puts "ERROR: Could not obtain the environment and cluster data from the token"
+      @config.logger.error "ERROR: Could not obtain the environment and cluster data from the token"
     end
   end
 
@@ -230,6 +230,6 @@ class HarnessConnector < Connector
 
   def log_error(e)
 
-    puts "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    @config.logger.error "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
   end
 end
