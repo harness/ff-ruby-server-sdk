@@ -184,8 +184,6 @@ class HarnessConnector < Connector
     config.read_timeout = max_timeout
     config.write_timeout = max_timeout
     config.connection_timeout = max_timeout
-    config.debugging = true
-
     config.base_url = config.event_url
 
     api_client.config = config
