@@ -1,3 +1,5 @@
+require "logger"
+
 require_relative "default_cache"
 
 class Config
@@ -50,9 +52,9 @@ class Config
 
     @debugging = false
 
-    @metrics_service_acceptable_duration = 10 * 1000
-
     @logger = Logger.new(STDOUT)
+
+    @metrics_service_acceptable_duration = 10 * 1000
 
     @cache = DefaultCache.new
 

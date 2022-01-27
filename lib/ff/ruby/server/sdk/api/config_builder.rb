@@ -89,6 +89,12 @@ class ConfigBuilder
     self
   end
 
+  def logger(logger)
+
+    @config.logger = logger
+    self
+  end
+
   def debugging(debug)
 
     @config.debugging = debug
