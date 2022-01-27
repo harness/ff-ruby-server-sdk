@@ -181,11 +181,12 @@ class HarnessConnector < Connector
 
     config = @options.clone
 
-    # TODO: Check the base path
-
     config.read_timeout = max_timeout
     config.write_timeout = max_timeout
     config.connection_timeout = max_timeout
+    config.debugging = true
+
+    config.base_url = config.event_url
 
     api_client.config = config
     api_client.user_agent = @user_agent

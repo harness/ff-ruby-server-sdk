@@ -6,7 +6,8 @@ class Config
 
   attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
                 :frequency, :buffer_size, :all_attributes_private, :private_attributes, :connection_timeout,
-                :read_timeout, :write_timeout, :debugging, :metrics_service_acceptable_duration, :cache, :store
+                :read_timeout, :write_timeout, :debugging, :metrics_service_acceptable_duration, :cache, :store,
+                :logger
 
   # Static:
   class << self
@@ -50,6 +51,8 @@ class Config
     @debugging = false
 
     @metrics_service_acceptable_duration = 10 * 1000
+
+    @logger = Logger.new(STDOUT)
 
     @cache = DefaultCache.new
 
