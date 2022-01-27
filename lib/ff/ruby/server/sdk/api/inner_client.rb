@@ -35,7 +35,7 @@ class InnerClient < ClientCallback
       @config = config
     end
 
-    puts "Ruby SDK version: " + Ff::Ruby::Server::Sdk::VERSION
+    @config.logger.debug "Ruby SDK version: " + Ff::Ruby::Server::Sdk::VERSION
 
     if connector == nil
 
@@ -87,7 +87,7 @@ class InnerClient < ClientCallback
 
   def on_auth_success
 
-    puts "SDK successfully logged in"
+    @config.logger.info "SDK successfully logged in"
 
     if @closing
 
@@ -110,7 +110,7 @@ class InnerClient < ClientCallback
 
   def close
 
-    puts "Closing the client: " + self.to_s
+    @config.logger.info "Closing the client: " + self.to_s
 
     @closing = true
 
@@ -163,19 +163,19 @@ class InnerClient < ClientCallback
 
   def on_poller_error(e)
 
-    puts "Poller error: " + e.to_s
+    @config.logger.error "Poller error: " + e.to_s
   end
 
   def on_poller_iteration(poller)
 
-    puts "Poller iterated" + poller.to_s
+    @config.logger.debug "Poller iterated" + poller.to_s
   end
 
   def update(message, manual)
 
     if @config.stream_enabled && manual
 
-      puts "You run the update method manually with the stream enabled. Please turn off the stream in this case."
+      @config.logger.warn "You run the update method manually with the stream enabled. Please turn off the stream in this case."
     end
 
     @update_processor.update(message)
@@ -201,19 +201,19 @@ class InnerClient < ClientCallback
     if processor == @poll_processor
 
       @poller_ready = true
-      puts "PollingProcessor ready"
+      @config.logger.info "PollingProcessor ready"
     end
 
     if processor == @update_processor
 
       @stream_ready = true
-      puts "Updater ready"
+      @config.logger.info "Updater ready"
     end
 
     if processor == @metrics_processor
 
       @metrics_ready = true
-      puts "Metrics ready"
+      @config.logger.info "Metrics ready"
     end
 
     if (@config.stream_enabled && !@stream_ready) ||
@@ -228,14 +228,14 @@ class InnerClient < ClientCallback
     # TODO: notify - Reactivity support
     # TODO: notify_consumers - Reactivity support
 
-    puts "Initialization is completed"
+    @config.logger.info "Initialization is completed"
   end
 
   def wait_for_initialization
 
     synchronize do
 
-      puts "Waiting for the initialization to finish"
+      @config.logger.info "Waiting for the initialization to finish"
 
       until @initialized
 
@@ -247,7 +247,7 @@ class InnerClient < ClientCallback
         raise "Initialization failed"
       end
 
-      puts "Waiting for the initialization completed"
+      @config.logger.info "Waiting for the initialization completed"
     end
   end
 
@@ -255,7 +255,7 @@ class InnerClient < ClientCallback
 
   def setup
 
-    puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
+    @config.logger.info "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
 
