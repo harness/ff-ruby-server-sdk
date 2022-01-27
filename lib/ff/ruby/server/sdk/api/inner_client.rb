@@ -285,7 +285,8 @@ class InnerClient < ClientCallback
     @updater = InnerClientUpdater.new(
 
       poll_processor = @poll_processor,
-      client_callback = self
+      client_callback = self,
+      logger = @config.logger
     )
 
     @update_processor = UpdateProcessor.new(

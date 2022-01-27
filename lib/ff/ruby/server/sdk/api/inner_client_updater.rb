@@ -5,7 +5,8 @@ class InnerClientUpdater < Updater
   def initialize(
 
     poll_processor,
-    client_callback
+    client_callback,
+    logger = nil
   )
 
     unless poll_processor.kind_of?(PollingProcessor)
@@ -18,8 +19,9 @@ class InnerClientUpdater < Updater
       raise "The 'client_callback' parameter must be of '" + ClientCallback.to_s + "' data type"
     end
 
-    @client_callback = client_callback
+    @logger = logger
     @poll_processor = poll_processor
+    @client_callback = client_callback
   end
 
   def on_connected
@@ -42,7 +44,7 @@ class InnerClientUpdater < Updater
 
   def on_error
 
-    puts "Error occurred"
+    @config.logger.error "Error occurred"
   end
 
   def update(message)
