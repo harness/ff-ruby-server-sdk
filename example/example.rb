@@ -26,11 +26,11 @@ client.init(
   config = config
 )
 
-puts "We will wait for the initialization"
+config.logger.debug "We will wait for the initialization"
 
 client.wait_for_initialization
 
-puts "Initialization is complete"
+config.logger.debug "Initialization is complete"
 
 while true do
 
@@ -46,10 +46,10 @@ while true do
   string_result = client.string_variation(string_flag, target, "unavailable !!!")
   json_result = client.json_variation(json_flag, target, JSON.parse("{}"))
 
-  puts "'" + bool_flag.to_s + "' has the value of: " + bool_result.to_s
-  puts "'" + number_flag.to_s + "' has the value of: " + number_result.to_s
-  puts "'" + string_flag.to_s + "' has the value of: " + string_result.to_s
-  puts "'" + json_flag.to_s + "' has the value of: " + json_result.to_s
+  config.logger.debug "'" + bool_flag.to_s + "' has the value of: " + bool_result.to_s
+  config.logger.debug "'" + number_flag.to_s + "' has the value of: " + number_result.to_s
+  config.logger.debug "'" + string_flag.to_s + "' has the value of: " + string_result.to_s
+  config.logger.debug "'" + json_flag.to_s + "' has the value of: " + json_result.to_s
 
   sleep 10
 end
