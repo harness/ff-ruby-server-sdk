@@ -35,6 +35,8 @@ class InnerClient < ClientCallback
       @config = config
     end
 
+    puts "Ruby SDK version: " + Ff::Ruby::Server::Sdk::VERSION
+
     if connector == nil
 
       @connector = HarnessConnector.new(api_key, config = @config, on_unauthorized = self)
@@ -252,8 +254,6 @@ class InnerClient < ClientCallback
   protected
 
   def setup
-
-    puts @user_agent.to_s
 
     puts "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
