@@ -1,3 +1,5 @@
+require "logger"
+
 require_relative "../connector/updater"
 
 class InnerClientUpdater < Updater
@@ -19,7 +21,14 @@ class InnerClientUpdater < Updater
       raise "The 'client_callback' parameter must be of '" + ClientCallback.to_s + "' data type"
     end
 
-    @logger = logger
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
+
     @poll_processor = poll_processor
     @client_callback = client_callback
   end
@@ -44,7 +53,7 @@ class InnerClientUpdater < Updater
 
   def on_error
 
-    @config.logger.error "Error occurred"
+    @logger.error "Error occurred"
   end
 
   def update(message)

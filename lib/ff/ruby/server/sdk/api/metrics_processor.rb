@@ -58,20 +58,20 @@ class MetricsProcessor < Closeable
 
   def start
 
-    puts "Starting MetricsProcessor with request interval: " + @config.frequency.to_s
+    @config.logger.info "Starting metrics processor with request interval: " + @config.frequency.to_s
     start_async
   end
 
   def stop
 
-    puts "Stopping MetricsProcessor"
+    @config.logger.info "Stopping metrics processor"
     stop_async
   end
 
   def close
 
     stop
-    puts "Closing MetricsProcessor"
+    @config.logger.info "Closing metrics processor"
   end
 
   def push_to_queue(
@@ -83,19 +83,19 @@ class MetricsProcessor < Closeable
 
     @executor.post do
 
-      puts "Pushing to the metrics queue: START"
+      @config.logger.debug "Pushing to the metrics queue: START"
 
       event = MetricsEvent.new(feature_config, target, variation)
       @queue.push(event)
 
-      puts "Pushing to the metrics queue: END, queue size: " + @queue.size.to_s
+      @config.logger.debug "Pushing to the metrics queue: END, queue size: " + @queue.size.to_s
 
     end
   end
 
   def send_data_and_reset_cache(data)
 
-    puts "Reading from queue and building cache"
+    @config.logger.debug "Reading from queue and building cache"
 
     @jar_version = get_version
 
@@ -128,7 +128,7 @@ class MetricsProcessor < Closeable
 
         if end_time - start_time > @config.metrics_service_acceptable_duration
 
-          puts "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+          @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
         end
       end
 
@@ -141,7 +141,7 @@ class MetricsProcessor < Closeable
 
   def run_one_iteration
 
-    puts "Async metrics iteration"
+    @config.logger.debug "Async metrics iteration"
 
     data = []
 
@@ -203,20 +203,20 @@ class MetricsProcessor < Closeable
 
   def start_async
 
-    puts "Async starting: " + self.to_s
+    @config.logger.debug "Async starting: " + self.to_s
 
     @ready = true
 
     @thread = Thread.new do
 
-      puts "Async started: " + self.to_s
+      @config.logger.debug "Async started: " + self.to_s
 
       while @ready do
 
         unless @initialized
 
           @initialized = true
-          puts "MetricsProcessor initialized"
+          @config.logger.info "Metrics processor initialized"
         end
 
         sleep(@config.frequency)
