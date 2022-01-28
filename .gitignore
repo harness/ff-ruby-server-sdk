@@ -21,3 +21,5 @@ Gemfile.lock
 generated
 cache
 moneta
+
+example.log
