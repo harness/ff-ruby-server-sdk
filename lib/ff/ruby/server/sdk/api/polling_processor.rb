@@ -7,26 +7,35 @@ class PollingProcessor < Closeable
     connector,
     repository,
     poll_interval_in_sec,
-    callback
+    callback,
+    logger = nil
   )
 
     @callback = callback
     @connector = connector
     @repository = repository
     @poll_interval_in_sec = poll_interval_in_sec
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
   end
 
   def retrieve_flags
 
     flags = []
 
-    puts "Fetching flags started"
+    @logger.info "Fetching flags started"
 
     result = @connector.get_flags
 
     if result != nil
 
-      puts "Flags are fetched"
+      @logger.info "Flags are fetched"
 
       result.each { |fc|
 
@@ -38,7 +47,7 @@ class PollingProcessor < Closeable
       }
     end
 
-    puts "Fetching flags finished"
+    @logger.info "Fetching flags finished"
 
     flags
   end
@@ -47,13 +56,13 @@ class PollingProcessor < Closeable
 
     segments = []
 
-    puts "Fetching segments started"
+    @logger.info "Fetching segments started"
 
     result = @connector.get_segments
 
     if result != nil
 
-      puts "Segments are fetched"
+      @logger.info "Segments are fetched"
 
       result.each { |s|
 
@@ -65,24 +74,24 @@ class PollingProcessor < Closeable
       }
     end
 
-    puts "Fetching segments finished"
+    @logger.info "Fetching segments finished"
 
     segments
   end
 
   def start_async
 
-    puts "Async starting: " + self.to_s
+    @logger.debug "Async starting: " + self.to_s
 
     @ready = true
 
     @thread = Thread.new do
 
-      puts "Async started: " + self.to_s
+      @logger.debug "Async started: " + self.to_s
 
       while @ready do
 
-        puts "Async poll iteration"
+        @logger.debug "Async poll iteration"
 
         if @callback != nil
 
@@ -97,7 +106,7 @@ class PollingProcessor < Closeable
           unless @initialized
 
             @initialized = true
-            puts "PollingProcessor initialized"
+            @logger.info "PollingProcessor initialized"
 
             if @callback != nil
 
@@ -128,24 +137,24 @@ class PollingProcessor < Closeable
 
   def start
 
-    puts "Starting PollingProcessor with request interval: " + @poll_interval_in_sec.to_s
+    @logger.info "Starting PollingProcessor with request interval: " + @poll_interval_in_sec.to_s
     start_async
   end
 
   def stop
 
-    puts "Stopping PollingProcessor"
+    @logger.info "Stopping PollingProcessor"
     stop_async
     unless @ready
 
-      puts "PollingProcessor stopped"
+      @logger.info "PollingProcessor stopped"
     end
   end
 
   def close
 
     stop
-    puts "Closing PollingProcessor"
+    @logger.info "Closing PollingProcessor"
   end
 
   def is_ready

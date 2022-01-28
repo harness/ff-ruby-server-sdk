@@ -3,7 +3,7 @@ require_relative "repository_callback"
 
 class InnerClientRepositoryCallback < RepositoryCallback
 
-  def initialize(logger)
+  def initialize(logger = nil)
 
     if logger != nil
 
