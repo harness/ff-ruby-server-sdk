@@ -34,7 +34,7 @@ class HarnessConnector < Connector
       response = @api.authenticate(opts = options)
       @token = response.auth_token
 
-      @config.logger.info "Token has been obtained: " + @token
+      @config.logger.info "Token has been obtained"
       process_token
       return true
 
