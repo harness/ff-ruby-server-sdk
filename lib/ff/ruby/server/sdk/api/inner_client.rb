@@ -261,7 +261,7 @@ class InnerClient < ClientCallback
 
     @repository = StorageRepository.new(@config.cache, @repository_callback, @config.store, @config.logger)
 
-    @metrics_callback = InnerClientMetricsCallback.new(self)
+    @metrics_callback = InnerClientMetricsCallback.new(self, @config.logger)
     @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)
 
     @evaluator = Evaluator.new(@repository, logger = @config.logger)
