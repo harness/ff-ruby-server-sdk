@@ -16,9 +16,12 @@ client = CfClient.instance
 # UAT:
 key = "8b00e7d0-3415-4c1e-a75b-f2b449e39ccc"
 
+logger = Logger.new("example_logs.txt", "daily")
+
 config = ConfigBuilder.new
                       .config_url("https://config.feature-flags.uat.harness.io/api/1.0")
                       .event_url("https://event.feature-flags.uat.harness.io/api/1.0")
+                      .logger(logger)
                       .build
 
 client.init(

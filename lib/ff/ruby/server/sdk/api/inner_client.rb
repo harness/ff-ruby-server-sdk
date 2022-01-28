@@ -280,7 +280,8 @@ class InnerClient < ClientCallback
       connector = @connector,
       repository = @repository,
       poll_interval_in_sec = @config.poll_interval_in_seconds,
-      callback = self
+      callback = self,
+      logger = @config.logger
     )
 
     @updater = InnerClientUpdater.new(
