@@ -20,7 +20,14 @@ class CfClient < Closeable
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
-    @config = config
+    if config == nil
+
+      @config = ConfigBuilder.new.build
+    else
+
+      @config = config
+    end
+
     @client = InnerClient.new(api_key, config, connector)
 
     @config.logger.debug "Client (1): " + @client.to_s
