@@ -294,7 +294,8 @@ class InnerClient < ClientCallback
 
       connector = @connector,
       repository = @repository,
-      callback = @updater
+      callback = @updater,
+      logger = @config.logger
     )
 
     @auth_service.start_async
