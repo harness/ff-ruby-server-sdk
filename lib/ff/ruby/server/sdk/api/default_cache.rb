@@ -4,13 +4,20 @@ require "libcache"
 
 class DefaultCache < Cache
 
-  def initialize
-    super
+  def initialize(logger = nil)
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
 
     @keys = Set[]
     @capacity = 10 * 1000
 
-    lambda = lambda { |*key| puts "Retrieved #{key}" }
+    lambda = lambda { |*key| @logger.debug "Retrieved #{key}" }
 
     cache_dir = "./cache"
     unless directory_exists?(cache_dir)
@@ -48,7 +55,8 @@ class DefaultCache < Cache
 
     rescue ArgumentError => e
 
-      puts "ERROR: " + e.to_s
+      @logger.error "ERROR: " + e.to_s
+
       raise "Invalid arguments passed to the 'set' method: key='" + key.to_s + "', value='" + value.to_s + "'"
     end
   end

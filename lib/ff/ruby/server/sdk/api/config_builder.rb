@@ -8,7 +8,7 @@ class ConfigBuilder
   def initialize
 
     @config = Config.new
-    @config.cache = DefaultCache.new
+    @config.cache = DefaultCache.new(@config.logger)
   end
 
   def config_url(config_url)

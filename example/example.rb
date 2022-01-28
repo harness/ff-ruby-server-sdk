@@ -33,14 +33,14 @@ client.wait_for_initialization
 
 config.logger.debug "Initialization is complete"
 
+target = Target.new("ruby_target_" + SecureRandom.uuid.to_s)
+
+bool_flag = "flag1"
+number_flag = "flag2"
+string_flag = "flag3"
+json_flag = "flag4"
+
 while true do
-
-  bool_flag = "flag1"
-  number_flag = "flag2"
-  string_flag = "flag3"
-  json_flag = "flag4"
-
-  target = Target.new("ruby_target_" + SecureRandom.uuid.to_s)
 
   bool_result = client.bool_variation(bool_flag, target, false)
   number_result = client.number_variation(number_flag, target, -1)

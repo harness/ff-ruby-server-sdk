@@ -53,7 +53,7 @@ class Config
 
     @metrics_service_acceptable_duration = 10 * 1000
 
-    @cache = DefaultCache.new
+    @cache = DefaultCache.new(@logger)
 
     # TODO: Storage goes here
 
