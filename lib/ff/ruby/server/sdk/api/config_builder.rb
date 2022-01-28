@@ -86,6 +86,7 @@ class ConfigBuilder
   def logger(logger)
 
     @config.logger = logger
+    @config.cache.logger = logger
     self
   end
 

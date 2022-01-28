@@ -4,6 +4,8 @@ require "libcache"
 
 class DefaultCache < Cache
 
+  attr_accessor :logger
+
   def initialize(logger = nil)
 
     if logger != nil
