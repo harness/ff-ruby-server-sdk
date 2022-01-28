@@ -60,7 +60,7 @@ class InnerClient < ClientCallback
 
     @my_mutex = Mutex.new
 
-    @repository_callback = InnerClientRepositoryCallback.new
+    @repository_callback = InnerClientRepositoryCallback.new(@config.logger)
 
     setup
   end
