@@ -6,11 +6,19 @@ require_relative "../common/repository"
 
 class Evaluator < Evaluation
 
-  def initialize(repository)
+  def initialize(repository, logger = nil)
 
     unless repository.kind_of?(Repository)
 
       raise "The 'repository' parameter must be of '" + Repository.to_s + "' data type"
+    end
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
     end
 
     @repository = repository
@@ -112,7 +120,7 @@ class Evaluator < Evaluation
 
       if target.respond_to?(attribute, :include_private)
 
-        puts "The attribute " + attribute.to_s + " exists (1)"
+        @logger.debug "The attribute " + attribute.to_s + " exists (1)"
 
         return target.send(attribute)
       else
@@ -121,18 +129,18 @@ class Evaluator < Evaluation
 
         if result == nil
 
-          puts "The attribute " + attribute.to_s + " does not exist"
+          @logger.debug "The attribute " + attribute.to_s + " does not exist"
 
         else
 
-          puts "The attribute " + attribute.to_s + " exists (2)"
+          @logger.debug "The attribute " + attribute.to_s + " exists (2)"
         end
 
         return result
       end
     end
 
-    puts "The passed attribute is empty"
+    @logger.debug "The passed attribute is empty"
 
     nil
   end
@@ -297,14 +305,14 @@ class Evaluator < Evaluation
 
         if is_target_in_list(target, segment.excluded)
 
-          puts "Target " + target.name.to_s + " excluded from segment " + segment.name.to_s + " via exclude list"
+          @logger.debug "Target " + target.name.to_s + " excluded from segment " + segment.name.to_s + " via exclude list"
 
           return false
         end
 
         if is_target_in_list(target, segment.included)
 
-          puts "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via include list"
+          @logger.debug "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via include list"
 
           return true
         end
@@ -313,7 +321,7 @@ class Evaluator < Evaluation
 
         if rules != nil && !rules.empty? && evaluate_clauses(rules, target)
 
-          puts "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via rules"
+          @logger.debug "Target " + target.name.to_s + " included in segment " + segment.name.to_s + " via rules"
 
           return true
         end
@@ -442,7 +450,7 @@ class Evaluator < Evaluation
 
     if prerequisites != nil && !prerequisites.empty?
 
-      puts "Checking pre requisites " + prerequisites.to_s + " of parent feature " + parent_feature_config.feature.to_s
+      @logger.debug "Checking pre requisites " + prerequisites.to_s + " of parent feature " + parent_feature_config.feature.to_s
 
       prerequisites.each do |pqs|
 
@@ -452,7 +460,7 @@ class Evaluator < Evaluation
 
         if pre_req_feature_config == nil
 
-          puts "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature.to_s
+          @logger.debug "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature.to_s
 
           return true
         end
@@ -461,18 +469,18 @@ class Evaluator < Evaluation
 
         if pre_req_evaluated_variation == nil
 
-          puts "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature.to_s
+          @logger.debug "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature.to_s
 
           return true
         end
 
-        puts "Pre requisite flag " + pre_req_feature_config.feature + " has variation " +
-               pre_req_evaluated_variation.to_s + " for target " + target.to_s
+        @logger.debug "Pre requisite flag " + pre_req_feature_config.feature + " has variation " +
+                        pre_req_evaluated_variation.to_s + " for target " + target.to_s
 
         valid_pre_req_variations = pqs.variations
 
-        puts "Pre requisite flag " + pre_req_feature_config.to_s + " should have the variations " +
-               valid_pre_req_variations.to_s
+        @logger.debug "Pre requisite flag " + pre_req_feature_config.to_s + " should have the variations " +
+                        valid_pre_req_variations.to_s
 
         none_match = true
 

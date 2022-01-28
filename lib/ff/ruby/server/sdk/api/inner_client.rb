@@ -255,7 +255,7 @@ class InnerClient < ClientCallback
 
   def setup
 
-    @config.logger.info "SDK is not initialized yet! If store is used then values will be loaded from store \n" +
+    @config.logger.info "SDK is not initialized yet! If store is used then values will be loaded from store" +
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
 
@@ -264,7 +264,7 @@ class InnerClient < ClientCallback
     @metrics_callback = InnerClientMetricsCallback.new(self)
     @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)
 
-    @evaluator = Evaluator.new(@repository)
+    @evaluator = Evaluator.new(@repository, logger = @config.logger)
     @evaluator_callback = InnerClientFlagEvaluateCallback.new(@metrics_processor, logger = @config.logger)
 
     @auth_service = AuthService.new(

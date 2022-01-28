@@ -11,12 +11,6 @@ class ConfigBuilder
     @config.cache = DefaultCache.new
   end
 
-  def base_url(base_url)
-
-    @config.base_url = base_url
-    self
-  end
-
   def config_url(config_url)
 
     @config.config_url = config_url

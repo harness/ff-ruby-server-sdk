@@ -4,8 +4,6 @@ require_relative "default_cache"
 
 class Config
 
-  attr_writer   :base_url
-
   attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
                 :frequency, :buffer_size, :all_attributes_private, :private_attributes, :connection_timeout,
                 :read_timeout, :write_timeout, :debugging, :metrics_service_acceptable_duration, :cache, :store,
@@ -26,8 +24,7 @@ class Config
   def initialize
     super
 
-    @base_url = "https://config.ff.harness.io/api/1.0"
-    @config_url = @base_url
+    @config_url = "https://config.ff.harness.io/api/1.0"
     @event_url = "https://events.ff.harness.io/api/1.0"
 
     @stream_enabled = true
@@ -66,12 +63,6 @@ class Config
   def get_frequency
 
     [@frequency, @@min_frequency].max
-  end
-
-  def base_url(args)
-
-    puts "Ignoring args: " + args.to_s
-    @base_url
   end
 
   def verify_ssl_host
@@ -119,11 +110,15 @@ class Config
     {}
   end
 
+  def base_url(args)
+
+    @config_url
+  end
+
   def describe
 
     to_s + "\n" +
       "\tmin_frequency = " + @@min_frequency.to_s + "\n" +
-      "\tbase_url = " + @base_url + "\n" +
       "\tconfig_url = " + @config_url + "\n" +
       "\tevent_url = " + @event_url + "\n" +
       "\tstream_enabled = " + @stream_enabled.to_s + "\n" +
