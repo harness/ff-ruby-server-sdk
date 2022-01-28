@@ -1,3 +1,4 @@
+require "logger"
 require "securerandom"
 
 require_relative '../lib/ff/ruby/server/sdk/dto/target'
@@ -16,7 +17,8 @@ client = CfClient.instance
 # UAT:
 key = "8b00e7d0-3415-4c1e-a75b-f2b449e39ccc"
 
-logger = Logger.new("example.log", "daily")
+logger = Logger.new(STDOUT)
+# logger = Logger.new("example.log", "daily")
 
 config = ConfigBuilder.new
                       .config_url("https://config.feature-flags.uat.harness.io/api/1.0")
