@@ -8,18 +8,27 @@ class UpdateProcessor < Closeable
 
     connector,
     repository,
-    callback
+    callback,
+    logger
   )
 
     @connector = connector
     @repository = repository
     @updater = callback
     @executor = Concurrent::FixedThreadPool.new(100)
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
   end
 
   def start
 
-    puts "Starting updater (EventSource)"
+    @logger.info "Starting updater (EventSource)"
 
     if @updater != nil
 
@@ -46,7 +55,7 @@ class UpdateProcessor < Closeable
 
   def stop
 
-    puts "Stopping updater (EventSource)"
+    @logger.info "Stopping updater (EventSource)"
 
     if @stream != nil
 
@@ -59,7 +68,7 @@ class UpdateProcessor < Closeable
 
   def close
 
-    puts "Closing UpdateProcessor"
+    @logger.info "Closing UpdateProcessor"
 
     stop
   end
@@ -89,7 +98,7 @@ class UpdateProcessor < Closeable
 
   def process_flag(message)
 
-    puts "Processing message: " + message.to_s
+    @logger.info "Processing flag message: " + message.to_s
 
     config = @connector.get_flag(message["identifier"])
 
@@ -111,7 +120,7 @@ class UpdateProcessor < Closeable
 
   def process_segment(message)
 
-    puts "Processing message: " + message.to_s
+    @logger.info "Processing segment message: " + message.to_s
 
     segment = @connector.get_segment(message["identifier"])
 
