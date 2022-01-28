@@ -146,7 +146,8 @@ class HarnessConnector < Connector
 
       url,
       headers,
-      updater
+      updater,
+      @config.logger
     )
 
     @event_source

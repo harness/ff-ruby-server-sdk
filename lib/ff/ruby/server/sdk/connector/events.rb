@@ -9,7 +9,8 @@ class Events < Service
 
     url,
     headers,
-    updater
+    updater,
+    logger = nil
   )
 
     if @updater != nil
@@ -21,6 +22,14 @@ class Events < Service
     end
 
     @updater = updater
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
 
     @sse = SSE::EventSource.new(
 
@@ -38,7 +47,7 @@ class Events < Service
 
       if error != nil
 
-        puts "SSE ERROR: " + error.body
+        @logger.error "SSE ERROR: " + error.body
       end
 
       on_error
@@ -59,13 +68,14 @@ class Events < Service
 
   def start
 
-    puts "Starting EventSource service"
+    @logger.info "Starting EventSource service"
+
     @sse.start
   end
 
   def stop
 
-    puts "Stopping EventSource service"
+    @logger.info "Stopping EventSource service"
 
     on_closed
   end
@@ -77,13 +87,15 @@ class Events < Service
 
   def on_open
 
-    puts "EventSource connected"
+    @logger.info "EventSource connected"
+
     @updater.on_connected
   end
 
   def on_error
 
-    puts "EventSource error"
+    @logger.error "EventSource error"
+
     @updater.on_error
 
     stop
@@ -91,13 +103,14 @@ class Events < Service
 
   def on_closed
 
-    puts "EventSource disconnected"
+    @logger.info "EventSource disconnected"
+
     @updater.on_disconnected
   end
 
   def on_message(message)
 
-    puts "EventSource message received " + message.to_s
+    @logger.debug "EventSource message received " + message.to_s
 
     msg = JSON.parse(message)
     @updater.update(msg)
