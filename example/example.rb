@@ -1,6 +1,8 @@
-require_relative '../lib/ff/ruby/server/sdk/api/cf_client'
+require "securerandom"
+
 require_relative '../lib/ff/ruby/server/sdk/dto/target'
 require_relative '../lib/ff/ruby/server/sdk/api/config'
+require_relative '../lib/ff/ruby/server/sdk/api/cf_client'
 require_relative '../lib/ff/ruby/server/sdk/api/config_builder'
 
 client = CfClient.instance
@@ -38,7 +40,7 @@ while true do
   string_flag = "flag3"
   json_flag = "flag4"
 
-  target = Target.new("ruby_target_1")
+  target = Target.new("ruby_target_" + SecureRandom.uuid.to_s)
 
   bool_result = client.bool_variation(bool_flag, target, false)
   number_result = client.number_variation(number_flag, target, -1)
