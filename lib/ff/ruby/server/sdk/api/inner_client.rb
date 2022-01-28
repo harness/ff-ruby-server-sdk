@@ -259,7 +259,7 @@ class InnerClient < ClientCallback
            " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
            " to be ready."
 
-    @repository = StorageRepository.new(@config.cache, @config.store, @repository_callback)
+    @repository = StorageRepository.new(@config.cache, @repository_callback, @config.store, @config.logger)
 
     @metrics_callback = InnerClientMetricsCallback.new(self)
     @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)

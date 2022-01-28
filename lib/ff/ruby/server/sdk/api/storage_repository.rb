@@ -4,11 +4,19 @@ require_relative "../common/repository"
 
 class StorageRepository < Repository
 
-  def initialize(cache, store = nil, callback)
+  def initialize(cache, callback = nil, store = nil, logger = nil)
 
     @cache = cache
     @store = store
     @callback = callback
+
+    if logger != nil
+
+      @logger = logger
+    else
+
+      @logger = Logger.new(STDOUT)
+    end
   end
 
   def get_flag(identifier, cacheable = true)
@@ -95,7 +103,7 @@ class StorageRepository < Repository
 
     if is_flag_outdated(identifier, feature_config)
 
-      puts "Flag " + identifier + " already exists"
+      @logger.debug "Flag " + identifier + " already exists"
       return
     end
 
@@ -106,12 +114,12 @@ class StorageRepository < Repository
       @store.set(flag_key, feature_config)
       @cache.delete(flag_key)
 
-      puts "Flag " + identifier + " successfully stored and cache invalidated"
+      @logger.debug "Flag " + identifier + " successfully stored and cache invalidated"
     else
 
       @cache.set(flag_key, feature_config)
 
-      puts "Flag " + identifier + " successfully cached"
+      @logger.debug "Flag " + identifier + " successfully cached"
     end
 
     if @callback != nil
@@ -129,7 +137,7 @@ class StorageRepository < Repository
 
     if is_segment_outdated(identifier, segment)
 
-      puts "Segment " + identifier + " already exists"
+      @logger.debug "Segment " + identifier + " already exists"
       return
     end
 
@@ -140,12 +148,12 @@ class StorageRepository < Repository
       @store.set(segment_key, segment)
       @cache.delete(segment_key)
 
-      puts "Segment " + identifier + " successfully stored and cache invalidated"
+      @logger.debug "Segment " + identifier + " successfully stored and cache invalidated"
     else
 
       @cache.set(segment_key, segment)
 
-      puts "Segment " + identifier + " successfully cached"
+      @logger.debug "Segment " + identifier + " successfully cached"
     end
 
     if @callback != nil
@@ -167,12 +175,12 @@ class StorageRepository < Repository
 
       @store.delete(flag_key)
 
-      puts "Flag " + identifier + " successfully deleted from store"
+      @logger.debug "Flag " + identifier + " successfully deleted from store"
     end
 
     @cache.delete(flag_key)
 
-    puts "Flag " + identifier + " successfully deleted from cache"
+    @logger.debug "Flag " + identifier + " successfully deleted from cache"
 
     if @callback != nil
 
@@ -193,12 +201,12 @@ class StorageRepository < Repository
 
       @store.delete(segment_key)
 
-      puts "Segment " + identifier + " successfully deleted from store"
+      @logger.debug "Segment " + identifier + " successfully deleted from store"
     end
 
     @cache.delete(segment_key)
 
-    puts "Segment " + identifier + " successfully deleted from cache"
+    @logger.debug "Segment " + identifier + " successfully deleted from cache"
 
     if @callback != nil
 

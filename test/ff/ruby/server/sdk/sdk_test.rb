@@ -248,7 +248,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     callback = RepositoryTestCallback.new
 
-    repository = StorageRepository.new(config.cache, nil, callback)
+    repository = StorageRepository.new(config.cache, callback)
 
     assert_repository(repository, callback)
 
@@ -262,7 +262,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     callback = RepositoryTestCallback.new
 
-    repository = StorageRepository.new(config.cache, config.store, callback)
+    repository = StorageRepository.new(config.cache, callback, config.store)
 
     assert_repository(repository, callback)
   end
@@ -275,7 +275,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     callback = RepositoryTestCallback.new
 
-    repository = StorageRepository.new(config.cache, nil, callback)
+    repository = StorageRepository.new(config.cache, callback)
 
     assert_repository(repository, callback)
 
