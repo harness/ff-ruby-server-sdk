@@ -74,6 +74,68 @@ target = Target.new("YOUR_TARGET_NAME")
 
 The Public API exposes a few methods that you can utilize:
 
-Tbd.
+Instantiate, initialize and destroy when done:
 
+* `def initialize(api_key = nil, config = nil, connector = nil)`
+* `def init(api_key = nil, config = nil, connector = nil)`
+* `def wait_for_initialization`
+* `def destroy`
+
+Evaluations:
+
+* `def bool_variation(identifier, target, default_value)`
+* `def string_variation(identifier, target, default_value)`
+* `def number_variation(identifier, target, default_value)`
+* `def json_variation(identifier, target, default_value)`
+
+## Fetch evaluation's value
+
+It is possible to fetch a value for a given evaluation. Evaluation is performed based on a different type. In case there
+is no evaluation with provided id, the default value is returned.
+
+Use the appropriate method to fetch the desired Evaluation of a certain type.
+
+### Bool variation
+
+```
+bool_result = client.bool_variation(bool_flag, target, false)  
+```
+
+### Number variation
+
+```
+number_result = client.number_variation(number_flag, target, -1)  
+```
+
+### String variation
+
+```
+string_result = client.string_variation(string_flag, target, "unavailable !!!")  
+```
+
+### JSON variation
+
+```
+json_result = client.json_variation(json_flag, target, JSON.parse("{}"))
+```
+
+## Using feature flags metrics
+
+Metrics API endpoint can be changed like this (if ever needed):
+
+```
+config = ConfigBuilder.new
+                      .event_url("SOME_ENDPOINT_URL")
+                      .build
+```
+
+Otherwise, the default metrics endpoint URL will be used.
+
+## Connector
+
+This is a new feature that allows you to create or use other connectors.
+Connector is just a proxy to your data. Currently supported connectors:
+
+* Harness
+* Local (used only in development)
 
