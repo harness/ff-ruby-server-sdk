@@ -29,7 +29,7 @@ After dependency has been added, the SDK elements, primarily `CfClient` should b
 
 ## Initialization
 
-`CfClient` is a base class that provides all features of SDK.
+`CfClient` is a base class that provides all features of the SDK.
 
 We can instantiate by calling the `instance` method or by using public
 constructor (making multiple instances).
