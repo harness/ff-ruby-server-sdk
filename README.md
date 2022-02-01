@@ -136,8 +136,7 @@ Otherwise, the default metrics endpoint URL will be used.
 This is a new feature that allows you to create or use other connectors.
 Connector is just a proxy to your data. Currently supported connectors:
 
-* Harness
-* Local (used only in development)
+* Harness (the default implementation)
 
 ```
 connector = YourConnectorImplementation.new
