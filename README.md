@@ -74,12 +74,12 @@ target = Target.new("YOUR_TARGET_NAME")
 
 The Public API exposes a few methods that you can utilize:
 
-Instantiate, initialize and destroy when done:
+Instantiate, initialize and close when done:
 
 * `def initialize(api_key = nil, config = nil, connector = nil)`
 * `def init(api_key = nil, config = nil, connector = nil)`
 * `def wait_for_initialization`
-* `def destroy`
+* `def close`
 
 Evaluations:
 
@@ -148,6 +148,15 @@ client.init(
   config,
   connector
 )
+```
+
+## Shutting down the SDK
+
+To avoid potential memory leak, when SDK is no longer needed
+(when the app is closed, for example), a caller should call this method:
+
+```
+client.close
 ```
 
 
