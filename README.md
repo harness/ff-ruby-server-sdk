@@ -139,3 +139,16 @@ Connector is just a proxy to your data. Currently supported connectors:
 * Harness
 * Local (used only in development)
 
+```
+connector = YourConnectorImplementation.new
+
+client.init(
+
+  key,
+  config,
+  connector
+)
+```
+
+
+

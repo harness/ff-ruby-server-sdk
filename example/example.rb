@@ -28,8 +28,8 @@ config = ConfigBuilder.new
 
 client.init(
 
-  api_key = key,
-  config = config
+  key,
+  config
 )
 
 config.logger.debug "We will wait for the initialization"
@@ -58,5 +58,6 @@ while true do
   config.logger.debug "'" + json_flag.to_s + "' has the value of: " + json_result.to_s
 
   sleep 10
+
 end
 

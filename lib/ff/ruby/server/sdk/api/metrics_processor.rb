@@ -224,11 +224,14 @@ class MetricsProcessor < Closeable
         run_one_iteration
       end
 
-      @thread.run
     end
+
+    @thread.run
   end
 
   def stop_async
+
+    @queue.clear
 
     @ready = false
     @initialized = false

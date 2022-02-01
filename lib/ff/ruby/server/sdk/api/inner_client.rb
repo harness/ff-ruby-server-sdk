@@ -17,7 +17,7 @@ class InnerClient < ClientCallback
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
-    if api_key == nil || api_key.empty?
+    if api_key == nil || api_key == ""
 
       raise "SDK key is not provided"
     end

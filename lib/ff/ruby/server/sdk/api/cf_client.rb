@@ -38,7 +38,13 @@ class CfClient < Closeable
     if @client == nil
 
       @config = config
-      @client = InnerClient.new(api_key, config, connector)
+
+      @client = InnerClient.new(
+
+        api_key = api_key,
+        config = config,
+        connector = connector
+      )
 
       @config.logger.debug "Client (2): " + @client.to_s
     end
