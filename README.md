@@ -152,7 +152,7 @@ client.init(
 ## Shutting down the SDK
 
 To avoid potential memory leak, when SDK is no longer needed
-(when the app is closed, for example), a caller should call this method:
+(when the app is closed, for example), a caller should call the `close` method:
 
 ```
 client.close
