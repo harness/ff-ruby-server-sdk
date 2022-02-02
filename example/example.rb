@@ -45,7 +45,7 @@ number_flag = "flag2"
 string_flag = "flag3"
 json_flag = "flag4"
 
-iterations = 3
+iterations = 10
 
 (0..iterations).each do
 

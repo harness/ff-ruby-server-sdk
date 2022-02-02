@@ -63,7 +63,14 @@ class UpdateProcessor < Closeable
     end
 
     @executor.shutdown
-    @executor.wait_for_termination
+    @executor.wait_for_termination(3)
+
+    if @executor.shuttingdown?
+
+      @executor.kill
+    end
+
+    @logger.info "Updater stopped (EventSource)"
   end
 
   def close

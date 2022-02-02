@@ -42,6 +42,7 @@ class MetricsProcessor < Closeable
     @global_target = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
 
+    @ready = false
     @jar_version = ""
     @server = "server"
     @sdk_version = "SDK_VERSION"
@@ -141,7 +142,7 @@ class MetricsProcessor < Closeable
 
   def run_one_iteration
 
-    @config.logger.debug "Async metrics iteration"
+    @config.logger.debug "Async metrics iteration: " + @thread.to_s
 
     data = []
 
@@ -223,7 +224,6 @@ class MetricsProcessor < Closeable
 
         run_one_iteration
       end
-
     end
 
     @thread.run
