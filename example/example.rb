@@ -45,7 +45,9 @@ number_flag = "flag2"
 string_flag = "flag3"
 json_flag = "flag4"
 
-while true do
+iterations = 3
+
+(0..iterations).each do
 
   bool_result = client.bool_variation(bool_flag, target, false)
   number_result = client.number_variation(number_flag, target, -1)
@@ -58,6 +60,7 @@ while true do
   config.logger.debug "'" + json_flag.to_s + "' has the value of: " + json_result.to_s
 
   sleep 10
-
 end
+
+client.close
 
