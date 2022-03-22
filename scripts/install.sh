@@ -8,9 +8,9 @@ dir_path=$(dirname "$full_path")
 # shellcheck disable=SC2154
 if cd "$dir_path/.." && gem build "$ff_ruby_sdk.gemspec" && gem install "$ff_ruby_sdk"; then
 
-  echo "$ff_ruby_sdk installed with success"
+  echo "The '$ff_ruby_sdk' is installed with success"
 else
 
-  echo "ERROR: $ff_ruby_sdk not installed"
+  echo "ERROR: the '$ff_ruby_sdk' is NOT installed with success"
   exit 1
 fi
