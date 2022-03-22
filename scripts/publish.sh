@@ -8,7 +8,7 @@ dir_path=$(dirname "$full_path")
 # shellcheck disable=SC2154
 if cd "$dir_path/.." && gem build "$ff_ruby_sdk.gemspec"; then
 
-  if echo "Please enter your 'sudo' password if asked" && sudo gem install "$ff_ruby_sdk"; then
+  if gem install "$ff_ruby_sdk"; then
 
     gem push "$ff_ruby_sdk-$ff_ruby_sdk_version.gem"
   else

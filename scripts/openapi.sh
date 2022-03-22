@@ -34,8 +34,7 @@ if which openapi-generator; then
   cd "$dir_path/.." &&
     openapi-generator generate -i api.yaml -g ruby -o "$generated_path" &&
     cd "$generated_path" && gem build openapi_client.gemspec && cd .. &&
-    echo "Please enter your 'sudo' password if asked" &&
-    sudo gem install "$generated_path/openapi_client-1.0.0.gem" &&
+    gem install "$generated_path/openapi_client-1.0.0.gem" &&
     echo "Generated API has been installed with success 🤟"
 
 else
