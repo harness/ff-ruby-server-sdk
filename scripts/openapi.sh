@@ -43,14 +43,34 @@ if which openapi-generator-cli; then
     fi
   fi
 
-  cd "$dir_path/.." &&
-    openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" &&
-    cd "$generated_path" && gem build openapi_client.gemspec && cd .. &&
-    gem install "$generated_path/openapi_client-1.0.0.gem" &&
-    echo "Generated API has been installed with success: $generated_path"
+  if  gem install rspec-expectations && \
+      gem install rspec-mocks && \
+      gem install rake && \
+      gem install minitest && \
+      gem install standard && \
+      gem install pp && \
+      gem install libcache && \
+      gem install rufus-scheduler && \
+      gem install jwt && \
+      gem install moneta && \
+      gem install rest-client && \
+      gem install sse-client && \
+      gem install concurrent-ruby && \
+      gem install murmurhash3 && \
+      cd "$dir_path/.." && \
+      openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" && \
+      cd "$generated_path" && gem build openapi_client.gemspec && \
+      test -e "openapi_client-1.0.0.gem" && \
+      gem install --dev "openapi_client-1.0.0.gem"; then
 
+      echo "Generated API has been installed with success: $generated_path"
+  else
+
+      echo "ERROR: 'openapi-generator-cli' is not installed [1] 😬"
+      exit 1
+  fi
 else
 
-  echo "ERROR: 'openapi-generator-cli' is not installed 😬"
+  echo "ERROR: 'openapi-generator-cli' is not installed [2] 😬"
   exit 1
 fi
