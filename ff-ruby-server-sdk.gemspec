@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.name = "ff-ruby-server-sdk"
   spec.version = Ff::Ruby::Server::Sdk::VERSION
   spec.authors = ["Milos Vasic"]
-  spec.email = ["milos85vasic@gmail.com"]
+  spec.email = ["milos.vasic@harness.io"]
 
   spec.summary = "Harness is a feature management platform that helps teams to build better software and to test features quicker."
   spec.description = "Harness is a feature management platform that helps teams to build better software and to test features quicker."
