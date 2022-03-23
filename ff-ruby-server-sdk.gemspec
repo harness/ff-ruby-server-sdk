@@ -5,6 +5,7 @@ system "sh scripts/openapi.sh lib/ff/ruby/server/generated"
 require_relative "lib/ff/ruby/server/sdk/version"
 
 Gem::Specification.new do |spec|
+
   spec.name = "ff-ruby-server-sdk"
   spec.version = Ff::Ruby::Server::Sdk::VERSION
   spec.authors = ["Milos Vasic"]
@@ -33,7 +34,9 @@ Gem::Specification.new do |spec|
 
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+
   spec.require_paths = ["lib"]
+  spec.require_paths += ["lib/ff/ruby/server/generated/lib"]
 
   # Uncomment to register a new dependency of your gem
   # spec.add_dependency "example-gem", "~> 1.0"
