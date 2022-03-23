@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-system "sh scripts/openapi.sh"
+system "sh scripts/openapi.sh lib/ff/ruby/server/generated"
 
 require_relative "lib/ff/ruby/server/sdk/version"
 
