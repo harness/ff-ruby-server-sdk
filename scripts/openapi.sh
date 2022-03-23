@@ -5,7 +5,7 @@ dir_path=$(dirname "$full_path")
 
 . "$dir_path/sdk_specs.sh"
 
-if which openapi-generator; then
+if which openapi-generator-cli; then
 
   generated_path="$dir_path/../lib/ff/ruby/server/generated"
 
@@ -32,13 +32,13 @@ if which openapi-generator; then
   fi
 
   cd "$dir_path/.." &&
-    openapi-generator generate -i api.yaml -g ruby -o "$generated_path" &&
+    openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" &&
     cd "$generated_path" && gem build openapi_client.gemspec && cd .. &&
     gem install "$generated_path/openapi_client-1.0.0.gem" &&
     echo "Generated API has been installed with success: $generated_path"
 
 else
 
-  echo "ERROR: 'openapi-generator' is not installed 😬"
+  echo "ERROR: 'openapi-generator-cli' is not installed 😬"
   exit 1
 fi
