@@ -35,7 +35,7 @@ if which openapi-generator; then
     openapi-generator generate -i api.yaml -g ruby -o "$generated_path" &&
     cd "$generated_path" && gem build openapi_client.gemspec && cd .. &&
     gem install "$generated_path/openapi_client-1.0.0.gem" &&
-    echo "Generated API has been installed with success 🤟"
+    echo "Generated API has been installed with success: $generated_path"
 
 else
 
