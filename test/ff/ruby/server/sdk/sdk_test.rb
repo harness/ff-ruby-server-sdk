@@ -3,8 +3,9 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 
 require "securerandom"
-require "ff/ruby/server/sdk"
 require "minitest/autorun"
+
+require_relative "../../../../../lib/ff/ruby/server/sdk"
 
 require_relative "wrapper"
 require_relative "stub_connector"
