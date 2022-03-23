@@ -6,7 +6,7 @@ dir_path=$(dirname "$full_path")
 if [ -z "$1" ]
   then
 
-    installation_path="$dir_path/.."
+    installation_path="$dir_path/../lib/ff/ruby/server/generated"
     echo "No installation has been provided, using the default path: $installation_path"
 else
 
@@ -19,7 +19,7 @@ fi
 
 if which openapi-generator-cli; then
 
-  generated_path="$installation_path/lib/ff/ruby/server/generated"
+  generated_path="$installation_path"
 
   if test -e "$generated_path"; then
 
@@ -44,7 +44,7 @@ if which openapi-generator-cli; then
   fi
 
   cd "$dir_path/.." &&
-    openapi-generator-cli generate -i api.yaml -g ruby -o "$installation_path" &&
+    openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" &&
     cd "$generated_path" && gem build openapi_client.gemspec && cd .. &&
     gem install "$generated_path/openapi_client-1.0.0.gem" &&
     echo "Generated API has been installed with success: $generated_path"
