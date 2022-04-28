@@ -20,6 +20,7 @@ executor = Concurrent::FixedThreadPool.new(100)
 
 keys = {
 
+  # "UAT" => "834b1749-073b-4a97-8424-03893572bab5",
   "Freemium" => "1f3339b4-e004-457a-91f7-9b5ce173eaaf",
   "Non-Freemium" => "a30cf6aa-67f2-4545-8ac7-f86709f4f3a0"
 }
@@ -31,11 +32,11 @@ keys.each do |name, key|
   config = ConfigBuilder.new
                         .logger(logger)
                         .build
-
-  client = CfClient.new(key, config)
-
+  # UAT:
   # .config_url("https://config.feature-flags.uat.harness.io/api/1.0")
   # .event_url("https://event.feature-flags.uat.harness.io/api/1.0")
+
+  client = CfClient.new(key, config)
 
   client.init
 
