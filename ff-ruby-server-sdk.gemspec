@@ -38,9 +38,21 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.require_paths += ["lib/ff/ruby/server/generated/lib"]
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_dependency "rake", "~> 13.0"
+  spec.add_dependency "minitest", "~> 5.0"
+  spec.add_dependency "standard", "~> 1.3"
 
-  # For more information and examples about making a new gem, checkout our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_dependency "pp", "0.3.0"
+  spec.add_dependency "rufus-scheduler", "3.8.1"
+  spec.add_dependency "libcache", "0.4.2"
+  spec.add_dependency "jwt", "2.3.0"
+  spec.add_dependency "moneta", "1.4.2"
+
+  spec.add_dependency "rest-client", "2.1.0"
+  spec.add_dependency "sse-client", "1.1.0"
+
+  spec.add_dependency "concurrent", "0.2.2"
+  spec.add_dependency "concurrent-ruby", "1.1.10"
+
+  spec.add_dependency "murmurhash3", "0.1.6"
 end
