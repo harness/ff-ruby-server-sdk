@@ -43,20 +43,20 @@ if which openapi-generator-cli; then
     fi
   fi
 
-  if  gem install rspec-expectations && \
-      gem install rspec-mocks && \
-      gem install rake && \
-      gem install minitest && \
-      gem install standard && \
-      gem install pp && \
-      gem install libcache && \
-      gem install rufus-scheduler && \
-      gem install jwt && \
-      gem install moneta && \
-      gem install rest-client && \
-      gem install sse-client && \
-      gem install concurrent-ruby && \
-      gem install murmurhash3 && \
+  if  gem install rspec-expectations -v 3.11.0 && \
+      gem install rspec-mocks -v 3.11.0 && \
+      gem install rake -v 13.0 && \
+      gem install minitest -v 5.15.0 && \
+      gem install standard -v 1.11.0 && \
+      gem install pp -v 0.3.0 && \
+      gem install libcache -v 0.4.2 && \
+      gem install rufus-scheduler -v 3.8.1 && \
+      gem install jwt -v 2.3.0 && \
+      gem install moneta -v 1.4.2 && \
+      gem install rest-client -v 2.1.0 && \
+      gem install sse-client -v 1.1.0 && \
+      gem install concurrent-ruby -v 1.1.10 && \
+      gem install murmurhash3 -v 0.1.6 && \
       cd "$dir_path/.." && \
       openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" && \
       cd "$generated_path" && gem build openapi_client.gemspec && \
