@@ -51,7 +51,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rest-client", "2.1.0"
   spec.add_dependency "sse-client", "1.1.0"
 
-  spec.add_dependency "concurrent", "0.2.2"
   spec.add_dependency "concurrent-ruby", "1.1.10"
 
   spec.add_dependency "murmurhash3", "0.1.6"
