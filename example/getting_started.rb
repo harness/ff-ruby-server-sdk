@@ -15,6 +15,8 @@ apiKey = ENV['FF_API_KEY'] || 'changeme'
 # Flag Name
 flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
 
+logger.info "Harness Ruby SDK Getting Started"
+
 # Create a Feature Flag Client and wait for it to initialize
 client = CfClient.instance
 
