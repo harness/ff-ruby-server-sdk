@@ -1,38 +1,45 @@
 Harness CF Ruby Server SDK
 ========================
 
-## Overview
+## Table of Contents
+**[Intro](#Intro)**<br>
+**[Requirements](#Requirements)**<br>
+**[Quickstart](#Quickstart)**<br>
+**[Further Reading](docs/further_reading.md)**<br>
+**[Build Instructions](docs/build.md)**<br>
 
--------------------------
-[Harness](https://www.harness.io/) is a feature management platform that helps teams to build better software and to
-test features quicker.
+## Intro
 
--------------------------
+Harness Feature Flags (FF) is a feature management solution that enables users to change the software’s functionality, without deploying new code. FF uses feature flags to hide code or behaviours without having to ship new versions of the software. A feature flag is like a powerful if statement.
+* For more information, see https://harness.io/products/feature-flags/
+* To read more, see https://ngdocs.harness.io/category/vjolt35atg-feature-flags
+* To sign up, https://app.harness.io/auth/#/signup/
 
-## Setup
+![FeatureFlags](./docs/images/ff-gui.png)
 
-Add the following snippet to your project's `Gemfile` file:
+## Requirements
+[Ruby 2.7](https://www.ruby-lang.org/en/documentation/installation/) or newer (ruby --version)<br>
+
+## Quickstart
+The Feature Flag SDK provides a client that connects to the feature flag service, and fetches the value
+of feature flags.   The following section provides an example of how to install the SDK and initialize it from
+an application.
+This quickstart assumes you have followed the instructions to [setup a Feature Flag project and have created a flag called `harnessappdemodarkmode` and created a server API Key](https://ngdocs.harness.io/article/1j7pdkqh7j-create-a-feature-flag#step_1_create_a_project).
+
+### Install the SDK
+Install the ruby SDK using gem
+```bash
+gem install harness-featureflags
+```
+or by adding the following snippet to your project's `Gemfile` file:
 
 ```
 gem "ff-ruby-server-sdk"
 ```
 
-## Cloning the SDK repository
-
-In order to clone SDK repository properly perform cloning like in the following example:
-
-```
-git clone --recurse-submodules git@github.com:harness/ff-ruby-server-sdk.git
-```
-
-After dependency has been added, the SDK elements, primarily `CfClient` should be accessible in the main application.
-
-## Initialization
-
-`CfClient` is a base class that provides all features of the SDK.
-
-We can instantiate by calling the `instance` method or by using public
-constructor (making multiple instances).
+### A Simple Example
+Here is a complete example that will connect to the feature flag service and report the flag value every 10 seconds until the connection is closed.  
+Any time a flag is toggled from the feature flag service you will receive the updated value.
 
 ```ruby
 require 'ff/ruby/server/sdk/api/config'
@@ -40,123 +47,70 @@ require 'ff/ruby/server/sdk/dto/target'
 require 'ff/ruby/server/sdk/api/cf_client'
 require 'ff/ruby/server/sdk/api/config_builder'
 
+require "logger"
+require "securerandom"
+
+$stdout.sync = true
+logger = Logger.new $stdout
+
+# API Key
+apiKey = ENV['FF_API_KEY'] || 'changeme'
+
+# Flag Name
+flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
+
+# Create a Feature Flag Client and wait for it to initialize
 client = CfClient.instance
-
-key = "YOUR_API_KEY_GOES_HERE"
-
-logger = Logger.new(STDOUT)
-
-# Or saving logs into the filesystem with daily rotation:
-# logger = Logger.new("example.log", "daily")
-
-config = ConfigBuilder.new
-                      .logger(logger)
-                      .build
-
-client.init(key, config)
-
-config.logger.debug 'We will wait for the initialization'
-
+client.init(apiKey, ConfigBuilder.new.logger(logger).build)
 client.wait_for_initialization
 
-config.logger.debug 'Initialization is complete'
+# Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
+target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "emea"})
 
-target = Target.new("YOUR_TARGET_NAME")
-```
+# Loop forever reporting the state of the flag
+loop do
+  result = client.bool_variation(flagName, target, false)
+  logger.info "Flag variation:  #{result}"
+  sleep 10
+end
 
-`target` represents the desired target for which we want features to be evaluated.
-
-`"YOUR_API_KEY"` is an authentication key, needed for access to Harness services.
-
-**Your Harness SDK is now initialized. Congratulations!**
-
-### Public API Methods ###
-
-The Public API exposes a few methods that you can utilize:
-
-Instantiate, initialize and close when done:
-
-* `def initialize(api_key = nil, config = nil, connector = nil)`
-* `def init(api_key = nil, config = nil, connector = nil)`
-* `def wait_for_initialization`
-* `def close`
-
-Evaluations:
-
-* `def bool_variation(identifier, target, default_value)`
-* `def string_variation(identifier, target, default_value)`
-* `def number_variation(identifier, target, default_value)`
-* `def json_variation(identifier, target, default_value)`
-
-## Fetch evaluation's value
-
-It is possible to fetch a value for a given evaluation. Evaluation is performed based on a different type. In case there
-is no evaluation with provided id, the default value is returned.
-
-Use the appropriate method to fetch the desired Evaluation of a certain type.
-
-### Bool variation
-
-```
-bool_result = client.bool_variation(bool_flag, target, false)  
-```
-
-### Number variation
-
-```
-number_result = client.number_variation(number_flag, target, -1)  
-```
-
-### String variation
-
-```
-string_result = client.string_variation(string_flag, target, "unavailable !!!")  
-```
-
-### JSON variation
-
-```
-json_result = client.json_variation(json_flag, target, JSON.parse("{}"))
-```
-
-## Using feature flags metrics
-
-Metrics API endpoint can be changed like this (if ever needed):
-
-```
-config = ConfigBuilder.new
-                      .event_url("SOME_ENDPOINT_URL")
-                      .build
-```
-
-Otherwise, the default metrics endpoint URL will be used.
-
-## Connector
-
-This is a new feature that allows you to create or use other connectors.
-Connector is just a proxy to your data. Currently supported connectors:
-
-* Harness (the default implementation)
-
-```
-connector = YourConnectorImplementation.new
-
-client.init(
-
-  key,
-  config,
-  connector
-)
-```
-
-## Shutting down the SDK
-
-To avoid potential memory leak, when SDK is no longer needed
-(when the app is closed, for example), a caller should call the `close` method:
-
-```
 client.close
 ```
 
+### Running the example
+
+```bash
+# Install the deps
+gem install ff-ruby-server-sdk typhoeus
+
+# Set your API Key
+export FF_API_KEY=<your key here>
+
+# Run the example
+ruby ./example/gettting_started.rb
+```
+
+### Running with docker
+If you don't have the right version of ruby installed locally, or don't want to install the dependencies you can
+use docker to quickly get started
+
+```bash
+# Install the package
+docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY ruby:2.7-buster gem install --install-dir ./gems ff-ruby-server-sdk typhoeus
+
+# Run the script
+docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY -e GEM_HOME=/app/gems ruby:2.7-buster ruby ./example/getting_started.rb
+```
+
+### Additional Reading
+
+Further examples and config options are in the further reading section:
+
+[Further Reading](docs/further_reading.md)
 
 
+-------------------------
+[Harness](https://www.harness.io/) is a feature management platform that helps teams to build better software and to
+test features quicker.
+
+-------------------------
