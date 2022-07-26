@@ -69,7 +69,7 @@ class PollingProcessor < Closeable
         if s != nil
 
           @repository.set_flag(s.identifier, s)
-          flags.push(s)
+          segments.push(s)
         end
       }
     end
