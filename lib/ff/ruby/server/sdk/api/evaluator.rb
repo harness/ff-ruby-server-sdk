@@ -48,13 +48,24 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def number_variation(identifier, target, default_value, callback)
+  def integer_variation(identifier, target, default_value, callback)
 
     variation = evaluate(identifier, target, "int", callback)
 
     if variation != nil
 
       return variation.value.to_i
+    end
+
+    default_value
+  end
+
+  def number_variation(identifier, target, default_value, callback)
+    variation = evaluate(identifier, target, "int", callback)
+
+    if variation != nil
+
+      return variation.value.to_f
     end
 
     default_value

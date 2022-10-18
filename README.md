@@ -29,7 +29,7 @@ This quickstart assumes you have followed the instructions to [setup a Feature F
 ### Install the SDK
 Install the ruby SDK using gem
 ```bash
-gem install harness-featureflags
+gem install ff-ruby-server-sdk
 ```
 or by adding the following snippet to your project's `Gemfile` file:
 
