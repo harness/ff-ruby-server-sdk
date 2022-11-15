@@ -43,8 +43,8 @@ if which openapi-generator-cli; then
     fi
   fi
 
-  if  gem install rspec-expectations -v 3.11.0 && \
-      gem install rspec-mocks -v 3.11.0 && \
+  if  gem install rspec-expectations -v 3.12.0 && \
+      gem install rspec-mocks -v 3.12.0 && \
       gem install rake -v 13.0 && \
       gem install minitest -v 5.15.0 && \
       gem install standard -v 1.11.0 && \
