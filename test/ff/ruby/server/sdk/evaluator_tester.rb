@@ -66,23 +66,45 @@ class EvaluatorTester < Minitest::Test
       end
     end
 
-    data["expected"].each do |key, value|
+    if data["tests"] != nil
+      data["tests"].each do |test|
 
-      puts "Expected: " + key.to_s + " -> " + value.to_s
+        key = test["target"].nil? ? "_no_target" : test["target"]
+        value = test["expected"]
 
-      expected = data["expected"][key]
+        puts "Expected: " + key.to_s + " -> " + value.to_s
 
-      result = EvaluatorTestResult.new(
+        result = EvaluatorTestResult.new(
 
-        data["test_file"],
-        key,
-        expected,
-        data
-      )
+          data["test_file"],
+          key,
+          value,
+          data
+        )
 
-      refute_nil result
+        refute_nil result
 
-      @results.push(result)
+        @results.push(result)
+      end
+    else
+      data["expected"].each do |key, value|
+
+        puts "Expected: " + key.to_s + " -> " + value.to_s
+
+        expected = data["expected"][key]
+
+        result = EvaluatorTestResult.new(
+
+          data["test_file"],
+          key,
+          expected,
+          data
+        )
+
+        refute_nil result
+
+        @results.push(result)
+      end
     end
 
     assert !@results.empty?

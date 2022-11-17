@@ -62,141 +62,148 @@ class EvaluatorIntegrationTest < Minitest::Test
 
         assert !data.empty?
 
-        model = JSON.parse(data)
+        models = JSON.parse(data)
 
-        refute_nil model
+        refute_nil models
 
-        model["test_file"] = file
+        models["flags"] = [models["flag"]] if models["flags"].to_a.empty?
 
-        feature = (model["flag"]["feature"].to_s + file).gsub("_", "").gsub(".", "").downcase
+        models["flags"].each do |flag_data|
+          model = {}
+          model["flag"] = flag_data
+          model["test_file"] = file
+          model["tests"] = models["tests"] unless models["tests"].nil?
+          model["expected"] = models["expected"] unless models["expected"].nil?
 
-        model["flag"]["feature"] = feature
+          feature = (model["flag"]["feature"].to_s + file).gsub("_", "").gsub(".", "").downcase
 
-        flag_hash = model["flag"]
+          model["flag"]["feature"] = feature
 
-        refute_nil flag_hash
+          flag_hash = model["flag"]
 
-        flag_hash["default_serve"] = OpenapiClient::Serve.new(flag_hash["defaultServe"])
-        flag_hash.delete("defaultServe")
+          refute_nil flag_hash
 
-        dist = flag_hash["default_serve"].distribution
+          flag_hash["default_serve"] = OpenapiClient::Serve.new(flag_hash["defaultServe"])
+          flag_hash.delete("defaultServe")
 
-        if dist != nil
+          dist = flag_hash["default_serve"].distribution
 
-          flag_hash["default_serve"].distribution = OpenapiClient::Distribution.new(dist)
-        end
+          if dist != nil
 
-        flag_hash["off_variation"] = flag_hash["offVariation"]
-        flag_hash.delete("offVariation")
-
-        flag_hash["variation_to_target_map"] = flag_hash["variationToTargetMap"]
-        flag_hash.delete("variationToTargetMap")
-
-        flag_hash["state"] = OpenapiClient::FeatureState.build_from_hash(flag_hash["state"])
-
-        variations = []
-
-        flag_hash["variations"].each do |v|
-
-          variation = OpenapiClient::Variation.new(v)
-
-          refute_nil variation
-
-          variations.push(variation)
-
-          assert !variations.empty?
-        end
-
-        flag_hash["variations"] = variations
-
-        rules = []
-
-        flag_hash["rules"].each do |v|
-
-          refute_nil v
-
-          v["rule_id"] = v["ruleId"]
-          v.delete("ruleId")
-
-          clauses = []
-
-          if v["clauses"] != nil
-
-            v["clauses"].each do |c|
-
-              clause = OpenapiClient::Clause.new(c)
-
-              refute_nil clause
-
-              clauses.push(clause)
-
-              assert !clauses.empty?
-            end
+            flag_hash["default_serve"].distribution = OpenapiClient::Distribution.new(dist)
           end
 
-          v["clauses"] = clauses
+          flag_hash["off_variation"] = flag_hash["offVariation"]
+          flag_hash.delete("offVariation")
 
-          v["serve"] = OpenapiClient::Serve.new(v["serve"])
+          flag_hash["variation_to_target_map"] = flag_hash["variationToTargetMap"]
+          flag_hash.delete("variationToTargetMap")
 
-          rule = OpenapiClient::ServingRule.new(v)
+          flag_hash["state"] = OpenapiClient::FeatureState.build_from_hash(flag_hash["state"])
 
-          refute_nil rule
+          variations = []
 
-          rules.push(rule)
+          flag_hash["variations"].each do |v|
 
-          assert !rules.empty?
-        end
+            variation = OpenapiClient::Variation.new(v)
 
-        flag_hash["rules"] = rules
+            refute_nil variation
 
-        prerequisites = []
+            variations.push(variation)
 
-        flag_hash["prerequisites"].each do |v|
+            assert !variations.empty?
+          end
 
-          prerequisite = OpenapiClient::Prerequisite.new(v)
+          flag_hash["variations"] = variations
 
-          refute_nil prerequisite
+          rules = []
 
-          prerequisites.push(prerequisite)
-
-          assert !prerequisites.empty?
-        end
-
-        flag_hash["prerequisites"] = prerequisites
-
-        variation_to_target_map = []
-
-        if flag_hash["variation_to_target_map"] != nil
-
-          flag_hash["variation_to_target_map"].each do |v|
+          flag_hash["rules"].each do |v|
 
             refute_nil v
 
-            v["target_segments"] = v["targetSegments"]
-            v.delete("targetSegments")
+            v["rule_id"] = v["ruleId"]
+            v.delete("ruleId")
 
-            map = OpenapiClient::VariationMap.new(v)
+            clauses = []
 
-            refute_nil map
+            if v["clauses"] != nil
 
-            variation_to_target_map.push(map)
+              v["clauses"].each do |c|
 
-            assert !variation_to_target_map.empty?
+                clause = OpenapiClient::Clause.new(c)
+
+                refute_nil clause
+
+                clauses.push(clause)
+
+                assert !clauses.empty?
+              end
+            end
+
+            v["clauses"] = clauses
+
+            v["serve"] = OpenapiClient::Serve.new(v["serve"])
+
+            rule = OpenapiClient::ServingRule.new(v)
+
+            refute_nil rule
+
+            rules.push(rule)
+
+            assert !rules.empty?
           end
+
+          flag_hash["rules"] = rules
+
+          prerequisites = []
+
+          flag_hash["prerequisites"].each do |v|
+
+            prerequisite = OpenapiClient::Prerequisite.new(v)
+
+            refute_nil prerequisite
+
+            prerequisites.push(prerequisite)
+
+            assert !prerequisites.empty?
+          end
+
+          flag_hash["prerequisites"] = prerequisites
+
+          variation_to_target_map = []
+
+          if flag_hash["variation_to_target_map"] != nil
+
+            flag_hash["variation_to_target_map"].each do |v|
+
+              refute_nil v
+
+              v["target_segments"] = v["targetSegments"]
+              v.delete("targetSegments")
+
+              map = OpenapiClient::VariationMap.new(v)
+
+              refute_nil map
+
+              variation_to_target_map.push(map)
+
+              assert !variation_to_target_map.empty?
+            end
+          end
+
+          flag_hash["variation_to_target_map"] = variation_to_target_map
+
+          flag = OpenapiClient::FeatureConfig.new(flag_hash)
+
+          refute_nil flag
+
+          model["flag"] = flag
+
+          @test_data.push(model)
+
+          assert !@test_data.empty?
         end
-
-        flag_hash["variation_to_target_map"] = variation_to_target_map
-
-        flag = OpenapiClient::FeatureConfig.new(flag_hash)
-
-        refute_nil flag
-
-        model["flag"] = flag
-
-        @test_data.push(model)
-
-        assert !@test_data.empty?
-
       else
 
         puts "Not able to access the file: " + file.to_s

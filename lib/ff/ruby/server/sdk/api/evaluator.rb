@@ -497,7 +497,7 @@ class Evaluator < Evaluation
 
         valid_pre_req_variations.each do |element|
 
-          if element.include?(pre_req_evaluated_variation.value)
+          if element.include?(pre_req_evaluated_variation.identifier)
 
             none_match = false
             break
