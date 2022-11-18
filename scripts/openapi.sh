@@ -48,7 +48,6 @@ if which openapi-generator-cli; then
       gem install rake -v 13.0 && \
       gem install minitest -v 5.15.0 && \
       gem install standard -v 1.11.0 && \
-      gem install pp -v 0.3.0 && \
       gem install libcache -v 0.4.2 && \
       gem install rufus-scheduler -v 3.8.1 && \
       gem install jwt -v 2.3.0 && \

@@ -42,7 +42,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "minitest", "~> 5.0"
   spec.add_dependency "standard", "~> 1.3"
 
-  spec.add_dependency "pp", "0.3.0"
   spec.add_dependency "rufus-scheduler", "3.8.1"
   spec.add_dependency "libcache", "0.4.2"
   spec.add_dependency "jwt", "2.3.0"

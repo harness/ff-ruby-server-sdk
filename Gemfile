@@ -9,7 +9,6 @@ gem "minitest", "~> 5.0"
 gem "standard", "~> 1.3"
 
 # Caching support:
-gem "pp"
 gem "rufus-scheduler"
 gem "libcache"
 gem "jwt"
