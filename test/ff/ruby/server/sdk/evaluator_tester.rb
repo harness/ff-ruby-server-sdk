@@ -12,16 +12,139 @@ class EvaluatorTester < Minitest::Test
     @repository = StorageRepository.new(@cache)
     @evaluator = Evaluator.new(@repository)
 
-    puts "Processing the test data '" + data["test_file"].to_s + "' started"
+    puts "Processing the test data '" + data["filename"].to_s + "' started"
 
-    flag = data["flag"]
 
-    refute_nil flag
+    data["flags"]&.each do |flag_hash|
+      refute_nil flag_hash
 
-    @repository.set_flag(flag.feature.to_s, flag)
+      flag_hash["default_serve"] = OpenapiClient::Serve.new(flag_hash["defaultServe"])
+      flag_hash.delete("defaultServe")
+
+      dist = flag_hash["default_serve"].distribution
+
+      if dist != nil
+
+        flag_hash["default_serve"].distribution = OpenapiClient::Distribution.new(dist)
+      end
+
+      flag_hash["off_variation"] = flag_hash["offVariation"]
+      flag_hash.delete("offVariation")
+
+      flag_hash["variation_to_target_map"] = flag_hash["variationToTargetMap"]
+      flag_hash.delete("variationToTargetMap")
+
+      flag_hash["state"] = OpenapiClient::FeatureState.build_from_hash(flag_hash["state"])
+
+      variations = []
+
+      flag_hash["variations"].each do |v|
+
+        variation = OpenapiClient::Variation.new(v)
+
+        refute_nil variation
+
+        variations.push(variation)
+
+        assert !variations.empty?
+      end
+
+      flag_hash["variations"] = variations
+
+      rules = []
+
+      flag_hash["rules"]&.each do |v|
+
+        refute_nil v
+
+        v["rule_id"] = v["ruleId"]
+        v.delete("ruleId")
+
+        clauses = []
+
+        if v["clauses"] != nil
+
+          v["clauses"].each do |c|
+
+            clause = OpenapiClient::Clause.new(c)
+
+            refute_nil clause
+
+            clauses.push(clause)
+
+            assert !clauses.empty?
+          end
+        end
+
+        v["clauses"] = clauses
+
+        v["serve"] = OpenapiClient::Serve.new(v["serve"])
+
+        rule = OpenapiClient::ServingRule.new(v)
+
+        refute_nil rule
+
+        rules.push(rule)
+
+        assert !rules.empty?
+      end
+
+      flag_hash["rules"] = rules
+
+      prerequisites = []
+
+      flag_hash["prerequisites"]&.each do |v|
+
+        prerequisite = OpenapiClient::Prerequisite.new(v)
+
+        refute_nil prerequisite
+
+        prerequisites.push(prerequisite)
+
+        assert !prerequisites.empty?
+      end
+
+      flag_hash["prerequisites"] = prerequisites
+
+      variation_to_target_map = []
+
+      if flag_hash["variation_to_target_map"] != nil
+
+        flag_hash["variation_to_target_map"].each do |v|
+
+          refute_nil v
+
+          # Convert the target JSON to target object
+          vTargets = v["targets"]
+          v.delete("targets")
+          v["targets"] = []
+          vTargets&.each do |t|
+            v["targets"].append(OpenapiClient::Target.new(t))
+          end
+
+
+
+          map = OpenapiClient::VariationMap.new(v)
+
+          refute_nil map
+
+          variation_to_target_map.push(map)
+
+          assert !variation_to_target_map.empty?
+        end
+      end
+
+      flag_hash["variation_to_target_map"] = variation_to_target_map
+
+      f = OpenapiClient::FeatureConfig.new(flag_hash)
+
+      refute_nil f
+
+      @repository.set_flag(f.feature.to_s, f)
+    end
+
 
     segments = data["segments"]
-
     if segments != nil
 
       segments.each do |segment_hash|
@@ -58,6 +181,16 @@ class EvaluatorTester < Minitest::Test
         segment_hash["included"] = included_segments
         segment_hash["excluded"] = excluded_segments
 
+        rules = []
+        if segment_hash["rules"] != nil
+          segment_hash["rules"]&.each do |r|
+            clause = OpenapiClient::Clause.new(r)
+            refute_nil clause
+            rules.push(clause)
+          end
+          segment_hash["rules"] = rules
+        end
+
         segment = OpenapiClient::Segment.new(segment_hash)
 
         refute_nil segment
@@ -69,36 +202,19 @@ class EvaluatorTester < Minitest::Test
     if data["tests"] != nil
       data["tests"].each do |test|
 
-        key = test["target"].nil? ? "_no_target" : test["target"]
+        target = test["target"].nil? ? "_no_target" : test["target"]
         value = test["expected"]
 
-        puts "Expected: " + key.to_s + " -> " + value.to_s
+        puts "Expected: " + target.to_s + " -> " + value.to_s + "for flag " + test["flag"]
+
+        data["flag"] = @repository.get_flag(test["flag"].to_s)
 
         result = EvaluatorTestResult.new(
-
-          data["test_file"],
-          key,
+          data["filename"],
+          test["flag"],
+          target,
           value,
-          data
-        )
-
-        refute_nil result
-
-        @results.push(result)
-      end
-    else
-      data["expected"].each do |key, value|
-
-        puts "Expected: " + key.to_s + " -> " + value.to_s
-
-        expected = data["expected"][key]
-
-        result = EvaluatorTestResult.new(
-
-          data["test_file"],
-          key,
-          expected,
-          data
+          data,
         )
 
         refute_nil result
@@ -113,8 +229,7 @@ class EvaluatorTester < Minitest::Test
 
       refute_nil result
 
-      "Use case '" + result.file.to_s + "' with target '" + result.target_identifier.to_s + "' and expected value '" +
-        result.value.to_s + "'"
+      puts "Use case '" + result.use_case["flag"].to_s + "' with target '" + result.target_identifier.to_s + "' and expected value '" + result.value.to_s + "'"
 
       target = nil
 
@@ -193,4 +308,5 @@ class EvaluatorTester < Minitest::Test
     puts "Processing the test data '" + data["test_file"].to_s + "' completed"
     true
   end
+
 end

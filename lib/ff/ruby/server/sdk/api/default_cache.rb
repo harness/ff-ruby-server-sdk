@@ -21,22 +21,6 @@ class DefaultCache < Cache
 
     lambda = lambda { |*key| @logger.debug "Retrieved #{key}" }
 
-    cache_dir = "./cache"
-    unless directory_exists?(cache_dir)
-
-      FileUtils.mkdir_p cache_dir
-      unless directory_exists?(cache_dir)
-
-        raise "Failed to initialize filesystem cache at: " + cache_dir
-      end
-    end
-
-    @filesystem = CacheBuilder.with(FileCache)
-                              .set_store(cache_dir)
-                              .set_max(@capacity)
-                              .set_post_get(lambda)
-                              .build
-
     @in_memory = CacheBuilder.with(Cache)
                              .set_max(@capacity)
                              .set_post_get(lambda)
@@ -44,16 +28,13 @@ class DefaultCache < Cache
   end
 
   def verify
-
-    @in_memory != nil && @filesystem != nil && @capacity > 0
+    @in_memory != nil && @capacity > 0
   end
 
   def set(key, value)
 
     begin
       @in_memory.put(key, value)
-      @filesystem.put(key, value)
-      keys.add(key)
 
     rescue ArgumentError => e
 
@@ -66,15 +47,6 @@ class DefaultCache < Cache
   def get(key)
 
     value = @in_memory.get(key)
-
-    if value == nil
-
-      value = @filesystem.get(key)
-      if value != nil
-
-        @in_memory.put(key, value)
-      end
-    end
     value
   end
 
@@ -88,11 +60,6 @@ class DefaultCache < Cache
     if @in_memory.exists?(key)
 
       @in_memory.invalidate(key)
-    end
-
-    if @filesystem.exists?(key)
-
-      @filesystem.invalidate(key)
     end
 
     @keys.delete(key)

@@ -335,11 +335,9 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     end
   end
 
-  def test_evaluator
-
+  describe "evaluation tests" do
     integration_test = EvaluatorIntegrationTest.new("Main_Evaluator_Integration_Test")
-
-    assert integration_test.execute
+    integration_test.execute
   end
 
   def test_sized_queue
