@@ -5,12 +5,14 @@ class EvaluatorTestResult
   def initialize(
 
     file,
+    flag,
     target_identifier,
     value,
     use_case
   )
 
     @file = file
+    @flag = flag
     @value = value
     @use_case = use_case
     @target_identifier = target_identifier
