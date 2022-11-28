@@ -1,3 +1,7 @@
+# [1.0.4]
+
+- [FFM-5478] Fixes bug caching some flags due to encoding
+
 # [1.0.3]
 
 - [FFM-4058] Fixes bug in storing target segments
