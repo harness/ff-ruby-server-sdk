@@ -21,7 +21,10 @@ logger.info "Harness Ruby SDK Getting Started"
 client = CfClient.instance
 
 client.init(apiKey, ConfigBuilder.new.logger(logger).build)
+
+logger.info "----- initialization started ----- "
 client.wait_for_initialization
+logger.info "----- initialization done ----- "
 
 # Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
 target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "emea"})
