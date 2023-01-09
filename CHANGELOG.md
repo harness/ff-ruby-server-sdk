@@ -1,3 +1,7 @@
+# [1.0.5]
+
+- [FFM-6362] - Ruby FF SDK is not waiting initialization when using "wait_for_initialization" method
+
 # [1.0.4]
 
 - [FFM-5478] Fixes bug caching some flags due to encoding
