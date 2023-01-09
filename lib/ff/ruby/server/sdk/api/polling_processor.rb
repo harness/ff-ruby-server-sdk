@@ -2,7 +2,7 @@ require_relative "../common/closeable"
 
 class PollingProcessor < Closeable
 
-  def initialize(
+  def init(
 
     connector,
     repository,

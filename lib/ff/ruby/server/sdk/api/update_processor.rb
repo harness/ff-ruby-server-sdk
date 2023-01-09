@@ -4,7 +4,7 @@ require_relative "../common/closeable"
 
 class UpdateProcessor < Closeable
 
-  def initialize(
+  def init(
 
     connector,
     repository,

@@ -223,6 +223,8 @@ class InnerClient < ClientCallback
       return
     end
 
+    @config.logger.info "All processors now ready"
+
     @initialized = true
 
     # TODO: notify - Reactivity support
@@ -262,7 +264,8 @@ class InnerClient < ClientCallback
     @repository = StorageRepository.new(@config.cache, @repository_callback, @config.store, @config.logger)
 
     @metrics_callback = InnerClientMetricsCallback.new(self, @config.logger)
-    @metrics_processor = MetricsProcessor.new(@connector, @config, @metrics_callback)
+    @metrics_processor = MetricsProcessor.new
+    @metrics_processor.init(@connector, @config, @metrics_callback)
 
     @evaluator = Evaluator.new(@repository, logger = @config.logger)
     @evaluator_callback = InnerClientFlagEvaluateCallback.new(@metrics_processor, logger = @config.logger)
@@ -275,8 +278,8 @@ class InnerClient < ClientCallback
       logger = @config.logger
     )
 
-    @poll_processor = PollingProcessor.new(
-
+    @poll_processor = PollingProcessor.new
+    @poll_processor.init(
       connector = @connector,
       repository = @repository,
       poll_interval_in_sec = @config.poll_interval_in_seconds,
@@ -291,7 +294,8 @@ class InnerClient < ClientCallback
       logger = @config.logger
     )
 
-    @update_processor = UpdateProcessor.new(
+    @update_processor = UpdateProcessor.new
+    @update_processor.init(
 
       connector = @connector,
       repository = @repository,

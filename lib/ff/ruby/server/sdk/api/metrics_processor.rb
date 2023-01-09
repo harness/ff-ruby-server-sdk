@@ -9,7 +9,7 @@ require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
 
-  def initialize(
+  def init(
 
     connector,
     config,
