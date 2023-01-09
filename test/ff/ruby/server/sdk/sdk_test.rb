@@ -288,7 +288,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     refute_nil callback
 
-    processor = PollingProcessor.new(
+    processor = PollingProcessor.new
+    processor.init(
 
       connector,
       repository,
