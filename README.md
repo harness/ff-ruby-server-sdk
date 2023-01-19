@@ -81,13 +81,13 @@ client.close
 
 ```bash
 # Install the deps
-gem install ff-ruby-server-sdk typhoeus
+gem install ff-ruby-server-sdk typhoeus openapi_client
 
 # Set your API Key
 export FF_API_KEY=<your key here>
 
 # Run the example
-ruby ./example/gettting_started.rb
+ruby ./example/getting_started/getting_started.rb
 ```
 
 ### Running with docker
@@ -96,10 +96,10 @@ use docker to quickly get started
 
 ```bash
 # Install the package
-docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY ruby:2.7-buster gem install --install-dir ./gems ff-ruby-server-sdk typhoeus
+docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY ruby:2.7-buster gem install --install-dir ./gems ff-ruby-server-sdk typhoeus openapi_client
 
 # Run the script
-docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY -e GEM_HOME=/app/gems ruby:2.7-buster ruby ./example/getting_started.rb
+docker run -v $(pwd):/app -w /app -e FF_API_KEY=$FF_API_KEY -e GEM_HOME=/app/gems ruby:2.7-buster ruby ./example/getting_started/getting_started.rb
 ```
 
 ### Additional Reading
