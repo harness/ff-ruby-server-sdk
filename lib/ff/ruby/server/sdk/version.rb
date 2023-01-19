@@ -5,7 +5,7 @@ module Ff
     module Server
       module Sdk
 
-        VERSION = "1.0.5"
+        VERSION = "1.0.6"
       end
     end
   end
