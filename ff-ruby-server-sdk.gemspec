@@ -53,4 +53,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "concurrent-ruby", "1.1.10"
 
   spec.add_dependency "murmurhash3", "0.1.6"
+
+  spec.add_dependency "openapi_client", "~> 1.0.0"
 end
