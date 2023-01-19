@@ -1,3 +1,7 @@
+# [1.0.6]
+
+- [FFM-3715] - Updates open api dependency issue
+
 # [1.0.5]
 
 - [FFM-6362] - Ruby FF SDK is not waiting initialization when using "wait_for_initialization" method
