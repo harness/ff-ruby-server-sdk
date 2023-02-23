@@ -108,6 +108,7 @@ Further examples and config options are in the further reading section:
 
 [Further Reading](docs/further_reading.md)
 
+[Ruby on Rails example](ruby_on_rails_example/README.md)
 
 -------------------------
 [Harness](https://www.harness.io/) is a feature management platform that helps teams to build better software and to
