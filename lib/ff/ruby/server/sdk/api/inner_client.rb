@@ -268,7 +268,10 @@ class InnerClient < ClientCallback
     @metrics_processor.init(@connector, @config, @metrics_callback)
 
     @evaluator = Evaluator.new(@repository, logger = @config.logger)
-    @evaluator_callback = InnerClientFlagEvaluateCallback.new(@metrics_processor, logger = @config.logger)
+
+    if @config.analytics_enabled
+      @evaluator_callback = InnerClientFlagEvaluateCallback.new(@metrics_processor, logger = @config.logger)
+    end
 
     @auth_service = AuthService.new(
 
