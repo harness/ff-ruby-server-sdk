@@ -48,7 +48,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "moneta", "1.4.2"
 
   spec.add_dependency "rest-client", "2.1.0"
-  spec.add_dependency "sse-client", "1.1.0"
 
   spec.add_dependency "concurrent-ruby", "1.1.10"
 

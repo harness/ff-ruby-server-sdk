@@ -53,7 +53,7 @@ class InnerClientUpdater < Updater
 
   def on_error
 
-    @logger.error "Error occurred"
+    @logger.error "InnerClientUpdater error occurred"
   end
 
   def update(message)
