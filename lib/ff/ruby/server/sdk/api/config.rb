@@ -7,7 +7,7 @@ class Config
   attr_accessor :config_url, :event_url, :stream_enabled, :poll_interval_in_seconds, :analytics_enabled,
                 :frequency, :buffer_size, :all_attributes_private, :private_attributes, :connection_timeout,
                 :read_timeout, :write_timeout, :debugging, :metrics_service_acceptable_duration, :cache, :store,
-                :logger
+                :logger, :ssl_ca_cert
 
   # Static:
   class << self
@@ -97,7 +97,7 @@ class Config
 
   def ssl_ca_cert
 
-    nil
+    @ssl_ca_cert
   end
 
   def client_side_validation

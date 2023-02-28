@@ -10,13 +10,14 @@ class Events < Service
     url,
     headers,
     updater,
-    logger = nil
+    config
   )
 
     @url = url
     @headers = headers
     @headers['params'] = {}
     @updater = updater
+    @config = config
 
     if @updater != nil
       unless @updater.kind_of?(Updater)
@@ -24,8 +25,8 @@ class Events < Service
       end
     end
 
-    if logger != nil
-      @logger = logger
+    if @config.logger != nil
+      @logger = @config.logger
     else
       @logger = Logger.new(STDOUT)
     end
@@ -42,7 +43,9 @@ class Events < Service
                                          block_response: proc { |response| response_handler response },
                                          before_execution_proc: nil,
                                          log: false,
-                                         read_timeout: 60)
+                                         read_timeout: 60,
+                                         ssl_ca_file: @config.ssl_ca_cert)
+
 
     rescue => e
       @logger.warn "SSE connection failed: " + e.message
