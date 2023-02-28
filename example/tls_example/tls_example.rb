@@ -18,9 +18,10 @@ flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
 logger.info "Harness Ruby SDK Getting Started"
 
 =begin
- For ff servers with a custom or private CAs, you can use 'tls_ca_cert' to pass in the CAs. Typhoeus HTTP client uses
- libcurl underneath, when developing you should enable debugging(true) to get more detailed error diagnostics logged,
- which aren't reported through OpenAPI. Common errors include:
+ For ff servers with a custom or private CAs, you can use 'tls_ca_cert' to pass in the CA bundle in ASCII PEM format.
+ You should also include any intermediate CAs so the full trust chain can be resolved. Typhoeus HTTP client uses libcurl
+ underneath, when developing you should enable debugging(true) to get more detailed error diagnostics logged, which
+ aren't reported through OpenAPI. Common errors include:
 
  SSL peer certificate or SSH remote key was not OK - you have an invalid or missing CA for the server you're trying
                                                      to connect to. It can also mean the server hostname and request
@@ -33,6 +34,10 @@ logger.info "Harness Ruby SDK Getting Started"
 The example below assumes you have an ff-server (or proxy) configured with TLS for a server hosted on
 'ffserver:8000' where the web server's cert has a SANs with DNS entry 'ffserver'. CA.crt tells the SDK you trust this
 server.
+
+Typhoeus/libcurl by default has its default CA bundle stored at /etc/ssl/cert.pem. You can append your CA here if
+you choose not to use 'tls_ca_cert'.
+
 =end
 
 
