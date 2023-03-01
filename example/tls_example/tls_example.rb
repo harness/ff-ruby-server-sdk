@@ -15,7 +15,7 @@ apiKey = ENV['FF_API_KEY'] || 'changeme'
 # Flag Name
 flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
 
-logger.info "Harness Ruby SDK Getting Started"
+logger.info "Harness Ruby SDK TLS example"
 
 =begin
  For ff servers with a custom or private CAs, you can use 'tls_ca_cert' to pass in the CA bundle in ASCII PEM format.
