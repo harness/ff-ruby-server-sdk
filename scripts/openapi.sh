@@ -57,12 +57,9 @@ if which openapi-generator-cli; then
       gem install concurrent-ruby -v 1.1.10 && \
       gem install murmurhash3 -v 0.1.6 && \
       cd "$dir_path/.." && \
-      openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path" && \
-      cd "$generated_path" && gem build openapi_client.gemspec && \
-      test -e "openapi_client-1.0.0.gem" && \
-      gem install --dev "openapi_client-1.0.0.gem"; then
+      openapi-generator-cli generate -i api.yaml -g ruby -o "$generated_path"; then
 
-      echo "Generated API has been installed with success: $generated_path"
+      echo "API has been generated with success: $generated_path"
   else
 
       echo "ERROR: 'openapi-generator-cli' is not installed [1] 😬"

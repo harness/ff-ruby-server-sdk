@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
-      (f == __FILE__) || f.match(%r{\A(?:(?:test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
+      (f == __FILE__) || f.match(%r{\A(?:(?:test|spec|features)/|\.(?:git|travis|circleci)|appveyor)}) || f.start_with?("ruby_on_rails_example")
     end
   end
 
@@ -53,6 +53,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "concurrent-ruby", "1.1.10"
 
   spec.add_dependency "murmurhash3", "0.1.6"
-
-  spec.add_dependency "openapi_client", "~> 1.0.0"
 end
