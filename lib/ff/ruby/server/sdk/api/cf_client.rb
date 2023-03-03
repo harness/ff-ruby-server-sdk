@@ -1,5 +1,5 @@
-require "openapi_client"
 
+require_relative "../../generated/lib/openapi_client"
 require_relative "../common/closeable"
 require_relative "inner_client"
 
