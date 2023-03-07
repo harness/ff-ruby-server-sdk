@@ -83,6 +83,11 @@ class ConfigBuilder
     self
   end
 
+  def tls_ca_cert(cert_file)
+    @config.ssl_ca_cert = cert_file
+    self
+  end
+
   def logger(logger)
 
     @config.logger = logger

@@ -16,7 +16,6 @@ gem "moneta"
 
 # SSE support:
 gem "rest-client"
-gem "sse-client"
 
 # Concurrency support:
 gem "concurrent-ruby", require: "concurrent"
