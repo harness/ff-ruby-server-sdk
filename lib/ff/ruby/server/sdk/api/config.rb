@@ -82,7 +82,7 @@ class Config
 
   def verify_ssl
 
-    nil
+    true
   end
 
   def cert_file
