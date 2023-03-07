@@ -43,7 +43,7 @@ you choose not to use 'tls_ca_cert'.
 
 client = CfClient.instance
 client.init(apiKey, ConfigBuilder.new.logger(logger)
-                                 .event_url("https://ffserver:8000/api/1.0")
+                                 .event_url("https://ffserver:8001/api/1.0")
                                  .config_url("https://ffserver:8000/api/1.0")
                                  .tls_ca_cert("/path/to/CA.crt")
                                  .debugging(true)
