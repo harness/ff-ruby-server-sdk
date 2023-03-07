@@ -32,7 +32,7 @@ target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "em
 # Loop forever reporting the state of the flag
 loop do
   result = client.bool_variation(flagName, target, false)
-  logger.info "Flag variation:  #{result}"
+  logger.info "Flag #{flagName} is set to:  #{result}"
   sleep 10
 end
 
