@@ -13,6 +13,7 @@ class HarnessConnector < Connector
     @config = config
     @on_unauthorized = on_unauthorized
     @user_agent = "RubySDK " + Ff::Ruby::Server::Sdk::VERSION
+    @sdk_info = "Ruby #{Ff::Ruby::Server::Sdk::VERSION} Server"
 
     @api = OpenapiClient::ClientApi.new(make_api_client)
     @metrics_api = OpenapiClient::MetricsApi.new(make_metrics_api_client)
@@ -139,8 +140,12 @@ class HarnessConnector < Connector
     headers = {
 
       "Authorization" => "Bearer " + @token,
-      "API-Key" => @api_key
-    }
+      "API-Key" => @api_key,
+      "User-Agent" => @user_agent,
+      "Harness-SDK-Info" =>  @sdk_info,
+      "Harness-AccountID" => @account_id,
+      "Harness-EnvironmentID" => @environment_id
+    }.compact
 
     @event_source = Events.new(
 
@@ -170,6 +175,7 @@ class HarnessConnector < Connector
 
     api_client.config = @config
     api_client.user_agent = @user_agent
+    api_client.default_headers['Harness-SDK-Info'] = @sdk_info
 
     api_client
   end
@@ -189,30 +195,32 @@ class HarnessConnector < Connector
 
     api_client.config = config
     api_client.user_agent = @user_agent
+    api_client.default_headers['Harness-SDK-Info'] = @sdk_info
 
     api_client
   end
 
   def process_token
-
-    headers = {
-
-      "Authorization" => "Bearer " + @token
-    }
-
-    @api.api_client.default_headers = @api.api_client.default_headers.merge(headers)
-    @metrics_api.api_client.default_headers = @metrics_api.api_client.default_headers.merge(headers)
-
     decoded_token = JWT.decode @token, nil, false
 
     if decoded_token != nil && !decoded_token.empty?
 
       @environment = decoded_token[0]["environment"]
       @cluster = decoded_token[0]["clusterIdentifier"]
+      @environment_id = decoded_token[0]["accountID"]
+      @account_id = decoded_token[0]["environmentIdentifier"]
+
+      headers = {
+        "Authorization" => "Bearer " + @token,
+        "Harness-AccountID" => @account_id,
+        "Harness-EnvironmentID" => @environment_id
+      }.compact
+
+      @api.api_client.default_headers = @api.api_client.default_headers.merge(headers)
+      @metrics_api.api_client.default_headers = @metrics_api.api_client.default_headers.merge(headers)
 
       @config.logger.debug "Token has been processed: environment='" + @environment.to_s + "', cluster='" + @cluster.to_s + "'"
     else
-
       @config.logger.error "ERROR: Could not obtain the environment and cluster data from the token"
     end
   end
