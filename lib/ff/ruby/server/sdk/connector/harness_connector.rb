@@ -207,8 +207,8 @@ class HarnessConnector < Connector
 
       @environment = decoded_token[0]["environment"]
       @cluster = decoded_token[0]["clusterIdentifier"]
-      @environment_id = decoded_token[0]["accountID"]
-      @account_id = decoded_token[0]["environmentIdentifier"]
+      @environment_id = decoded_token[0]["environmentIdentifier"]
+      @account_id = decoded_token[0]["accountID"]
 
       headers = {
         "Authorization" => "Bearer " + @token,
