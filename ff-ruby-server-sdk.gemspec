@@ -52,4 +52,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "concurrent-ruby", "1.1.10"
 
   spec.add_dependency "murmurhash3", "0.1.6"
+
+  spec.add_dependency "typhoeus", '~> 1.0', '>= 1.0.1'
 end

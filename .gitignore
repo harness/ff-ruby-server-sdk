@@ -18,7 +18,7 @@
 .idea
 *.gem
 Gemfile.lock
-generated
+lib/ff/ruby/server/generated
 cache
 moneta
 
