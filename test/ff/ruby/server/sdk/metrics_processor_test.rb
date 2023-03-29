@@ -14,11 +14,11 @@ class MetricsProcessorTest < Minitest::Test
     end
 
     def on_metrics_error(error)
-      print error
+      puts error
     end
 
     def wait_until_ready
-      print "Wait for metrics processor to start"
+      puts "Wait for metrics processor to start"
       @latch.wait 30
     end
   end
@@ -26,10 +26,13 @@ class MetricsProcessorTest < Minitest::Test
   class TestConnector < Connector
     def initialize
       @captured_metrics = []
+      @post_metrics_latch = Concurrent::CountDownLatch.new(1)
     end
 
     def post_metrics(metrics)
       @captured_metrics.push metrics
+      @post_metrics_latch.count_down
+
       puts metrics.to_s.gsub "},", "},\n"
 
       metrics.target_data.each do |target|
@@ -65,6 +68,12 @@ class MetricsProcessorTest < Minitest::Test
     def get_captured_metrics
       @captured_metrics
     end
+
+    def wait_for_metrics
+      puts "Waiting for metrics to be posted..."
+      @post_metrics_latch.wait 30
+    end
+
   end
 
   def initialize(name)
@@ -198,6 +207,33 @@ class MetricsProcessorTest < Minitest::Test
     event2 = MetricsEvent.new(@feature2, @target, @variation2)
 
     assert(event1 != event2)
+  end
+
+  def test_flush_map_when_buffer_fills
+
+    logger = Logger.new(STDOUT)
+    callback = TestCallback.new
+    connector = TestConnector.new
+    config = MiniTest::Mock.new
+    config.expect :kind_of?, true, [Config.class]
+    config.expect :metrics_service_acceptable_duration, 10000
+
+    (1..30).each { |_| config.expect :buffer_size, 2 }
+    (1..30).each { |_| config.expect :logger, logger }
+
+    metrics_processor = MetricsProcessor.new
+    metrics_processor.init connector, config, callback
+
+    callback.wait_until_ready
+
+    # several evaluations with a buffer size of 2
+    metrics_processor.register_evaluation @target, @feature1, @variation1
+    metrics_processor.register_evaluation @target, @feature1, @variation2
+    metrics_processor.register_evaluation @target, @feature2, @variation1
+    metrics_processor.register_evaluation @target, @feature2, @variation2
+
+    assert connector.wait_for_metrics, "no metrics were posted"
+
   end
 
 

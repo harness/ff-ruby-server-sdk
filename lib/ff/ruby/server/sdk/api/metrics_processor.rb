@@ -77,6 +77,8 @@ class MetricsProcessor < Closeable
 
     @frequency_map = FrequencyMap.new
 
+    @max_buffer_size = config.buffer_size - 1
+
     @callback.on_metrics_ready
   end
 
@@ -97,7 +99,8 @@ class MetricsProcessor < Closeable
 
   def register_evaluation(target, feature_config, variation)
 
-    if @frequency_map.size > @config.buffer_size - 1
+    if @frequency_map.size > @max_buffer_size
+      @config.logger.warn "metrics buffer is full #{@frequency_map.size} - flushing metrics"
       @executor.post do
         run_one_iteration
       end
@@ -111,6 +114,8 @@ class MetricsProcessor < Closeable
 
   def run_one_iteration
     send_data_and_reset_cache @frequency_map.drain_to_map
+
+    @config.logger.debug "metrics: frequency map size #{@frequency_map.size}. global target size #{@global_target_set.size}"
   end
 
   def send_data_and_reset_cache(map)
@@ -136,7 +141,9 @@ class MetricsProcessor < Closeable
     freq_map.each_key do |key|
       add_target_data(metrics, key.target)
     end
+    total_count = 0
     freq_map.each do |key, value|
+      total_count += value
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
       metrics_data.count = value
@@ -149,6 +156,8 @@ class MetricsProcessor < Closeable
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
       metrics.metrics_data.push(metrics_data)
     end
+    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{freq_map.size}"
+
     metrics
   end
 
