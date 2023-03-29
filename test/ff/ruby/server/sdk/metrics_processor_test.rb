@@ -70,7 +70,7 @@ class MetricsProcessorTest < Minitest::Test
   def initialize(name)
     super
 
-    @target = Target.new "target-name", "target-id"
+    @target = Target.new "target-name", "target-id", attributes={"location": "emea"}
 
     @variation1 = OpenapiClient::Variation.new
     @variation1.identifier = "variation1"
@@ -108,6 +108,7 @@ class MetricsProcessorTest < Minitest::Test
 
     callback.wait_until_ready
 
+    # Here we test register_evaluation then run_one_iteration
     (1..3).each { metrics_processor.register_evaluation @target, @feature1, @variation1 }
     (1..3).each { metrics_processor.register_evaluation @target, @feature1, @variation2 }
     (1..3).each { metrics_processor.register_evaluation @target, @feature2, @variation1 }
@@ -121,12 +122,33 @@ class MetricsProcessorTest < Minitest::Test
     metrics_processor.send :run_one_iteration
 
     assert_equal 0, freq_map.size, "not all pending metrics were flushed"
-
-
     assert_equal 1, connector.get_captured_metrics.size
+    assert_equal 2, connector.get_captured_metrics[0].target_data.size, "there should only be 2 targets"
 
+    connector.get_captured_metrics.each do |metric|
+      metric.metrics_data.each do |metric_data|
+        assert_equal 6, metric_data.attributes.size, "too many attributes"
+      end
+    end
 
-    # if global target is set then targets should still include targets
+    assert_target_data connector.get_captured_metrics[0].target_data
+  end
+
+  def assert_target_data(target_data)
+    targets = {}
+
+    target_data.each do |target_data|
+      targets[target_data.identifier] = true
+      if target_data.identifier == "target-id"
+        target_data.attributes.each do |kv|
+          assert_equal :location, kv.key
+          assert_equal "emea", kv.value
+        end
+      end
+    end
+
+    assert targets.key?("__global__cf_target")
+    assert targets.key?("target-id")
   end
 
   def test_frequency_map_increment
