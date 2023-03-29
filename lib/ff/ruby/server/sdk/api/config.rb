@@ -35,7 +35,7 @@ class Config
 
     @frequency = @@min_frequency
 
-    @buffer_size = 1024
+    @buffer_size = 2048
 
     @all_attributes_private = false
 

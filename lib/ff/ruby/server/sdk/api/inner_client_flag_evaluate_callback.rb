@@ -25,6 +25,6 @@ class InnerClientFlagEvaluateCallback < FlagEvaluateCallback
 
     @logger.debug "Processing evaluation: " + feature_config.feature.to_s + ", " + target.identifier.to_s
 
-    @metrics_processor.push_to_queue(target, feature_config, variation)
+    @metrics_processor.register_evaluation(target, feature_config, variation)
   end
 end
