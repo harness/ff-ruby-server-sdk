@@ -94,7 +94,15 @@ class InnerClient < ClientCallback
       return
     end
 
-    on_auth_done
+    @poll_processor.start
+
+    if @config.stream_enabled
+      @update_processor.start
+    end
+
+    if @config.analytics_enabled
+      @metrics_processor.start
+    end
 
   end
 
@@ -102,7 +110,6 @@ class InnerClient < ClientCallback
     @config.logger.warn "Authentication failed with a non-recoverable error - defaults will be served"
     @initialized = true
 
-    on_auth_done
   end
 
   def close
@@ -312,15 +319,4 @@ class InnerClient < ClientCallback
     @my_mutex.synchronize(&block)
   end
 
-  def on_auth_done
-    @poll_processor.start
-
-    if @config.stream_enabled
-      @update_processor.start
-    end
-
-    if @config.analytics_enabled
-      @metrics_processor.start
-    end
-  end
 end
