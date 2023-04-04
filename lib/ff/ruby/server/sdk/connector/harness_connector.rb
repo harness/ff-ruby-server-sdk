@@ -175,6 +175,8 @@ class HarnessConnector < Connector
     api_client = OpenapiClient::ApiClient.new
 
     api_client.config = @config
+    api_client.config.connection_timeout = @config.read_timeout / 1000
+    api_client.config.read_timeout = @config.read_timeout / 1000
     api_client.user_agent = @user_agent
     api_client.default_headers['Harness-SDK-Info'] = @sdk_info
 
