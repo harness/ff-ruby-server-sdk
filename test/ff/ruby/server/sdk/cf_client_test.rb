@@ -29,7 +29,7 @@ class CfClientTest < Minitest::Test
         Thread.current.terminate
       }
 
-      client = CfClient.new
+      client = CfClient.instance
 
       client.init("DUMMY_KEY", ConfigBuilder.new.logger(logger)
                                             .stream_enabled(false)

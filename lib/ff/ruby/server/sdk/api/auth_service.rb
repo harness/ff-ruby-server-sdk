@@ -45,30 +45,14 @@ class AuthService < Closeable
       end
     end
 
-
     @thread.run
   end
-
-  def should_retry_http_code(code)
-    # 408 request timeout
-    # 425 too early
-    # 429 too many requests
-    # 500 internal server error
-    # 502 bad gateway
-    # 503 service unavailable
-    # 504 gateway timeout
-    case code
-    when 408,425,429,500,502,503,504
-      return true
-    else
-      return false
-    end
-  end
-
 
   def close
     stop_async
   end
+
+  protected
 
   def on_auth_success
 
@@ -79,8 +63,6 @@ class AuthService < Closeable
       @callback.on_auth_success
     end
   end
-
-  protected
 
   def stop_async
 
@@ -97,5 +79,21 @@ class AuthService < Closeable
 
   def is_authenticated
     @authenticated
+  end
+
+  def should_retry_http_code(code)
+    # 408 request timeout
+    # 425 too early
+    # 429 too many requests
+    # 500 internal server error
+    # 502 bad gateway
+    # 503 service unavailable
+    # 504 gateway timeout
+    case code
+    when 408,425,429,500,502,503,504
+      return true
+    else
+      return false
+    end
   end
 end
