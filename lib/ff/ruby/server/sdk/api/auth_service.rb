@@ -65,8 +65,6 @@ class AuthService < Closeable
   end
 
   def stop_async
-
-
     if @thread != nil
       @logger.info "Stopping Auth service, status=#{@thread.status}"
       @thread.exit
@@ -89,8 +87,9 @@ class AuthService < Closeable
     # 502 bad gateway
     # 503 service unavailable
     # 504 gateway timeout
+    #  -1 OpenAPI error (timeout etc)
     case code
-    when 408,425,429,500,502,503,504
+    when 408,425,429,500,502,503,504,-1
       return true
     else
       return false

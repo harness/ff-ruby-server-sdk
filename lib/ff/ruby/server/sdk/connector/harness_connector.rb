@@ -41,6 +41,14 @@ class HarnessConnector < Connector
 
     rescue OpenapiClient::ApiError => e
 
+      if e.message.include? "the server returns an error"
+        # NOTE openapi-generator 5.2.1 has a bug where exceptions don't contain any useful information and we can't
+        # determine if a timeout has occurred. This is fixed in 6.3.0 but requires Ruby version to be increased to 2.7
+        # https://github.com/OpenAPITools/openapi-generator/releases/tag/v6.3.0
+        @config.logger.warn "OpenapiClient::ApiError [\n\n#{e}\n]"
+        return -1
+      end
+
       log_error(e)
       return e.code
     end
