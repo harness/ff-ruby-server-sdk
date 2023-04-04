@@ -2,44 +2,49 @@ require_relative "../common/closeable"
 
 class ClientCallback < Closeable
 
+  TBI = RuntimeError.new("To be implemented")
+
   def initialize
     super
-
-    @tbi = "To be implemented"
   end
 
   def on_auth_success
 
-    raise @tbi
+    raise TBI
+  end
+
+  def on_auth_failed
+
+    raise TBI
   end
 
   def on_authorized
 
-    raise @tbi
+    raise TBI
   end
 
   def is_closing
 
-    raise @tbi
+    raise TBI
   end
 
   def on_processor_ready(processor)
 
-    raise @tbi
+    raise TBI
   end
 
   def on_update_processor_ready
 
-    raise @tbi
+    raise TBI
   end
 
   def on_metrics_processor_ready
 
-    raise @tbi
+    raise TBI
   end
 
   def update(message, manual)
 
-    raise @tbi
+    raise TBI
   end
 end

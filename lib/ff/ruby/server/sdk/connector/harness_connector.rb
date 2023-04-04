@@ -37,14 +37,13 @@ class HarnessConnector < Connector
 
       @config.logger.info "Token has been obtained"
       process_token
-      return true
+      return 200
 
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
+      return e.code
     end
-
-    false
   end
 
   def get_flags
@@ -60,6 +59,7 @@ class HarnessConnector < Connector
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
+      return nil
     end
   end
 
@@ -76,6 +76,7 @@ class HarnessConnector < Connector
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
+      return nil
     end
   end
 
@@ -239,6 +240,12 @@ class HarnessConnector < Connector
 
   def log_error(e)
 
-    @config.logger.error "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    if e.code == 0
+      type = "typhoeus/libcurl"
+    else
+      type = "HTTP code #{e.code}"
+    end
+
+    @config.logger.warn "OpenapiClient::ApiError (#{type}) [\n\n" + e.to_s + "\n]"
   end
 end
