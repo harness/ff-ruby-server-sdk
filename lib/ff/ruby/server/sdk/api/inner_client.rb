@@ -280,8 +280,7 @@ class InnerClient < ClientCallback
     @auth_service = AuthService.new(
       connector = @connector,
       callback = self,
-      logger = @config.logger,
-      poll_interval_in_sec = @config.poll_interval_in_seconds
+      logger = @config.logger
     )
 
     @poll_processor = PollingProcessor.new
