@@ -1,3 +1,12 @@
+# [1.1.0]
+
+- [FFM-7285] - Remove Metrics queue and implement Map for better memory usage
+- [FFM-7325] - Improve authentication retry logic
+- [FFM-6926] - Add basic Ruby on Rails example
+- [FFM-6965] - Fixes analytics_enabled(false) which didn't fully turn off metrics
+- [FFM-7005] - Add TLS support custom CAs and remove sse-client
+- [FFM-7292] - Add HTTP headers for diagnostics
+
 # [1.0.6]
 
 - [FFM-3715] - Updates open api dependency issue
