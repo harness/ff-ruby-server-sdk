@@ -2,56 +2,47 @@ require_relative "../common/closeable"
 
 class AuthService < Closeable
 
-  def initialize(connector = nil, poll_interval_in_sec = 60, callback = nil, logger = nil)
+  def initialize(connector, callback, logger, retry_delay_ms = 6000)
 
     unless connector.kind_of?(Connector)
-
       raise "The 'connector' parameter must be of '" + Connector.to_s + "' data type"
     end
 
     unless callback.kind_of?(ClientCallback)
-
       raise "The 'callback' parameter must be of '" + ClientCallback.to_s + "' data type"
     end
 
+    @logger = logger
     @callback = callback
     @connector = connector
-    @poll_interval_in_sec = poll_interval_in_sec
-
-    if logger != nil
-
-      @logger = logger
-    else
-
-      @logger = Logger.new(STDOUT)
-    end
+    @retry_delay_ms = retry_delay_ms
+    @authenticated = false
   end
 
   def start_async
-
     @logger.debug "Async starting: " + self.to_s
 
-    @ready = true
+    @thread = Thread.new :report_on_exception => true do
+      attempt = 1
+      until @authenticated do
+        http_code = @connector.authenticate
 
-    @thread = Thread.new do
-
-      @logger.debug "Async started: " + self.to_s
-
-      while @ready do
-
-        @logger.debug "Async auth iteration"
-
-        if @connector.authenticate
-
+        if http_code == 200
+          @authenticated = true
           @callback.on_auth_success
           stop_async
-          @logger.info "Stopping Auth service"
+        elsif should_retry_http_code http_code
+          delay_ms = @retry_delay_ms * [10, attempt].min
+          @logger.warn "Got HTTP code #{http_code} while authenticating on attempt #{attempt}, will retry in #{delay_ms} ms"
+          sleep(delay_ms/1000)
+          attempt += 1
+          @logger.info "Retrying to authenticate, attempt #{attempt}..."
         else
-
-          @logger.error "Exception while authenticating, retry in " + @poll_interval_in_sec.to_s + " seconds"
+          @logger.warn "Auth Service got HTTP code #{http_code} while authenticating, will not attempt to reconnect"
+          @callback.on_auth_failed
+          stop_async
+          next
         end
-
-        sleep(@poll_interval_in_sec)
       end
     end
 
@@ -59,33 +50,50 @@ class AuthService < Closeable
   end
 
   def close
-
     stop_async
-  end
-
-  def on_auth_success
-
-    unless @callback == nil
-
-      unless @callback.kind_of?(ClientCallback)
-
-        raise "Expected '" + ClientCallback.to_s + "' data type for the callback"
-      end
-
-      @callback.on_auth_success
-    end
   end
 
   protected
 
+  def on_auth_success
+
+    if @callback != nil
+      unless @callback.kind_of?(ClientCallback)
+        raise "Expected '" + ClientCallback.to_s + "' data type for the callback"
+      end
+      @callback.on_auth_success
+    end
+  end
+
   def stop_async
-
-    @ready = false
-
     if @thread != nil
-
+      @logger.info "Stopping Auth service, status=#{@thread.status}"
       @thread.exit
       @thread = nil
+      @logger.info "Stopping Auth service done"
+    end
+  end
+
+  private
+
+  def is_authenticated
+    @authenticated
+  end
+
+  def should_retry_http_code(code)
+    # 408 request timeout
+    # 425 too early
+    # 429 too many requests
+    # 500 internal server error
+    # 502 bad gateway
+    # 503 service unavailable
+    # 504 gateway timeout
+    #  -1 OpenAPI error (timeout etc)
+    case code
+    when 408,425,429,500,502,503,504,-1
+      return true
+    else
+      return false
     end
   end
 end

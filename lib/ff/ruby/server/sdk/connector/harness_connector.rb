@@ -37,14 +37,21 @@ class HarnessConnector < Connector
 
       @config.logger.info "Token has been obtained"
       process_token
-      return true
+      return 200
 
     rescue OpenapiClient::ApiError => e
 
-      log_error(e)
-    end
+      if e.message.include? "the server returns an error"
+        # NOTE openapi-generator 5.2.1 has a bug where exceptions don't contain any useful information and we can't
+        # determine if a timeout has occurred. This is fixed in 6.3.0 but requires Ruby version to be increased to 2.7
+        # https://github.com/OpenAPITools/openapi-generator/releases/tag/v6.3.0
+        @config.logger.warn "OpenapiClient::ApiError [\n\n#{e}\n]"
+        return -1
+      end
 
-    false
+      log_error(e)
+      return e.code
+    end
   end
 
   def get_flags
@@ -60,6 +67,7 @@ class HarnessConnector < Connector
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
+      return nil
     end
   end
 
@@ -76,6 +84,7 @@ class HarnessConnector < Connector
     rescue OpenapiClient::ApiError => e
 
       log_error(e)
+      return nil
     end
   end
 
@@ -174,6 +183,8 @@ class HarnessConnector < Connector
     api_client = OpenapiClient::ApiClient.new
 
     api_client.config = @config
+    api_client.config.connection_timeout = @config.read_timeout / 1000
+    api_client.config.read_timeout = @config.read_timeout / 1000
     api_client.user_agent = @user_agent
     api_client.default_headers['Harness-SDK-Info'] = @sdk_info
 
@@ -239,6 +250,12 @@ class HarnessConnector < Connector
 
   def log_error(e)
 
-    @config.logger.error "ERROR - Start\n\n" + e.to_s + "\nERROR - End"
+    if e.code == 0
+      type = "typhoeus/libcurl"
+    else
+      type = "HTTP code #{e.code}"
+    end
+
+    @config.logger.warn "OpenapiClient::ApiError (#{type}) [\n\n" + e.to_s + "\n]"
   end
 end
