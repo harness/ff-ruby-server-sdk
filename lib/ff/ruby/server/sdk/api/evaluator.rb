@@ -3,6 +3,7 @@ require "murmurhash3"
 
 require_relative "evaluation"
 require_relative "../common/repository"
+require_relative "../common/sdk_codes"
 
 class Evaluator < Evaluation
 
@@ -33,6 +34,7 @@ class Evaluator < Evaluation
       return variation.value == "true"
     end
 
+    SdkCodes::warn_default_variation_served @logger, identifier, target, default_value.to_s
     default_value
   end
 
@@ -45,6 +47,7 @@ class Evaluator < Evaluation
       return variation.value
     end
 
+    SdkCodes::warn_default_variation_served @logger, identifier, target, default_value.to_s
     default_value
   end
 
@@ -57,6 +60,7 @@ class Evaluator < Evaluation
       return variation.value.to_i
     end
 
+    SdkCodes::warn_default_variation_served @logger, identifier, target, default_value.to_s
     default_value
   end
 
@@ -68,6 +72,7 @@ class Evaluator < Evaluation
       return variation.value.to_f
     end
 
+    SdkCodes::warn_default_variation_served @logger, identifier, target, default_value.to_s
     default_value
   end
 
@@ -80,6 +85,7 @@ class Evaluator < Evaluation
       return JSON.parse(variation.value)
     end
 
+    SdkCodes::warn_default_variation_served @logger, identifier, target, default_value.to_s
     default_value
   end
 

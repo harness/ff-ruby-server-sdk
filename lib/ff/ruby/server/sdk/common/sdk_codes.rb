@@ -26,12 +26,20 @@ class SdkCodes
     logger.info SdkCodes.sdk_err_msg(5000)
   end
 
+  def self.info_stream_event_received(logger, event_json)
+    logger.info SdkCodes.sdk_err_msg(5002, event_json)
+  end
+
   def self.info_metrics_thread_started(logger)
     logger.info SdkCodes.sdk_err_msg(7000)
   end
 
   def self.warn_auth_failed_srv_defaults(logger)
     logger.warn SdkCodes.sdk_err_msg(2001)
+  end
+
+  def self.warn_auth_retying(logger, attempt)
+    logger.warn SdkCodes.sdk_err_msg(2003, ", attempt #{attempt}")
   end
 
   def self.warn_stream_disconnected(logger, reason)
@@ -43,7 +51,7 @@ class SdkCodes
   end
 
   def self.warn_default_variation_served(logger, identifier, target, default)
-    logger.warn SdkCodes.sdk_err_msg(6001, "identifier=%s, target=%s, default=%s" % [identifier, target, default])
+    logger.warn SdkCodes.sdk_err_msg(6001, "identifier=%s, target=%s, default=%s" % [identifier, target.identifier, default])
   end
 
   private
@@ -57,24 +65,26 @@ class SdkCodes
       # SDK_AUTH_2xxx
       2000 => "Authenticated ok",
       2001 => "Authentication failed with a non-recoverable error - defaults will be served",
-      # SDK_CLOSE_3xxx
+      2003 => "Retrying to authenticate",
       # SDK_POLL_4xxx
-      4000 => "Polling started, interval=",
+      4000 => "Polling started, intervalMs:",
       4001 => "Polling stopped",
-      # SDK_POLL_5xxx
+      # SDK_STREAM_5xxx
       5000 => "SSE stream connected ok",
-      5001 => "SSE stream disconnected, reason=",
+      5001 => "SSE stream disconnected, reason:",
+      5002 => "SSE event received: ",
+      5003 => "SSE retrying to connect in",
       # SDK_EVAL_6xxx
-      6000 => "Evaluated variation successfully:",
+      6000 => "Evaluated variation successfully",
       6001 => "Default variation was served",
       # SDK_METRICS_7xxx
       7000 => "Metrics thread started",
       7001 => "Metrics thread exited",
-      7002 => "Posting metrics failed, reason=",
+      7002 => "Posting metrics failed, reason:",
     }
 
   def self.sdk_err_msg(error_code, append_text = "")
-    "SDKCODE(#{error_code},#{get_err_class error_code}): #{@map[error_code]}#{append_text}"
+    "SDKCODE(%s:%s): %s %s" % [(get_err_class error_code), error_code, @map[error_code], append_text]
   end
 
   def self.get_err_class(error_code)

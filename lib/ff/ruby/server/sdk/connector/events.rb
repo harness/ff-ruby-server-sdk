@@ -72,12 +72,13 @@ class Events < Service
   end
 
   def on_closed
-    SdkCodes::warn_stream_disconnected @logger, "closed"
+    SdkCodes::warn_stream_disconnected @logger, "on_closed called"
     @updater.on_disconnected
   end
 
   def on_message(message)
-    @logger.debug "EventSource message received " + message.to_s
+    SdkCodes::info_stream_event_received @logger, message.to_s
+
     msg = JSON.parse(message)
     @updater.update(msg)
   end

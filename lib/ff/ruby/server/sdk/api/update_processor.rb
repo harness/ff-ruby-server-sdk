@@ -105,8 +105,6 @@ class UpdateProcessor < Closeable
 
   def process_flag(message)
 
-    @logger.info "Processing flag message: " + message.to_s
-
     config = @connector.get_flag(message["identifier"])
 
     if config != nil
