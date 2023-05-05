@@ -12,14 +12,14 @@ require_relative "inner_client_repository_callback"
 require_relative "inner_client_flag_evaluate_callback"
 
 require_relative "../connector/harness_connector"
+require_relative "../common/sdk_codes"
 
 class InnerClient < ClientCallback
 
   def initialize(api_key = nil, config = nil, connector = nil)
 
     if api_key == nil || api_key == ""
-
-      raise "SDK key is not provided"
+      SdkCodes::raise_missing_sdk_key config.logger
     end
 
     if config == nil
@@ -87,7 +87,7 @@ class InnerClient < ClientCallback
 
   def on_auth_success
 
-    @config.logger.info "SDK successfully logged in"
+    SdkCodes::info_sdk_auth_ok @config.logger
 
     if @closing
 
@@ -107,9 +107,8 @@ class InnerClient < ClientCallback
   end
 
   def on_auth_failed
-    @config.logger.warn "Authentication failed with a non-recoverable error - defaults will be served"
+    SdkCodes::warn_auth_failed_srv_defaults @config.logger
     @initialized = true
-
   end
 
   def close
@@ -205,19 +204,19 @@ class InnerClient < ClientCallback
     if processor == @poll_processor
 
       @poller_ready = true
-      @config.logger.info "PollingProcessor ready"
+      @config.logger.debug "PollingProcessor ready"
     end
 
     if processor == @update_processor
 
       @stream_ready = true
-      @config.logger.info "Updater ready"
+      @config.logger.debug "Updater ready"
     end
 
     if processor == @metrics_processor
 
       @metrics_ready = true
-      @config.logger.info "Metrics ready"
+      @config.logger.debug "Metrics ready"
     end
 
     if (@config.stream_enabled && !@stream_ready) ||
@@ -227,21 +226,16 @@ class InnerClient < ClientCallback
       return
     end
 
-    @config.logger.info "All processors now ready"
+    SdkCodes.info_sdk_init_ok @config.logger
 
     @initialized = true
-
-    # TODO: notify - Reactivity support
-    # TODO: notify_consumers - Reactivity support
-
-    @config.logger.info "Initialization is completed"
   end
 
   def wait_for_initialization
 
     synchronize do
 
-      @config.logger.info "Waiting for the initialization to finish"
+      @config.logger.debug "Waiting for initialization to finish"
 
       until @initialized
 
@@ -253,17 +247,13 @@ class InnerClient < ClientCallback
         raise "Initialization failed"
       end
 
-      @config.logger.info "Waiting for the initialization completed"
+      @config.logger.debug "Waiting for initialization has completed"
     end
   end
 
   protected
 
   def setup
-
-    @config.logger.info "SDK is not initialized yet! If store is used then values will be loaded from store" +
-           " otherwise default values will be used in meantime. You can use waitForInitialization method for SDK" +
-           " to be ready."
 
     @repository = StorageRepository.new(@config.cache, @repository_callback, @config.store, @config.logger)
 

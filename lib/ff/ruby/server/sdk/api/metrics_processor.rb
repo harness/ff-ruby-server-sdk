@@ -4,6 +4,7 @@ require "concurrent-ruby"
 require_relative "../dto/target"
 require_relative "../../sdk/version"
 require_relative "../common/closeable"
+require_relative "../common/sdk_codes"
 require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
@@ -83,18 +84,18 @@ class MetricsProcessor < Closeable
   end
 
   def start
-    @config.logger.info "Starting metrics processor with request interval: " + @config.frequency.to_s
+    @config.logger.debug "Starting metrics processor with request interval: " + @config.frequency.to_s
     start_async
   end
 
   def stop
-    @config.logger.info "Stopping metrics processor"
+    @config.logger.debug "Stopping metrics processor"
     stop_async
   end
 
   def close
     stop
-    @config.logger.info "Closing metrics processor"
+    @config.logger.debug "Closing metrics processor"
   end
 
   def register_evaluation(target, feature_config, variation)
@@ -198,7 +199,7 @@ class MetricsProcessor < Closeable
       while @ready do
         unless @initialized
           @initialized = true
-          @config.logger.info "Metrics processor initialized"
+          SdkCodes::info_metrics_thread_started @config.logger
         end
         sleep(@config.frequency)
         run_one_iteration

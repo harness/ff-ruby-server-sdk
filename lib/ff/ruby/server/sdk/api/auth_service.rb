@@ -67,10 +67,10 @@ class AuthService < Closeable
 
   def stop_async
     if @thread != nil
-      @logger.info "Stopping Auth service, status=#{@thread.status}"
+      @logger.debug "Stopping Auth service, status=#{@thread.status}"
       @thread.exit
       @thread = nil
-      @logger.info "Stopping Auth service done"
+      @logger.debug "Stopping Auth service done"
     end
   end
 

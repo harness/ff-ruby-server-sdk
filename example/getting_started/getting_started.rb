@@ -8,6 +8,7 @@ require "securerandom"
 
 $stdout.sync = true
 logger = Logger.new $stdout
+logger.level = Logger::DEBUG
 
 # API Key
 apiKey = ENV['FF_API_KEY'] || 'changeme'

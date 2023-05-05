@@ -28,7 +28,7 @@ class UpdateProcessor < Closeable
 
   def start
 
-    @logger.info "Starting updater (EventSource)"
+    @logger.debug "Starting updater (EventSource)"
 
     if @updater != nil
 

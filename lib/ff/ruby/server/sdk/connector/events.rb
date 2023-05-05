@@ -2,7 +2,7 @@ require "json"
 require 'restclient'
 
 require_relative './service'
-
+require_relative "../common/sdk_codes"
 class Events < Service
 
   def initialize(
@@ -35,7 +35,7 @@ class Events < Service
   end
 
   def start
-    @logger.info "Starting EventSource service"
+    @logger.debug "Starting EventSource service"
     begin
       conn = RestClient::Request.execute(method: :get,
                                          url: @url,
@@ -46,15 +46,13 @@ class Events < Service
                                          read_timeout: 60,
                                          ssl_ca_file: @config.ssl_ca_cert)
 
-
     rescue => e
-      @logger.warn "SSE connection failed: " + e.message
-      on_error
+      on_error e.message
     end
   end
 
   def stop
-    @logger.info "Stopping EventSource service"
+    @logger.debug "Stopping EventSource service"
     on_closed
   end
 
@@ -63,18 +61,18 @@ class Events < Service
   end
 
   def on_open
-    @logger.info "EventSource connected"
+    SdkCodes::info_stream_connected @logger
     @updater.on_connected
   end
 
-  def on_error
-    @logger.error "EventSource error"
+  def on_error(reason="")
+    SdkCodes::warn_stream_disconnected @logger, reason
     @updater.on_error
     stop
   end
 
   def on_closed
-    @logger.info "EventSource disconnected"
+    SdkCodes::warn_stream_disconnected @logger, "closed"
     @updater.on_disconnected
   end
 
@@ -106,8 +104,9 @@ class Events < Service
       end
       close
     else
-      @logger.error "SSE ERROR: http_code=%d body=%d" % [response.code, response.body]
-      on_error
+      msg = "SSE ERROR: http_code=%d body=%d" % [response.code, response.body]
+      @logger.warn msg
+      on_error msg
     end
   end
 
