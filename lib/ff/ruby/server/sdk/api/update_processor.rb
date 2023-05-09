@@ -28,7 +28,7 @@ class UpdateProcessor < Closeable
 
   def start
 
-    @logger.info "Starting updater (EventSource)"
+    @logger.debug "Starting updater (EventSource)"
 
     if @updater != nil
 
@@ -104,8 +104,6 @@ class UpdateProcessor < Closeable
   protected
 
   def process_flag(message)
-
-    @logger.info "Processing flag message: " + message.to_s
 
     config = @connector.get_flag(message["identifier"])
 

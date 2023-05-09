@@ -36,7 +36,7 @@ class AuthService < Closeable
           @logger.warn "Got HTTP code #{http_code} while authenticating on attempt #{attempt}, will retry in #{delay_ms} ms"
           sleep(delay_ms/1000)
           attempt += 1
-          @logger.info "Retrying to authenticate, attempt #{attempt}..."
+          SdkCodes::warn_auth_retying @logger, attempt
         else
           @logger.warn "Auth Service got HTTP code #{http_code} while authenticating, will not attempt to reconnect"
           @callback.on_auth_failed
@@ -67,10 +67,10 @@ class AuthService < Closeable
 
   def stop_async
     if @thread != nil
-      @logger.info "Stopping Auth service, status=#{@thread.status}"
+      @logger.debug "Stopping Auth service, status=#{@thread.status}"
       @thread.exit
       @thread = nil
-      @logger.info "Stopping Auth service done"
+      @logger.debug "Stopping Auth service done"
     end
   end
 

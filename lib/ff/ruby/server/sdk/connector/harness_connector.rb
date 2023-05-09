@@ -35,7 +35,7 @@ class HarnessConnector < Connector
       response = @api.authenticate(opts = options)
       @token = response.auth_token
 
-      @config.logger.info "Token has been obtained"
+      @config.logger.debug "Token has been obtained"
       process_token
       return 200
 
@@ -49,7 +49,7 @@ class HarnessConnector < Connector
         return -1
       end
 
-      log_error(e)
+      log_error("auth", e)
       return e.code
     end
   end
@@ -66,7 +66,7 @@ class HarnessConnector < Connector
 
     rescue OpenapiClient::ApiError => e
 
-      log_error(e)
+      log_error("get_feature_config", e)
       return nil
     end
   end
@@ -83,7 +83,7 @@ class HarnessConnector < Connector
 
     rescue OpenapiClient::ApiError => e
 
-      log_error(e)
+      log_error("get_all_segments", e)
       return nil
     end
   end
@@ -127,12 +127,11 @@ class HarnessConnector < Connector
         opts = options
       )
 
-      @config.logger.info "Successfully sent analytics data to the server"
+      @config.logger.debug "Successfully sent analytics data to the server"
 
     rescue OpenapiClient::ApiError => e
-
-      log_error(e)
-      @config.logger.error "Exception while posting metrics to the event server"
+      log_error("post_metrics", e)
+      SdkCodes.warn_post_metrics_failed @config.logger, e.message
     end
   end
 
@@ -248,7 +247,7 @@ class HarnessConnector < Connector
     }
   end
 
-  def log_error(e)
+  def log_error(prefix, e)
 
     if e.code == 0
       type = "typhoeus/libcurl"
@@ -256,6 +255,6 @@ class HarnessConnector < Connector
       type = "HTTP code #{e.code}"
     end
 
-    @config.logger.warn "OpenapiClient::ApiError (#{type}) [\n\n" + e.to_s + "\n]"
+    @config.logger.warn "%s: OpenapiClient::ApiError (%s) [\n\n%s\n]" % [prefix, type, e.to_s]
   end
 end

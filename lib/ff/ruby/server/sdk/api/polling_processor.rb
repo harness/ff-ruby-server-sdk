@@ -29,13 +29,13 @@ class PollingProcessor < Closeable
 
     flags = []
 
-    @logger.info "Fetching flags started"
+    @logger.debug "Fetching flags started"
 
     result = @connector.get_flags
 
     if result != nil
 
-      @logger.info "Flags are fetched"
+      @logger.debug "Flags are fetched"
 
       result.each { |fc|
 
@@ -47,7 +47,7 @@ class PollingProcessor < Closeable
       }
     end
 
-    @logger.info "Fetching flags finished"
+    @logger.debug "Fetching flags finished"
 
     flags
   end
@@ -56,13 +56,13 @@ class PollingProcessor < Closeable
 
     segments = []
 
-    @logger.info "Fetching segments started"
+    @logger.debug "Fetching segments started"
 
     result = @connector.get_segments
 
     if result != nil
 
-      @logger.info "Segments are fetched"
+      @logger.debug "Segments are fetched"
 
       result.each { |s|
 
@@ -74,7 +74,7 @@ class PollingProcessor < Closeable
       }
     end
 
-    @logger.info "Fetching segments finished"
+    @logger.debug "Fetching segments finished"
 
     segments
   end
@@ -106,7 +106,7 @@ class PollingProcessor < Closeable
           unless @initialized
 
             @initialized = true
-            @logger.info "PollingProcessor initialized"
+            SdkCodes::info_poll_started(@logger, @poll_interval_in_sec)
 
             if @callback != nil
 
@@ -137,17 +137,16 @@ class PollingProcessor < Closeable
 
   def start
 
-    @logger.info "Starting PollingProcessor with request interval: " + @poll_interval_in_sec.to_s
+    @logger.debug "Starting PollingProcessor with request interval: " + @poll_interval_in_sec.to_s
     start_async
   end
 
   def stop
 
-    @logger.info "Stopping PollingProcessor"
+    @logger.debug "Stopping PollingProcessor"
     stop_async
     unless @ready
-
-      @logger.info "PollingProcessor stopped"
+      SdkCodes::info_polling_stopped @logger
     end
   end
 
