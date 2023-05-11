@@ -225,13 +225,13 @@ class Evaluator < Evaluation
 
     clauses.each do |clause|
 
-      unless evaluate_clause(clause, target)
+      if evaluate_clause(clause, target)
 
-        return false
+        return true
       end
     end
 
-    true
+    false
   end
 
   def evaluate_clause(clause, target)
