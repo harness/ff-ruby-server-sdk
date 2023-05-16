@@ -466,60 +466,47 @@ class Evaluator < Evaluation
     prerequisites = parent_feature_config.prerequisites
 
     if prerequisites != nil && !prerequisites.empty?
+      @logger.debug "Checking prerequisite #{prerequisites.to_s} of flag #{parent_feature_config.feature}"
 
-      @logger.debug "Checking pre requisites " + prerequisites.to_s + " of parent feature " + parent_feature_config.feature.to_s
+      prerequisites.each do |pre_req|
+        pre_req_flag = @repository.get_flag(pre_req.feature)
 
-      prerequisites.each do |pqs|
-
-        pre_req_feature = pqs.feature
-
-        pre_req_feature_config = @repository.get_flag(pre_req_feature)
-
-        if pre_req_feature_config == nil
-
-          @logger.debug "Could not retrieve the pre requisite details of feature flag: " + pre_req_feature.to_s
-
+        if pre_req_flag == nil
+          @logger.debug "Could not retrieve the pre requisite details of feature flag: #{pre_req.feature}"
           return true
         end
 
-        pre_req_evaluated_variation = evaluate_flag(pre_req_feature_config, target)
+        evaluated_pre_req = evaluate_flag(pre_req_flag, target)
 
-        if pre_req_evaluated_variation == nil
-
-          @logger.debug "Could not evaluate the prerequisite details of feature flag: " + pre_req_feature.to_s
-
+        if evaluated_pre_req == nil
+          @logger.debug "Could not evaluate the prerequisite details of feature flag: #{pre_req.feature}"
           return true
         end
-
-        @logger.debug "Pre requisite flag " + pre_req_feature_config.feature + " has variation " +
-                        pre_req_evaluated_variation.to_s + " for target " + target.to_s
-
-        valid_pre_req_variations = pqs.variations
-
-        @logger.debug "Pre requisite flag " + pre_req_feature_config.to_s + " should have the variations " +
-                        valid_pre_req_variations.to_s
 
         none_match = true
-
-        valid_pre_req_variations.each do |element|
-
-          if element.include?(pre_req_evaluated_variation.identifier)
-
+        pre_req.variations.each do |next_variation|
+          if next_variation.include?(evaluated_pre_req.identifier)
             none_match = false
             break
           end
         end
 
         if none_match
-
+          @logger.debug "Prerequisite flag #{pre_req_flag.feature} has no matching variations for flag #{parent_feature_config.feature}"
           return false
         else
-
-          return check_pre_requisite(pre_req_feature_config, target)
+          unless check_pre_requisite(pre_req_flag, target)
+            @logger.debug "Prerequisite flag #{pre_req_flag.feature} is switched off for flag #{parent_feature_config.feature}"
+            return false
+          end
         end
-      end
+      end # prerequisites.each
+
+      @logger.debug "All prerequisite flags are switched on for flag #{parent_feature_config.feature}"
+      return true
     end
 
+    @logger.debug "No prerequisite flags present for flag #{parent_feature_config.feature}, skipped"
     true
   end
 
