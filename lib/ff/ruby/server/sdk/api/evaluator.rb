@@ -301,7 +301,7 @@ class Evaluator < Evaluation
 
     if operator == "in"
 
-      return object.include?(value)
+      return clause.values.include?(object)
     end
 
     if operator == "segmentMatch"
