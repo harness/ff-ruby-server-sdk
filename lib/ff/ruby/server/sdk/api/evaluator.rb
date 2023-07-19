@@ -142,7 +142,7 @@ class Evaluator < Evaluation
         return target.send(attribute)
       else
 
-        result = target.attributes.key?(attribute)
+        result = target.attributes[attribute.to_sym]
 
         if result == nil
 
