@@ -142,6 +142,8 @@ class Evaluator < Evaluation
         return target.send(attribute)
       else
 
+        @logger.debug "target attrs: " + target.attributes.to_s
+
         result = target.attributes[attribute.to_sym]
 
         if result == nil

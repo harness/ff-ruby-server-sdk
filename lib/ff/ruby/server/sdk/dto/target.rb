@@ -6,7 +6,7 @@ class Target
 
     name,
     identifier = name,
-    attributes = [],
+    attributes = {},
     is_private = false
   )
 
