@@ -12,7 +12,7 @@ class Target
 
     @name = name
     @identifier = identifier
-    @attributes = attributes
+    @attributes = attributes.transform_keys(&:to_sym)
     @is_private = is_private
     @private_attributes = Set[]
   end
