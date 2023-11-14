@@ -183,7 +183,7 @@ class Evaluator < Evaluation
   def get_normalized_number(property, bucket_by)
 
     joined = bucket_by.to_s + ":" + property.to_s
-    hash = MurmurHash3::V32.str_hash(joined, joined.length)
+    hash = MurmurHash3::V32.str_hash(joined, 0)
     (hash % 100) + 1
   end
 
