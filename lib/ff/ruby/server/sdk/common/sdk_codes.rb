@@ -54,6 +54,13 @@ class SdkCodes
     logger.warn SdkCodes.sdk_err_msg(6001, "identifier=%s, target=%s, default=%s" % [identifier, target.identifier, default])
   end
 
+  def self.warn_bucket_by_attr_not_found(logger, attr_name, new_value)
+    if new_value == nil
+      new_value = "NOT FOUND"
+    end
+    logger.warn SdkCodes.sdk_err_msg(6002, "missing=%s, using value=%s" % [attr_name, new_value])
+  end
+
   private
 
   @map =
@@ -77,6 +84,7 @@ class SdkCodes
       # SDK_EVAL_6xxx
       6000 => "Evaluated variation successfully",
       6001 => "Default variation was served",
+      6002 => "BucketBy attribute not found in target attributes, falling back to 'identifier':",
       # SDK_METRICS_7xxx
       7000 => "Metrics thread started",
       7001 => "Metrics thread exited",
