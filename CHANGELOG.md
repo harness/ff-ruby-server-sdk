@@ -1,4 +1,4 @@
-# [2.0.0] ** BREAKING ** 
+# [1.2.0] ** BREAKING **
 
 - [FFM-9804] - The percentage rollout hash algorithm was slightly different compared to other Feature Flags SDKs, which resulted 
 in a different bucket allocation for the same target. While the overall percentage distribution was correct with the previous
