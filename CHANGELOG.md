@@ -1,3 +1,10 @@
+# [1.2.0] ** BREAKING **
+
+- [FFM-9804] - The percentage rollout hash algorithm was slightly different compared to other Feature Flags SDKs, which resulted 
+in a different bucket allocation for the same target. While the overall percentage distribution was correct with the previous
+algorithm; this fix ensures that the same target will get the same allocation per SDK. We are marking as a breaking change
+as existing targets may get different allocations in a percentage rollout flag. 
+
 # [1.1.0]
 
 - [FFM-7285] - Remove Metrics queue and implement Map for better memory usage

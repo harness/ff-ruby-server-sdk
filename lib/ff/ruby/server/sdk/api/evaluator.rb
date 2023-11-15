@@ -181,20 +181,24 @@ class Evaluator < Evaluation
   end
 
   def get_normalized_number(property, bucket_by)
-
-    joined = property.to_s + ":" + bucket_by.to_s
-    hash = MurmurHash3::V32.str_hash(joined, joined.length)
+    joined = bucket_by.to_s + ":" + property.to_s
+    hash = MurmurHash3::V32.str_hash(joined, 0)
     (hash % 100) + 1
   end
 
   def is_enabled(target, bucket_by, percentage)
-
     property = get_attr_value(target, bucket_by)
 
+    if property == nil
+      old_bb = bucket_by
+      bucket_by = "identifier"
+      property = get_attr_value(target, bucket_by)
+      SdkCodes.warn_bucket_by_attr_not_found @logger, old_bb, property
+    end
+
     if property != nil
-
       bucket_id = get_normalized_number(property, bucket_by)
-
+      @logger.debug "MM3 percentage_check=%s bucket_by=%s value=%s bucket=%s" % [percentage, bucket_by, property, bucket_id]
       return percentage > 0 && bucket_id <= percentage
     end
 
@@ -206,13 +210,11 @@ class Evaluator < Evaluation
     if distribution != nil
 
       variation = nil
-
+      total_percentage = 0
       distribution.variations.each do |weighted_variation|
-
         variation = weighted_variation.variation
-
-        if is_enabled(target, distribution.bucket_by, weighted_variation.weight)
-
+        total_percentage = total_percentage + weighted_variation.weight
+        if is_enabled(target, distribution.bucket_by, total_percentage)
           return variation
         end
       end
