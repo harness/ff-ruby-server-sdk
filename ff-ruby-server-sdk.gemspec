@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-system "sh scripts/openapi.sh lib/ff/ruby/server/generated"
+
+if not Dir.exist?("lib/ff/ruby/server/generated")
+  puts "Generating OpenAPI sources..."
+  system "sh scripts/openapi.sh lib/ff/ruby/server/generated"
+else
+  puts "OpenAPI sources found"
+end if
 
 require_relative "lib/ff/ruby/server/sdk/version"
 
@@ -42,14 +48,14 @@ Gem::Specification.new do |spec|
   spec.add_dependency "minitest", "~> 5.0"
   spec.add_dependency "standard", "~> 1.3"
 
-  spec.add_dependency "rufus-scheduler", "3.8.1"
+  spec.add_dependency "rufus-scheduler", "~> 3.8"
   spec.add_dependency "libcache", "0.4.2"
-  spec.add_dependency "jwt", "2.3.0"
-  spec.add_dependency "moneta", "1.4.2"
+  spec.add_dependency "jwt", "~> 2.3"
+  spec.add_dependency "moneta", "~> 1.4"
 
-  spec.add_dependency "rest-client", "2.1.0"
+  spec.add_dependency "rest-client", "~> 2.1"
 
-  spec.add_dependency "concurrent-ruby", "1.1.10"
+  spec.add_dependency "concurrent-ruby", "~> 1.1"
 
   spec.add_dependency "murmurhash3", "0.1.6"
 
