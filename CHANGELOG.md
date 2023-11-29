@@ -1,3 +1,7 @@
+# [1.2.1]
+
+- [FFM-10177] - Ruby SDK - Use pessimistic version operator for minor versions
+
 # [1.2.0] ** BREAKING **
 
 - [FFM-9804] - The percentage rollout hash algorithm was slightly different compared to other Feature Flags SDKs, which resulted 
