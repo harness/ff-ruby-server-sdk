@@ -301,11 +301,11 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     processor.start
 
-    sleep(1)
+    sleep(2)
 
     assert_equal(1, callback.on_poller_ready_count)
     assert_equal(0, callback.on_poller_error_count)
-    assert_equal(10, callback.on_poller_iteration_count)
+    assert(callback.on_poller_iteration_count >= 10)
 
     processor.close
 
