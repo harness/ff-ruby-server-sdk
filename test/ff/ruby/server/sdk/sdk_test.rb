@@ -301,7 +301,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     processor.start
 
-    sleep(2)
+    sleep(3)
 
     assert_equal(1, callback.on_poller_ready_count)
     assert_equal(0, callback.on_poller_error_count)
