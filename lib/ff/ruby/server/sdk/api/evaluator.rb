@@ -199,6 +199,10 @@ class Evaluator < Evaluation
 
 
   def evaluate_clauses_v2(clauses, target)
+    if clauses.empty?
+      return false
+    end
+
     # New style rules require that all clauses are true
     clauses.each do |clause|
       if !evaluate_clause(clause, target)
