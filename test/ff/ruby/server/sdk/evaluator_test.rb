@@ -46,10 +46,10 @@ class EvaluatorTest < Minitest::Test
 
   [
     #
-    # if (target.attr.email endswith '@harness.io' || target.attr.email endswith '@gmail.com'
+    # if (target.attr.email endswith '@harness.io' || target.attr.email endswith '@somethingelse.com'
     #
     {name: "email_is_harness", email: "user@harness.io", role: "developer", expected: true},
-    {name: "email_is_something_else", email: "user@harness.io", role: "manager", expected: true},
+    {name: "email_is_something_else", email: "user@somethingelse.com", role: "manager", expected: true},
     {name: "email_is_gmail", email: "user@gmail.com", role: "developer", expected: false},
 
   ].each do | test_case |
