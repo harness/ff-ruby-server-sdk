@@ -105,7 +105,7 @@ class MetricsProcessorTest < Minitest::Test
     logger = Logger.new(STDOUT)
     callback = TestCallback.new
     connector = TestConnector.new
-    config = MiniTest::Mock.new
+    config = Minitest::Mock.new
     config.expect :kind_of?, true, [Config.class]
     config.expect :metrics_service_acceptable_duration, 10000
 
@@ -214,7 +214,7 @@ class MetricsProcessorTest < Minitest::Test
     logger = Logger.new(STDOUT)
     callback = TestCallback.new
     connector = TestConnector.new
-    config = MiniTest::Mock.new
+    config = Minitest::Mock.new
     config.expect :kind_of?, true, [Config.class]
     config.expect :metrics_service_acceptable_duration, 10000
 

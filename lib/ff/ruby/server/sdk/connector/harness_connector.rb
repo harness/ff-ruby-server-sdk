@@ -74,11 +74,10 @@ class HarnessConnector < Connector
   def get_segments
 
     begin
-
       return @api.get_all_segments(
 
         environment_uuid = @environment,
-        opts = get_query_params
+        opts = get_segment_query_params
       )
 
     rescue OpenapiClient::ApiError => e
@@ -104,7 +103,7 @@ class HarnessConnector < Connector
 
       identifier = identifier,
       environment_uuid = @environment,
-      opts = get_query_params
+      opts = get_segment_query_params
     )
   end
 
@@ -243,6 +242,16 @@ class HarnessConnector < Connector
       :'query_params' => {
 
         :'cluster' => @cluster
+      }
+    }
+  end
+
+  def get_segment_query_params
+    {
+      :'query_params' => {
+
+        :'cluster' => @cluster,
+        :'rules' => 'v2'
       }
     }
   end
