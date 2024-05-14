@@ -125,10 +125,6 @@ class MetricsProcessor < Closeable
         @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
       end
     end
-
-    # @global_target_set.merge(@staging_target_set)
-    # @staging_target_set.clear
-
   end
 
   def prepare_summary_metrics_body(freq_map)
@@ -161,7 +157,17 @@ class MetricsProcessor < Closeable
 
     target_data = OpenapiClient::TargetData.new({ :attributes => [] })
     private_attributes = target.private_attributes
-    if @seen_targets.key?(target.identifier) || target.is_private
+
+    if target.is_private
+      return
+    end
+
+    already_seen = @seen_targets.compute_if_absent(target.identifier) do
+      false
+    end
+
+    if already_seen
+      @config.logger.debug "Skipping target: #{target.identifier}, already seen or is private"
       return
     end
 
@@ -199,7 +205,7 @@ class MetricsProcessor < Closeable
           @initialized = true
           SdkCodes::info_metrics_thread_started @config.logger
         end
-        sleep(@config.frequency)
+        sleep(2)
         run_one_iteration
       end
     end
