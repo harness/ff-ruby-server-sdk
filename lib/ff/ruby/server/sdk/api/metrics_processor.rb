@@ -27,14 +27,10 @@ class MetricsProcessor < Closeable
 
     def drain_to_map
       result = {}
-      each_key do |key|
-        result[key] = 0
-      end
-      result.each_key do |key|
-        value = get_and_set(key, 0)
+      each_pair do |key, value|
         result[key] = value
-        delete_pair(key, 0)
       end
+      clear
       result
     end
   end
@@ -59,8 +55,7 @@ class MetricsProcessor < Closeable
     @connector = connector
 
     @sdk_type = "SDK_TYPE"
-    @global_target_set = Set[]
-    @staging_target_set = Set[]
+    @seen_targets = Concurrent::Map.new
     @target_attribute = "target"
     @global_target = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
@@ -116,7 +111,7 @@ class MetricsProcessor < Closeable
   def run_one_iteration
     send_data_and_reset_cache @frequency_map.drain_to_map
 
-    @config.logger.debug "metrics: frequency map size #{@frequency_map.size}. global target size #{@global_target_set.size}"
+    @config.logger.debug "metrics: frequency map size #{@frequency_map.size}. global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(map)
@@ -131,8 +126,8 @@ class MetricsProcessor < Closeable
       end
     end
 
-    @global_target_set.merge(@staging_target_set)
-    @staging_target_set.clear
+    # @global_target_set.merge(@staging_target_set)
+    # @staging_target_set.clear
 
   end
 
@@ -166,30 +161,33 @@ class MetricsProcessor < Closeable
 
     target_data = OpenapiClient::TargetData.new({ :attributes => [] })
     private_attributes = target.private_attributes
+    if @seen_targets.key?(target.identifier) || target.is_private
+      return
+    end
 
-    if !@staging_target_set.include?(target) && !@global_target_set.include?(target) && !target.is_private
-      @staging_target_set.add(target)
-      attributes = target.attributes
-      attributes.each do |k, v|
-        key_value = OpenapiClient::KeyValue.new
-        if !private_attributes.empty?
-          unless private_attributes.include?(k)
-            key_value = OpenapiClient::KeyValue.new({ :key => k, :value => v.to_s })
-          end
-        else
+    @seen_targets[target.identifier] = true
+
+    attributes = target.attributes
+    attributes.each do |k, v|
+      key_value = OpenapiClient::KeyValue.new
+      if !private_attributes.empty?
+        unless private_attributes.include?(k)
           key_value = OpenapiClient::KeyValue.new({ :key => k, :value => v.to_s })
         end
-        target_data.attributes.push(key_value)
-      end
-      target_data.identifier = target.identifier
-      if target.name == nil || target.name == ""
-        target_data.name = target.identifier
       else
-        target_data.name = target.name
+        key_value = OpenapiClient::KeyValue.new({ :key => k, :value => v.to_s })
       end
-      metrics.target_data.push(target_data)
+      target_data.attributes.push(key_value)
     end
+    target_data.identifier = target.identifier
+    if target.name == nil || target.name == ""
+      target_data.name = target.identifier
+    else
+      target_data.name = target.name
+    end
+    metrics.target_data.push(target_data)
   end
+
 
   def start_async
     @config.logger.debug "Async starting: " + self.to_s
