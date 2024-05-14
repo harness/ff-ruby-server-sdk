@@ -162,16 +162,11 @@ class MetricsProcessor < Closeable
       return
     end
 
-    already_seen = @seen_targets.compute_if_absent(target.identifier) do
-      false
-    end
+    already_seen = @seen_targets.put_if_absent(target.identifier, true)
 
     if already_seen
-      @config.logger.debug "Skipping target: #{target.identifier}, already seen or is private"
       return
     end
-
-    @seen_targets[target.identifier] = true
 
     attributes = target.attributes
     attributes.each do |k, v|
