@@ -104,6 +104,7 @@ class MetricsProcessor < Closeable
   def register_evaluation(target, feature_config, variation)
     if @evaluation_metrics.size > @max_buffer_size
       SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
+      return 
     end
 
     event = MetricsEvent.new(feature_config, @global_target, variation)
