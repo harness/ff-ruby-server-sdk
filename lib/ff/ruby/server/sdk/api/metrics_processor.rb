@@ -130,24 +130,25 @@ class MetricsProcessor < Closeable
   private
 
   def run_one_iteration
-    send_data_and_reset_cache(@evaluation_metrics.drain_to_map, @target_metrics)
+    send_data_and_reset_cache(@evaluation_metrics, @target_metrics)
 
     @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. targets map size #{@target_metrics.size} global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
+    evaluation_metrics_map_clone = evaluation_metrics_map.drain_to_map
+
     target_metrics_map_clone = Concurrent::Map.new
 
     target_metrics_map.each_pair do |key, value|
       target_metrics_map_clone[key] = value
     end
 
-    # Clear the original map
     target_metrics_map.clear
 
-    metrics = prepare_summary_metrics_body(evaluation_metrics_map, target_metrics_map)
+    metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
-    if !metrics.metrics_data.empty? && !metrics.target_data.empty?
+    unless metrics.metrics_data.empty?
       start_time = (Time.now.to_f * 1000).to_i
       @connector.post_metrics(metrics)
       end_time = (Time.now.to_f * 1000).to_i
@@ -175,7 +176,7 @@ class MetricsProcessor < Closeable
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
       metrics.metrics_data.push(metrics_data)
     end
-    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_map.size}"
+    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_map.size}.  target_data count is #{target_metrics_map.size}"
 
     target_metrics_map.each_pair do |_, value|
       add_target_data(metrics, value)
@@ -221,7 +222,8 @@ class MetricsProcessor < Closeable
           @initialized = true
           SdkCodes::info_metrics_thread_started @config.logger
         end
-        sleep(2)
+        sleep(5)
+        # sleep(@config.frequency)
         run_one_iteration
       end
     end
