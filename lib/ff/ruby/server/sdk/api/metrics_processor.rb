@@ -64,7 +64,7 @@ class MetricsProcessor < Closeable
     #                                             targets as a summary
     @global_target =  Target.new("RubySDK1", identifier=@global_target_identifier, name=@global_target_name)
     @ready = false
-    @jar_version = ""
+    @jar_version = Ff::Ruby::Server::Sdk::VERSION
     @server = "server"
     @sdk_version = "SDK_VERSION"
     @sdk_language = "SDK_LANGUAGE"
@@ -132,7 +132,7 @@ class MetricsProcessor < Closeable
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics.drain_to_map, @target_metrics)
 
-    @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. global target size #{@seen_targets.size}"
+    @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. targets map size #{@target_metrics.size} global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
