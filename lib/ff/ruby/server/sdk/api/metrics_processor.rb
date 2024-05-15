@@ -55,11 +55,10 @@ class MetricsProcessor < Closeable
     @connector = connector
 
     @sdk_type = "SDK_TYPE"
-    @seen_targets = Concurrent::Map.new
     @target_attribute = "target"
-    @global_target = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
+    @global_target_identifier = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
-
+    @global_target =  Target.new("RubySDK1", identifier=@global_target_identifier, name=@global_target_name)
     @ready = false
     @jar_version = ""
     @server = "server"
@@ -71,7 +70,12 @@ class MetricsProcessor < Closeable
 
     @executor = Concurrent::FixedThreadPool.new(10)
 
-    @frequency_map = FrequencyMap.new
+    @evaluation_metrics = FrequencyMap.new
+    @target_metrics = Concurrent::Map.new
+
+    # Keep track of targets that have already been sent to avoid sending them again
+    @seen_targets = Concurrent::Map.new
+
 
     @max_buffer_size = config.buffer_size - 1
 
@@ -95,23 +99,36 @@ class MetricsProcessor < Closeable
 
   def register_evaluation(target, feature_config, variation)
 
-    if @frequency_map.size > @max_buffer_size
-      @config.logger.warn "metrics buffer is full #{@frequency_map.size} - flushing metrics"
+    # TODO - don't flush metrics, only drain them here. We can't tie network requests to evaluations.
+    if @evaluation_metrics.size > @max_buffer_size
+      @config.logger.warn "metrics buffer is full #{@evaluation_metrics.size} - flushing metrics"
       @executor.post do
         run_one_iteration
       end
     end
 
-    event = MetricsEvent.new(feature_config, target, variation)
-    @frequency_map.increment event
+    event = MetricsEvent.new(feature_config, @global_target, variation)
+    @evaluation_metrics.increment event
+
+    if target.is_private
+      return
+    end
+
+    already_seen = @seen_targets.put_if_absent(target.identifier, true)
+
+    if already_seen
+      return
+    end
+
+    @target_metrics.put(target.identifier, target)
   end
 
   private
 
   def run_one_iteration
-    send_data_and_reset_cache @frequency_map.drain_to_map
+    send_data_and_reset_cache @evaluation_metrics.drain_to_map
 
-    @config.logger.debug "metrics: frequency map size #{@frequency_map.size}. global target size #{@seen_targets.size}"
+    @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(map)
@@ -129,7 +146,7 @@ class MetricsProcessor < Closeable
 
   def prepare_summary_metrics_body(freq_map)
     metrics = OpenapiClient::Metrics.new({ :target_data => [], :metrics_data => [] })
-    add_target_data(metrics, Target.new(name = @global_target_name, identifier = @global_target))
+    add_target_data(metrics, Target.new(name = @global_target_name, identifier = @global_target_identifier))
     freq_map.each_key do |key|
       add_target_data(metrics, key.target)
     end
@@ -142,7 +159,7 @@ class MetricsProcessor < Closeable
       metrics_data.metrics_type = "FFMETRICS"
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @feature_name_attribute, :value => key.feature_config.feature }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @variation_identifier_attribute, :value => key.variation.identifier }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @target_attribute, :value => @global_target }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @target_attribute, :value => @global_target_identifier }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_type, :value => @server }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_language, :value => "ruby" }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
@@ -157,16 +174,6 @@ class MetricsProcessor < Closeable
 
     target_data = OpenapiClient::TargetData.new({ :attributes => [] })
     private_attributes = target.private_attributes
-
-    if target.is_private
-      return
-    end
-
-    already_seen = @seen_targets.put_if_absent(target.identifier, true)
-
-    if already_seen
-      return
-    end
 
     attributes = target.attributes
     attributes.each do |k, v|
@@ -217,7 +224,7 @@ class MetricsProcessor < Closeable
   end
 
   def get_frequency_map
-    @frequency_map
+    @evaluation_metrics
   end
 
 end
