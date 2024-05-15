@@ -27,10 +27,14 @@ class MetricsProcessor < Closeable
 
     def drain_to_map
       result = {}
-      each_pair do |key, value|
-        result[key] = value
+      each_key do |key|
+        result[key] = 0
       end
-      clear
+      result.each_key do |key|
+        value = get_and_set(key, 0)
+        result[key] = value
+        delete_pair(key, 0)
+      end
       result
     end
   end
@@ -126,13 +130,22 @@ class MetricsProcessor < Closeable
   private
 
   def run_one_iteration
-    send_data_and_reset_cache @evaluation_metrics.drain_to_map
+    send_data_and_reset_cache(@evaluation_metrics.drain_to_map, @target_metrics)
 
     @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. global target size #{@seen_targets.size}"
   end
 
-  def send_data_and_reset_cache(map)
-    metrics = prepare_summary_metrics_body(map)
+  def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
+    target_metrics_map_clone = Concurrent::Map.new
+
+    target_metrics_map.each_pair do |key, value|
+      target_metrics_map_clone[key] = value
+    end
+
+    # Clear the original map
+    target_metrics_map.clear
+
+    metrics = prepare_summary_metrics_body(evaluation_metrics_map, target_metrics_map)
 
     if !metrics.metrics_data.empty? && !metrics.target_data.empty?
       start_time = (Time.now.to_f * 1000).to_i
@@ -144,14 +157,11 @@ class MetricsProcessor < Closeable
     end
   end
 
-  def prepare_summary_metrics_body(freq_map)
+  def prepare_summary_metrics_body(evaluation_metrics_map, target_metrics_map)
     metrics = OpenapiClient::Metrics.new({ :target_data => [], :metrics_data => [] })
-    add_target_data(metrics, Target.new(name = @global_target_name, identifier = @global_target_identifier))
-    freq_map.each_key do |key|
-      add_target_data(metrics, key.target)
-    end
+
     total_count = 0
-    freq_map.each do |key, value|
+    evaluation_metrics_map.each do |key, value|
       total_count += value
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
@@ -165,7 +175,11 @@ class MetricsProcessor < Closeable
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
       metrics.metrics_data.push(metrics_data)
     end
-    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{freq_map.size}"
+    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_map.size}"
+
+    target_metrics_map.each_pair do |_, value|
+      add_target_data(metrics, value)
+    end
 
     metrics
   end
