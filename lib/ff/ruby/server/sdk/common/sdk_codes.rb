@@ -89,6 +89,8 @@ class SdkCodes
       7000 => "Metrics thread started",
       7001 => "Metrics thread exited",
       7002 => "Posting metrics failed, reason:",
+      7004 => "Target metrics exceeded max size, remaining targets for this analytics interval will not be sent",
+      7007 => "Evaluation metrics exceeded max size, remaining evaluations for this analytics interval will not be sent"
     }
 
   def self.sdk_err_msg(error_code, append_text = "")
