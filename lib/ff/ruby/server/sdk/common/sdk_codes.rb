@@ -34,6 +34,13 @@ class SdkCodes
     logger.info SdkCodes.sdk_err_msg(7000)
   end
 
+  def self.warn_metrics_targets_max_size_exceeded(logger)
+    logger.warn SdkCodes.sdk_err_msg(7004)
+  end
+
+  def self.warn_metrics_evaluations_max_size_exceeded(logger)
+    logger.warn SdkCodes.sdk_err_msg(7007)
+  end
   def self.warn_auth_failed_srv_defaults(logger)
     logger.warn SdkCodes.sdk_err_msg(2001)
   end

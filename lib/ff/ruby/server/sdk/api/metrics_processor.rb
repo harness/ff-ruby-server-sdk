@@ -102,13 +102,8 @@ class MetricsProcessor < Closeable
   end
 
   def register_evaluation(target, feature_config, variation)
-
-    # TODO - don't flush metrics, only drain them here. We can't tie network requests to evaluations.
     if @evaluation_metrics.size > @max_buffer_size
-      @config.logger.warn "metrics buffer is full #{@evaluation_metrics.size} - flushing metrics"
-      @executor.post do
-        run_one_iteration
-      end
+      SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
     end
 
     event = MetricsEvent.new(feature_config, @global_target, variation)
