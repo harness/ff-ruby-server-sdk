@@ -222,8 +222,7 @@ class MetricsProcessor < Closeable
           @initialized = true
           SdkCodes::info_metrics_thread_started @config.logger
         end
-        sleep(5)
-        # sleep(@config.frequency)
+        sleep(@config.frequency)
         run_one_iteration
       end
     end
