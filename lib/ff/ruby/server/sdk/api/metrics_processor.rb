@@ -120,7 +120,7 @@ class MetricsProcessor < Closeable
     if @evaluation_metrics.size > @max_buffer_size
       unless @evaluation_warning_issued.true?
         SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
-        @evaluation_warning_issued.set(true)
+        @evaluation_warning_issued.make_true
       end
       return
     end
@@ -133,7 +133,7 @@ class MetricsProcessor < Closeable
     if @target_metrics.size > @max_targets_buffer_size
       unless @target_warning_issued.true?
         SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
-        @target_warning_issued.set(true)
+        @target_warning_issued.make_true
       end
       return
     end
@@ -168,8 +168,8 @@ class MetricsProcessor < Closeable
 
     target_metrics_map.clear
 
-    @evaluation_warning_issued.set(false)
-    @target_warning_issued.set(false)
+    @evaluation_warning_issued.make_false
+    @target_warning_issued.make_false
 
     metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
