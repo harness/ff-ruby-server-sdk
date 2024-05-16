@@ -34,6 +34,13 @@ class SdkCodes
     logger.info SdkCodes.sdk_err_msg(7000)
   end
 
+  def self.warn_metrics_targets_max_size_exceeded(logger)
+    logger.warn SdkCodes.sdk_err_msg(7004)
+  end
+
+  def self.warn_metrics_evaluations_max_size_exceeded(logger)
+    logger.warn SdkCodes.sdk_err_msg(7007)
+  end
   def self.warn_auth_failed_srv_defaults(logger)
     logger.warn SdkCodes.sdk_err_msg(2001)
   end
@@ -89,6 +96,8 @@ class SdkCodes
       7000 => "Metrics thread started",
       7001 => "Metrics thread exited",
       7002 => "Posting metrics failed, reason:",
+      7004 => "Target metrics exceeded max size, remaining targets for this analytics interval will not be sent",
+      7007 => "Evaluation metrics exceeded max size, remaining evaluations for this analytics interval will not be sent"
     }
 
   def self.sdk_err_msg(error_code, append_text = "")
