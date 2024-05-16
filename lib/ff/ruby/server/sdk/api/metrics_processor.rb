@@ -17,7 +17,11 @@ class MetricsProcessor < Closeable
 
     def increment(key)
       compute(key) do |old_value|
-        if old_value == nil; 1 else old_value + 1 end
+        if old_value == nil;
+          1
+        else
+          old_value + 1
+        end
       end
     end
 
@@ -38,7 +42,6 @@ class MetricsProcessor < Closeable
       result
     end
   end
-
 
   def init(connector, config, callback)
 
@@ -62,7 +65,7 @@ class MetricsProcessor < Closeable
     @target_attribute = "target"
     @global_target_identifier = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
-    @global_target =  Target.new("RubySDK1", identifier=@global_target_identifier, name=@global_target_name)
+    @global_target = Target.new("RubySDK1", identifier = @global_target_identifier, name = @global_target_name)
     @ready = false
     @jar_version = Ff::Ruby::Server::Sdk::VERSION
     @server = "server"
@@ -80,8 +83,10 @@ class MetricsProcessor < Closeable
     # Keep track of targets that have already been sent to avoid sending them again
     @seen_targets = Concurrent::Map.new
 
-
     @max_buffer_size = config.buffer_size - 1
+
+    # Max 100k targets per interval
+    @max_targets_buffer_size = 100000
 
     @callback.on_metrics_ready
   end
@@ -102,16 +107,30 @@ class MetricsProcessor < Closeable
   end
 
   def register_evaluation(target, feature_config, variation)
+    register_evaluation_metric(feature_config, variation)
+    register_target_metric(target)
+  end
+
+  private
+
+  def register_evaluation_metric(feature_config, variation)
     if @evaluation_metrics.size > @max_buffer_size
       SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
-      return 
+      return
     end
 
     event = MetricsEvent.new(feature_config, @global_target, variation)
     @evaluation_metrics.increment event
+  end
+
+  def register_target_metric(target)
+    if @target_metrics.size > @max_targets_buffer_size
+      SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
+      return
+    end
 
     if target.is_private
-      return
+      return 
     end
 
     already_seen = @seen_targets.put_if_absent(target.identifier, true)
@@ -122,8 +141,6 @@ class MetricsProcessor < Closeable
 
     @target_metrics.put(target.identifier, target)
   end
-
-  private
 
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics, @target_metrics)
@@ -206,7 +223,6 @@ class MetricsProcessor < Closeable
     end
     metrics.target_data.push(target_data)
   end
-
 
   def start_async
     @config.logger.debug "Async starting: " + self.to_s
