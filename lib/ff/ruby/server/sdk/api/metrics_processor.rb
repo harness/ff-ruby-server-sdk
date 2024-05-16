@@ -88,6 +88,9 @@ class MetricsProcessor < Closeable
     # Max 100k targets per interval
     @max_targets_buffer_size = 100000
 
+    @evaluation_warning_issued = Concurrent::AtomicBoolean.new
+    @target_warning_issued = Concurrent::AtomicBoolean.new
+
     @callback.on_metrics_ready
   end
 
@@ -115,7 +118,10 @@ class MetricsProcessor < Closeable
 
   def register_evaluation_metric(feature_config, variation)
     if @evaluation_metrics.size > @max_buffer_size
-      SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
+      unless @evaluation_warning_issued.true?
+        SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
+        @evaluation_warning_issued.set(true)
+      end
       return
     end
 
@@ -125,12 +131,15 @@ class MetricsProcessor < Closeable
 
   def register_target_metric(target)
     if @target_metrics.size > @max_targets_buffer_size
-      SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
+      unless @target_warning_issued.true?
+        SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
+        @target_warning_issued.set(true)
+      end
       return
     end
 
     if target.is_private
-      return 
+      return
     end
 
     already_seen = @seen_targets.put_if_absent(target.identifier, true)
@@ -158,6 +167,9 @@ class MetricsProcessor < Closeable
     end
 
     target_metrics_map.clear
+
+    @evaluation_warning_issued.set(false)
+    @target_warning_issued.set(false)
 
     metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
