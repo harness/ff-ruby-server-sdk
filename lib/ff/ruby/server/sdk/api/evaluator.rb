@@ -311,7 +311,6 @@ class Evaluator < Evaluation
         if new_serving_rules != nil && !new_serving_rules.empty?
           # Use enhanced rules first if they're available
 
-          new_serving_rules.sort_by!(&:priority)
           new_serving_rules.each do |serving_rule|
             if evaluate_clauses_v2(serving_rule.clauses, target)
               return true
@@ -339,11 +338,7 @@ class Evaluator < Evaluation
       return nil
     end
 
-    sorted = serving_rules.sort do |a, b|
-      b.priority <=> a.priority
-    end
-
-    sorted.each do |rule|
+    serving_rules.each do |rule|
       next unless evaluate_rule(rule, target)
 
       if rule.serve.distribution != nil

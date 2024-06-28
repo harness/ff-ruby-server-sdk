@@ -107,6 +107,7 @@ class StorageRepository < Repository
       return
     end
 
+    sort_flag_rules(feature_config)
     flag_key = format_flag_key(identifier)
 
     if @store != nil
@@ -141,6 +142,7 @@ class StorageRepository < Repository
       return
     end
 
+    sort_segment_serving_rules(segment)
     segment_key = format_segment_key(identifier)
 
     if @store != nil
@@ -238,6 +240,18 @@ class StorageRepository < Repository
     end
 
     false
+  end
+
+  def sort_flag_rules(flag)
+    if flag.rules && flag.rules.length > 1
+      flag.rules.sort_by!(&:priority)
+    end
+  end
+
+  def sort_segment_serving_rules(segment)
+    if segment.serving_rules && segment.serving_rules.length > 1
+      segment.serving_rules.sort_by!(&:priority)
+    end
   end
 
   def is_segment_outdated(identifier, new_segment)
