@@ -44,9 +44,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.require_paths += ["lib/ff/ruby/server/generated/lib"]
 
-  spec.add_dependency "rake", "~> 13.0"
-  spec.add_dependency "minitest", "~> 5.0"
-  spec.add_dependency "standard", "~> 1.3"
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "minitest", "~> 5.0"
+  spec.add_development_dependency "standard", "~> 1.3"
 
   spec.add_dependency "rufus-scheduler", "~> 3.8"
   spec.add_dependency "libcache", "0.4.2"
