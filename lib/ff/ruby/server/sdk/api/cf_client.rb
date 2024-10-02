@@ -50,9 +50,9 @@ class CfClient < Closeable
     end
   end
 
-  def wait_for_initialization(timeout: nil)
+  def wait_for_initialization(timeout_ms: nil)
     if @client != nil
-      @client.wait_for_initialization(timeout: timeout)
+      @client.wait_for_initialization(timeout: timeout_ms)
     end
   end
 

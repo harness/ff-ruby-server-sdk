@@ -40,11 +40,11 @@ result = client.bool_variation("bool_flag", target, false)
 
 ### Synchronous (Blocking) Initialization
 
-In cases where it's critical to ensure the SDK is initialized before evaluating flags, the SDK offers a synchronous initialization method. This approach blocks the current thread until the SDK is fully initialized or the optional specified timeout period elapses.
+In cases where it's critical to ensure the SDK is initialized before evaluating flags, the SDK offers a synchronous initialization method. This approach blocks the current thread until the SDK is fully initialized or the optional specified timeout (in milliseconds) period elapses.
 
 The synchronous method is useful for environments where feature flag decisions are needed before continuing, such as during application startup.
 
-You can use the `wait_for_initialization` method, optionally providing a timeout to prevent waiting indefinitely in case of unrecoverable isues, e.g. incorrect API key used.
+You can use the `wait_for_initialization` method, optionally providing a timeout in milliseconds to prevent waiting indefinitely in case of unrecoverable isues, e.g. incorrect API key used.
 
 **Usage with a timeout**
 
@@ -63,7 +63,7 @@ result = client.bool_variation("bool_flag", target, false)
 client = CfClient.instance
 client.init(api_key, config)
 
-client.wait_for_initialization(timeout: 3000)
+client.wait_for_initialization(timeout_ms: 3000)
 
 result = client.bool_variation("bool_flag", target, false)
 ```
