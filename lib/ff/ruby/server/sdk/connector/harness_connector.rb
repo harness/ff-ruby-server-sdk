@@ -46,6 +46,11 @@ class HarnessConnector < Connector
         # determine if a timeout has occurred. This is fixed in 6.3.0 but requires Ruby version to be increased to 2.7
         # https://github.com/OpenAPITools/openapi-generator/releases/tag/v6.3.0
         @config.logger.warn "OpenapiClient::ApiError [\n\n#{e}\n]"
+
+        if e.code
+          return e.code
+        end
+
         return -1
       end
 
