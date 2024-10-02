@@ -231,19 +231,24 @@ class InnerClient < ClientCallback
     @initialized = true
   end
 
-  def wait_for_initialization
-
+  def wait_for_initialization(timeout: nil)
     synchronize do
+      SdkCodes::info_sdk_waiting_to_initialize(@config.logger, timeout)
 
-      @config.logger.debug "Waiting for initialization to finish"
+      start_time = Time.now
 
       until @initialized
+        # Check if a timeout is specified and has been exceeded
+        if timeout && (Time.now - start_time) > (timeout / 1000.0)
+          # raise "Initialization timed out after #{timeout} seconds"
+          @config.logger.error ""
+          handle_initialization_failure
+        end
 
         sleep(1)
       end
 
       if @failure
-
         raise "Initialization failed"
       end
 
@@ -251,7 +256,16 @@ class InnerClient < ClientCallback
     end
   end
 
+
   protected
+
+  def handle_initialization_failure
+    @auth_service.close
+    @poll_processor.stop
+    @update_processor.stop
+    @metrics_processor.stop
+    on_auth_failed
+  end
 
   def setup
 

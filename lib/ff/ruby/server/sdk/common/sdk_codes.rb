@@ -14,6 +14,17 @@ class SdkCodes
     logger.info SdkCodes.sdk_err_msg(1000)
   end
 
+  def self.info_sdk_waiting_to_initialize(logger, timeout)
+    if timeout
+      message = "with timeout: #{timeout} ms"
+    else
+
+      message = "with no timeout"
+
+    end
+    logger.info SdkCodes.sdk_err_msg(1003, message)
+  end
+
   def self.info_sdk_auth_ok(logger)
     logger.info SdkCodes.sdk_err_msg(2000)
   end
@@ -76,6 +87,7 @@ class SdkCodes
       1000 => "The SDK has successfully initialized",
       1001 => "The SDK has failed to initialize due to the following authentication error:",
       1002 => "The SDK has failed to initialize due to a missing or empty API key",
+      1003 => "The SDK is waiting for initialzation to complete",
       # SDK_AUTH_2xxx
       2000 => "Authenticated ok",
       2001 => "Authentication failed with a non-recoverable error - defaults will be served",
