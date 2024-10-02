@@ -63,7 +63,9 @@ result = client.bool_variation("bool_flag", target, false)
 client = CfClient.instance
 client.init(api_key, config)
 
-client.wait_for_initialization(timeout_ms: 3000)
+# Only wait for 30 seconds, after which if the SDK has not initialized the call will
+# unblock and the SDK will then serve defaults
+client.wait_for_initialization(timeout_ms: 30000)
 
 result = client.bool_variation("bool_flag", target, false)
 ```
