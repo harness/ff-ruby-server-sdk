@@ -24,6 +24,50 @@ client.init(apiKey, ConfigBuilder
 | enableStream    | analytics_enabled(false)                           | Enable streaming mode.                                                                                                                           | true                                 |
 | enableAnalytics | stream_enabled(true)                               | Enable analytics.  Metrics data is posted every 60s                                                                                              | true                                 |
 
+## Client Initialization Options
+The Harness Feature Flags SDK for Ruby provides flexible initialization strategies to accommodate various application requirements. You can choose between an asynchronous (non-blocking) or synchronous (blocking) approach to initialize the SDK.
+
+### Asynchronous (Non-Blocking) Initialization
+The SDK can be initialized asynchronously without blocking the main thread or requiring a callback. In this case, defaults will be served until the SDK completes the initialization process.
+
+```ruby
+client = CfClient.instance
+client.init(api_key, config)
+
+# Will serve default until the SDK completes initialization
+result = client.bool_variation("bool_flag", target, false)
+```
+
+### Synchronous (Blocking) Initialization
+
+In cases where it's critical to ensure the SDK is initialized before evaluating flags, the SDK offers a synchronous initialization method. This approach blocks the current thread until the SDK is fully initialized or the optional specified timeout period elapses.
+
+The synchronous method is useful for environments where feature flag decisions are needed before continuing, such as during application startup.
+
+You can use the `wait_for_initialization` method, optionally providing a timeout to prevent waiting indefinitely in case of unrecoverable isues, e.g. incorrect API key used.
+
+**Usage with a timeout**
+
+```ruby
+client = CfClient.instance
+client.init(api_key, config)
+
+client.wait_for_initialization
+
+result = client.bool_variation("bool_flag", target, false)
+```
+
+**Usage without a timeout**
+
+```ruby
+client = CfClient.instance
+client.init(api_key, config)
+
+client.wait_for_initialization(timeout: 3000)
+
+result = client.bool_variation("bool_flag", target, false)
+```
+
 ## Logging Configuration
 You can provide your own logger to the SDK i.e. using the moneta logger we can do this
 
