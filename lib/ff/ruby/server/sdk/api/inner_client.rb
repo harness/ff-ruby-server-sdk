@@ -241,7 +241,7 @@ class InnerClient < ClientCallback
         # Check if a timeout is specified and has been exceeded
         if timeout && (Time.now - start_time) > (timeout / 1000.0)
           # raise "Initialization timed out after #{timeout} seconds"
-          @config.logger.error ""
+          @config.logger.warn "The SDK has timed out waiting to initialize with supplied timeout #{timeout} ms"
           handle_initialization_failure
         end
 
