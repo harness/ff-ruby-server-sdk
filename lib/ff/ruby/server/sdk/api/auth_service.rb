@@ -89,8 +89,9 @@ class AuthService < Closeable
     # 503 service unavailable
     # 504 gateway timeout
     #  -1 OpenAPI error (timeout etc)
+    # 0 Un-categorised typhoeus error
     case code
-    when 408,425,429,500,502,503,504,-1
+    when 408,425,429,500,502,503,504,-1, 0
       return true
     else
       return false
