@@ -46,7 +46,7 @@ The synchronous method is useful for environments where feature flag decisions a
 
 You can use the `wait_for_initialization` method, optionally providing a timeout in milliseconds to prevent waiting indefinitely in case of unrecoverable isues, e.g. incorrect API key used.
 
-**Usage with a timeout**
+**Usage without a timeout**
 
 ```ruby
 client = CfClient.instance
@@ -57,13 +57,15 @@ client.wait_for_initialization
 result = client.bool_variation("bool_flag", target, false)
 ```
 
-**Usage without a timeout**
+**Usage with a timeout**
 
 ```ruby
 client = CfClient.instance
 client.init(api_key, config)
 
-client.wait_for_initialization(timeout_ms: 3000)
+# Only wait for 30 seconds, after which if the SDK has not initialized the call will
+# unblock and the SDK will then serve defaults
+client.wait_for_initialization(timeout_ms: 30000)
 
 result = client.bool_variation("bool_flag", target, false)
 ```
