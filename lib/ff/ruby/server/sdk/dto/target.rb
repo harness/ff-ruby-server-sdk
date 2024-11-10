@@ -1,24 +1,18 @@
-class Target
+require 'set'
 
+class Target
   attr_accessor :name, :identifier, :attributes, :is_private, :private_attributes
 
-  def initialize(
-
-    name,
-    identifier = name,
-    attributes = {},
-    is_private = false
-  )
-
-    @name = name
+  # Define all parameters as keyword arguments
+  def initialize(identifier:, name: nil, attributes: {}, is_private: false)
     @identifier = identifier
-    @attributes = attributes == nil ? {} : attributes.transform_keys(&:to_sym)
+    @name = name || identifier
+    @attributes = attributes.transform_keys(&:to_sym) || {}
     @is_private = is_private
-    @private_attributes = Set[]
+    @private_attributes = Set.new
   end
 
   def is_valid
-
-    @identifier != nil && !@identifier.strip.empty?
+    @identifier && !@identifier.strip.empty?
   end
 end

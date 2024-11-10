@@ -6,7 +6,7 @@ class FlagEvaluateCallback
     @tbi = "To be implemented"
   end
 
-  def process_evaluation(feature_config, target, variation)
+  def process_evaluation(feature_config:, target:, variation:)
 
     raise @tbi
   end

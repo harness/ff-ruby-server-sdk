@@ -6,7 +6,7 @@ class SdkCodeTest < Minitest::Test
   def test_logs_dont_raise_exception
     logger = Logger.new $stdout
     logger.level = Logger::DEBUG
-    target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "emea"})
+    target = Target.new(identifier: "RubySDK", name:"rubysdk", attributes:{"location": "emea"})
 
     SdkCodes.info_poll_started logger, 10
     SdkCodes.info_sdk_init_ok logger

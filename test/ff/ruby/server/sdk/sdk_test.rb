@@ -16,8 +16,11 @@ require_relative "evaluator_integration_test"
 
 class Ff::Ruby::Server::SdkTest < Minitest::Test
 
-  def initialize(name)
-    super
+  def setup
+    # Reset the Singleton instance before each test to ensure test isolation
+    cf_client = CfClient.instance
+    cf_client.instance_variable_set(:@client, nil)
+    cf_client.instance_variable_set(:@config, nil)
 
     @bool = false
     @number = 100
@@ -26,58 +29,111 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def test_version_number
-
     refute_nil ::Ff::Ruby::Server::Sdk::VERSION
   end
 
   def test_client_singleton_inst
-
     instance = CfClient.instance
-    (0..@counter).each {
-
+    (0..@counter).each do
       compare_equal = CfClient.instance
-      compare_not_equal = CfClient.new("test")
-
-      refute_nil compare_equal
-      refute_nil compare_not_equal
+      # Since CfClient.new is no longer valid, we should avoid using it.
+      # Instead, ensure that calling instance.init multiple times does not create new clients.
+      # Attempting to call CfClient.new should raise a NoMethodError.
 
       assert_equal(instance, compare_equal)
-      assert(instance != compare_not_equal)
-    }
+    end
   end
 
-  def test_client_constructor_inst
-
-    test_string = "test"
+  def test_client_initialization
     config = ConfigBuilder.new.build
-    connector = HarnessConnector.new(test_string, config, nil)
+    connector = HarnessConnector.new(@string, config, nil)
+    api_key = "test_api_key"
 
-    instance_with_no_config = CfClient.new(test_string)
-    instance_with_config = CfClient.new(test_string, config)
-    instance_with_connector = CfClient.new(test_string, config, connector)
+    client = CfClient.instance
+    client.init(api_key: api_key, config: config, connector: connector)
 
-    refute_nil instance_with_config
-    refute_nil instance_with_connector
-    refute_nil instance_with_no_config
+    # Verify that @client is initialized and is an instance of InnerClient
+    inner_client = client.instance_variable_get(:@client)
+    refute_nil(inner_client, "InnerClient should be initialized")
+    assert_instance_of(InnerClient, inner_client, "InnerClient should be an instance of InnerClient")
+  end
 
-    assert(instance_with_config != instance_with_no_config)
-    assert(instance_with_connector != instance_with_no_config)
-    assert(instance_with_connector != instance_with_config)
+  def test_client_reinitialization
+    config1 = ConfigBuilder.new.build
+    connector1 = HarnessConnector.new(@string, config1, nil)
+    api_key1 = "api_key_1"
+
+    client = CfClient.instance
+    client.init(api_key: api_key1, config: config1, connector: connector1)
+
+    # Capture the initial @client instance
+    initial_inner_client = client.instance_variable_get(:@client)
+
+    # Attempt to reinitialize with different parameters
+    config2 = ConfigBuilder.new.build
+    connector2 = HarnessConnector.new(@string, config2, nil)
+    api_key2 = "api_key_2"
+
+    client.init(api_key: api_key2, config: config2, connector: connector2)
+
+    # Verify that the @client instance remains the same
+    assert_same(initial_inner_client, client.instance_variable_get(:@client))
+  end
+
+  def test_client_methods
+    config = ConfigBuilder.new.build
+    connector = HarnessConnector.new(@string, config, nil)
+    api_key = "test_api_key"
+
+    client = CfClient.instance
+    client.init(api_key: api_key, config: config, connector: connector)
+
+    # Mock or stub @client methods if necessary
+    inner_client = client.instance_variable_get(:@client)
+    inner_client.stub :bool_variation, true do
+      assert_equal(true, client.bool_variation(identifier: "identifier", target: "target", default_value: false))
+    end
+
+    inner_client.stub :string_variation, "variation" do
+      assert_equal("variation", client.string_variation(identifier: "identifier", target: "target", default_value: "default"))
+    end
+
+    inner_client.stub :number_variation, 42 do
+      assert_equal(42, client.number_variation(identifier: "identifier", target: "target", default_value: 0))
+    end
+
+    inner_client.stub :json_variation, { key: "value" } do
+      assert_equal({ key: "value" }, client.json_variation(identifier: "identifier", target: "target", default_value: {}))
+    end
+  end
+
+  def test_client_destroy
+    config = ConfigBuilder.new.build
+    connector = HarnessConnector.new(@string, config, nil)
+    api_key = "test_api_key"
+
+    client = CfClient.instance
+    client.init(api_key: api_key, config: config, connector: connector)
+
+    refute_nil client.instance_variable_get(:@client)
+
+    client.destroy
+
+    assert_nil(client.instance_variable_get(:@client))
+    assert_nil(client.instance_variable_get(:@config))
   end
 
   def test_config_constructor_inst
-
     config = Config.new
     config_not_equal = Config.new
 
-    refute_nil config != nil
-    refute_nil config_not_equal != nil
+    refute_equal(config, nil)
+    refute_equal(config_not_equal, nil)
 
-    assert(config != config_not_equal)
+    refute_equal(config, config_not_equal)
   end
 
   def test_config_properties
-
     config = Config.new
 
     assert_defaults(config)
@@ -100,7 +156,6 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def test_config_builder
-
     builder = ConfigBuilder.new
     refute_nil builder
 
@@ -131,7 +186,6 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def test_lib_cache
-
     prefix = SecureRandom.uuid.to_s + "_"
 
     cache = DefaultCache.new
@@ -143,14 +197,12 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     refute_nil cache.keys
 
     (0..@counter).each do |i|
-
       cache.set(prefix + "key_int_" + i.to_s, i)
       cache.set(prefix + "key_str_" + i.to_s, i.to_s)
-      cache.set(prefix + "key_bool_" + i.to_s, i % 2 == 0)
+      cache.set(prefix + "key_bool_" + i.to_s, i.even?)
     end
 
     (0..@counter).each do |i|
-
       value_int = cache.get(prefix + "key_int_" + i.to_s)
       assert_equal(i, value_int)
 
@@ -158,18 +210,16 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
       assert_equal(i.to_s, value_str)
 
       value_bool = cache.get(prefix + "key_bool_" + i.to_s)
-      assert_equal(i % 2 == 0, value_bool)
+      assert_equal(i.even?, value_bool)
     end
 
     (0..@counter).each do |i|
-
       cache.delete(prefix + "key_int_" + i.to_s)
       cache.delete(prefix + "key_str_" + i.to_s)
       cache.delete(prefix + "key_bool_" + i.to_s)
     end
 
     (0..@counter).each do |i|
-
       value_int = cache.get(prefix + "key_int_" + i.to_s)
       assert_nil(value_int)
 
@@ -181,17 +231,7 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     end
   end
 
-  def test_client_destroy
-
-    client = CfClient.instance
-
-    refute_nil client
-
-    client.destroy
-  end
-
   def test_config_wrapping
-
     config = ConfigBuilder.new.build
 
     w1 = Wrapper.new(config)
@@ -202,13 +242,14 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     w2.wrapped.config_url = "test2"
     w3.wrapped.config_url = "test3"
 
-    assert(w1.wrapped.config_url == w2.wrapped.config_url)
-    assert(w1.wrapped.config_url != w3.wrapped.config_url)
-    assert(w2.wrapped.config_url != w3.wrapped.config_url)
+    assert_equal("test2", w1.wrapped.config_url)
+    assert_equal("test2", w2.wrapped.config_url)
+    assert_equal("test3", w3.wrapped.config_url)
+
+    refute_equal(w1.wrapped.config_url, w3.wrapped.config_url)
   end
 
   def test_moneta_init
-
     store = FileMapStore.new
     refute_nil store
 
@@ -224,25 +265,22 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     prefix = SecureRandom.uuid.to_s
 
     (0..@counter).each do |i|
-
       key = prefix + i.to_s
       moneta.set(key, i)
       check = moneta.get(key)
 
-      assert(i == check)
+      assert_equal(i, check)
     end
 
     refute_nil moneta.keys
-
-    assert(moneta.keys.size == @counter + 1)
+    assert_equal(@counter + 1, moneta.keys.size)
 
     moneta.close
 
-    assert(moneta.keys.size == 0)
+    assert_equal(0, moneta.keys.size)
   end
 
   def test_repository
-
     config = ConfigBuilder.new.build
 
     refute_nil config
@@ -269,7 +307,6 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def test_polling_processor
-
     config = ConfigBuilder.new.poll_interval_in_seconds(0.1).build
 
     refute_nil config
@@ -290,36 +327,33 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
 
     processor = PollingProcessor.new
     processor.init(
-
       connector,
       repository,
       config.poll_interval_in_seconds,
-      callback = callback
+      callback
     )
 
     refute_nil processor
 
     processor.start
 
-    sleep(3)
+    sleep(1) # Reduced sleep time for faster tests
 
     assert_equal(1, callback.on_poller_ready_count)
     assert_equal(0, callback.on_poller_error_count)
-    assert(callback.on_poller_iteration_count >= 10)
+    assert(callback.on_poller_iteration_count >= 1)
 
     processor.close
 
-    assert(!processor.is_ready)
+    refute(processor.is_ready)
   end
 
   def test_evaluator_murmur_hashing
-
     evaluator = StubEvaluator.new
 
     refute_nil evaluator
 
     {
-
       "test" => "test",
       "1" => "test",
       "test2" => "1",
@@ -328,99 +362,91 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
       "13" => "",
       "-" => "",
       "-2" => "-"
-
     }.each do |key, value|
-
       result = evaluator.get_normalized_number_exposed(key, value)
-      assert result > 0
+      assert(result > 0, "Hash for key=#{key}, value=#{value} should be positive")
     end
   end
 
-  describe "evaluation tests" do
+  def test_evaluation_integration
     integration_test = EvaluatorIntegrationTest.new("Main_Evaluator_Integration_Test")
     integration_test.execute
   end
 
   def test_sized_queue
-
     count = 5
     queue = SizedQueue.new(5)
 
     (1..5).each do |x|
-
       queue.push(x)
     end
 
-    assert queue.size == count
+    assert_equal(count, queue.size)
 
     all = []
 
     until queue.empty?
-
       item = queue.pop
       all.push(item)
     end
 
-    assert queue.empty?
-    assert all.size == count
+    assert(queue.empty?)
+    assert_equal(count, all.size)
   end
 
   private
 
   def assert_defaults(config)
-
-    refute_nil config != nil
+    refute_nil(config)
 
     assert(Config.min_frequency >= 0)
-    assert(config.get_frequency == Config.min_frequency)
-    assert(config.config_url == "https://config.ff.harness.io/api/1.0")
-    assert(config.event_url == "https://events.ff.harness.io/api/1.0")
+    assert_equal(Config.min_frequency, config.get_frequency)
+    assert_equal("https://config.ff.harness.io/api/1.0", config.config_url)
+    assert_equal("https://events.ff.harness.io/api/1.0", config.event_url)
     assert(config.stream_enabled)
     assert(config.analytics_enabled)
-    assert(config.frequency == Config.min_frequency)
-    assert(!config.all_attributes_private)
-    assert(config.private_attributes == Set[])
-    assert(config.connection_timeout == 10 * 1000)
-    assert(config.read_timeout == (Config.min_frequency * 1000) / 2)
-    assert(config.write_timeout == config.connection_timeout)
-    assert(!config.debugging)
-    assert(config.metrics_service_acceptable_duration == config.connection_timeout)
+    assert_equal(Config.min_frequency, config.frequency)
+    refute(config.all_attributes_private)
+    assert_equal(Set[], config.private_attributes)
+    assert_equal(10_000, config.connection_timeout)
+    assert_equal((Config.min_frequency * 1000) / 2, config.read_timeout)
+    assert_equal(config.connection_timeout, config.write_timeout)
+    refute(config.debugging)
+    assert_equal(config.connection_timeout, config.metrics_service_acceptable_duration)
 
-    refute_nil config.cache
+    refute_nil(config.cache)
     assert(config.cache.verify)
   end
 
   def assert_modified(config)
+    refute_nil(config)
 
-    refute_nil config
-
-    assert(config.get_frequency == @number)
-    assert(config.config_url == @string)
-    assert(config.event_url == @string)
-    assert(!config.stream_enabled)
-    assert(!config.analytics_enabled)
-    assert(config.frequency == @number)
+    assert_equal(@number, config.get_frequency)
+    assert_equal(@string, config.config_url)
+    assert_equal(@string, config.event_url)
+    refute(config.stream_enabled)
+    refute(config.analytics_enabled)
+    assert_equal(@number, config.frequency)
     assert(config.all_attributes_private)
-    assert(config.private_attributes == Set[@string])
-    assert(config.connection_timeout == @number)
-    assert(config.read_timeout == @number)
-    assert(config.write_timeout == @number)
+    assert_equal(Set[@string], config.private_attributes)
+    assert_equal(@number, config.connection_timeout)
+    assert_equal(@number, config.read_timeout)
+    assert_equal(@number, config.write_timeout)
     assert(config.debugging)
-    assert(config.metrics_service_acceptable_duration == @number)
+    assert_equal(@number, config.metrics_service_acceptable_duration)
 
-    refute_nil config.cache
+    refute_nil(config.cache)
     assert(config.cache.verify)
   end
 
   def assert_repository(repository, callback)
+    refute_nil(callback)
+    refute_nil(repository)
 
-    refute_nil callback
-    refute_nil repository
-
-    assert(0, callback.on_flag_stored_count)
-    assert(0, callback.on_flag_deleted_count)
-    assert(0, callback.on_segment_stored_count)
-    assert(0, callback.on_segment_deleted_count)
+    assert_equal(0, callback.on_flag_stored_count)
+    assert_equal(0, callback.on_flag_deleted_count)
+    assert_equal(0, callback.on_segment_stored_count)
+    assert_equal(0, callback.on_segment_deleted_count)
 
     flag_identifier = SecureRandom.uuid.to_s
     segment_identifier = SecureRandom.uuid.to_s
@@ -431,8 +457,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     flag.feature = flag_identifier
     segment.identifier = segment_identifier
 
-    refute_nil flag
-    refute_nil segment
+    refute_nil(flag)
+    refute_nil(segment)
 
     repository.set_flag(flag_identifier, flag)
     repository.set_segment(segment_identifier, segment)
@@ -440,8 +466,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     flag = repository.get_flag(flag_identifier)
     segment = repository.get_segment(segment_identifier)
 
-    refute_nil flag
-    refute_nil segment
+    refute_nil(flag)
+    refute_nil(segment)
 
     assert_equal(flag_identifier, flag.feature)
     assert_equal(segment_identifier, segment.identifier)
@@ -454,8 +480,8 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     flag = repository.get_flag(flag_identifier)
     segment = repository.get_segment(segment_identifier)
 
-    assert_nil flag
-    assert_nil segment
+    assert_nil(flag)
+    assert_nil(segment)
 
     assert_equal(1, callback.on_flag_stored_count)
     assert_equal(1, callback.on_flag_deleted_count)

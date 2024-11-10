@@ -9,6 +9,7 @@ require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
+  GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
 
   class FrequencyMap < Concurrent::Map
     def initialize(options = nil, &block)
@@ -65,7 +66,6 @@ class MetricsProcessor < Closeable
     @target_attribute = "target"
     @global_target_identifier = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
-    @global_target = Target.new("RubySDK1", identifier = @global_target_identifier, name = @global_target_name)
     @ready = false
     @jar_version = Ff::Ruby::Server::Sdk::VERSION
     @server = "server"
@@ -109,14 +109,14 @@ class MetricsProcessor < Closeable
     @config.logger.debug "Closing metrics processor"
   end
 
-  def register_evaluation(target, feature_config, variation)
-    register_evaluation_metric(feature_config, variation)
+  def register_evaluation(target:, feature_config:, variation:)
+    register_evaluation_metric(feature_config: feature_config, variation: variation)
     register_target_metric(target)
   end
 
   private
 
-  def register_evaluation_metric(feature_config, variation)
+  def register_evaluation_metric(feature_config:, variation:)
     if @evaluation_metrics.size > @max_buffer_size
       unless @evaluation_warning_issued.true?
         SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
@@ -125,7 +125,7 @@ class MetricsProcessor < Closeable
       return
     end
 
-    event = MetricsEvent.new(feature_config, @global_target, variation)
+    event = MetricsEvent.new(feature_config: feature_config, target: GLOBAL_TARGET, variation: variation)
     @evaluation_metrics.increment event
   end
 
@@ -158,8 +158,16 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    evaluation_metrics_map_clone = evaluation_metrics_map.drain_to_map
+    # Clone and clear evaluation metrics map
+    evaluation_metrics_map_clone = Concurrent::Map.new
 
+    evaluation_metrics_map.each_pair do |key, value|
+      evaluation_metrics_map_clone[key] = value
+    end
+
+    evaluation_metrics_map.clear
+
+    # Clone and clear target metrics map
     target_metrics_map_clone = Concurrent::Map.new
 
     target_metrics_map.each_pair do |key, value|
@@ -188,6 +196,22 @@ class MetricsProcessor < Closeable
 
     total_count = 0
     evaluation_metrics_map.each do |key, value|
+      # Components should not be missing, but as we transition to Ruby 3 support, let's
+      # add validation.
+      # Initialize an array to collect missing components
+      missing_components = []
+
+      # Check each required component and add to missing_components if absent
+      missing_components << 'feature_config' unless key.respond_to?(:feature_config) && key.feature_config
+      missing_components << 'variation' unless key.respond_to?(:variation) && key.variation
+      missing_components << 'target' unless key.respond_to?(:target) && key.target
+
+      # If any components are missing, log a detailed warning and skip processing
+      unless missing_components.empty?
+        @config.logger.warn "Skipping invalid metrics event: missing #{missing_components.join(', ')} in key: #{key.inspect}, full details: #{key.inspect}"
+        next
+      end
+
       total_count += value
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i

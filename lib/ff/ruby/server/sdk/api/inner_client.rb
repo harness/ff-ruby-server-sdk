@@ -65,26 +65,37 @@ class InnerClient < ClientCallback
     setup
   end
 
-  def bool_variation(identifier, target, default_value)
-
-    @evaluator.bool_variation(identifier, target, default_value, @evaluator_callback)
+  def bool_variation(identifier:, target:, default_value:)
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier: identifier, default_value: default_value)
+      return default_value
+    end
+    @evaluator.bool_variation(identifier: identifier, target: target, default_value: default_value, callback: @evaluator_callback)
   end
 
-  def string_variation(identifier, target, default_value)
-
-    @evaluator.string_variation(identifier, target, default_value, @evaluator_callback)
+  def string_variation(identifier:, target:, default_value:)
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier: identifier, default_value: default_value)
+      return default_value
+    end
+    @evaluator.string_variation(identifier: identifier, target: target, default_value: default_value, callback: @evaluator_callback)
   end
 
-  def number_variation(identifier, target, default_value)
-
-    @evaluator.number_variation(identifier, target, default_value, @evaluator_callback)
+  def number_variation(identifier:, target:, default_value:)
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier: identifier, default_value: default_value)
+      return default_value
+    end
+    @evaluator.number_variation(identifier: identifier, target: target, default_value: default_value, callback: @evaluator_callback)
   end
 
-  def json_variation(identifier, target, default_value)
-
-    @evaluator.json_variation(identifier, target, default_value, @evaluator_callback)
+  def json_variation(identifier:, target:, default_value:)
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier: identifier, default_value: default_value)
+      return default_value
+    end
+    @evaluator.json_variation(identifier: identifier, target: target, default_value: default_value, callback: @evaluator_callback)
   end
-
   def on_auth_success
 
     SdkCodes::info_sdk_auth_ok @config.logger
@@ -226,7 +237,9 @@ class InnerClient < ClientCallback
       return
     end
 
-    SdkCodes.info_sdk_init_ok @config.logger
+    unless @initialized
+      SdkCodes.info_sdk_init_ok @config.logger
+    end
 
     @initialized = true
   end
@@ -242,9 +255,11 @@ class InnerClient < ClientCallback
         if timeout && (Time.now - start_time) > (timeout / 1000.0)
           @config.logger.warn "The SDK has timed out waiting to initialize with supplied timeout #{timeout} ms"
           handle_initialization_failure
+          @initialized = false
+          break
         end
 
-        sleep(1)
+        sleep(0.1)
       end
 
       if @failure
@@ -315,6 +330,10 @@ class InnerClient < ClientCallback
   end
 
   private
+
+  def log_sdk_not_initialized_warning(identifier:, default_value:)
+    @config.logger.warn "SDKCODE:6001: SDK is not initialized; serving default variation for bool variation: identifier=#{identifier}, default=#{default_value}"
+  end
 
   def synchronize(&block)
 

@@ -22,9 +22,9 @@ class Evaluator < Evaluation
     @repository = repository
   end
 
-  def bool_variation(identifier, target, default_value, callback)
+  def bool_variation(identifier:, target:, default_value:, callback:)
 
-    variation = evaluate(identifier, target, "boolean", callback)
+    variation = evaluate(identifier: identifier, target: target, expected: "boolean", callback: callback)
 
     if variation != nil
       return variation.value == "true"
@@ -34,9 +34,9 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def string_variation(identifier, target, default_value, callback)
+  def string_variation(identifier:, target:, default_value:, callback:)
 
-    variation = evaluate(identifier, target, "string", callback)
+    variation = evaluate(identifier: identifier, target: target, expected: "string", callback: callback)
 
     if variation != nil
       return variation.value
@@ -46,9 +46,9 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def integer_variation(identifier, target, default_value, callback)
+  def integer_variation(identifier:, target:, default_value:, callback:)
 
-    variation = evaluate(identifier, target, "int", callback)
+    variation = evaluate(identifier: identifier, target: target, expected: "int", callback: callback)
 
     if variation != nil
       return variation.value.to_i
@@ -58,8 +58,8 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def number_variation(identifier, target, default_value, callback)
-    variation = evaluate(identifier, target, "int", callback)
+  def number_variation(identifier:, target:, default_value:, callback:)
+    variation = evaluate(identifier: identifier, target: target, expected: "int", callback: callback)
 
     if variation != nil
       return variation.value.to_f
@@ -69,9 +69,9 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def json_variation(identifier, target, default_value, callback)
+  def json_variation(identifier:, target:, default_value:, callback:)
 
-    variation = evaluate(identifier, target, "json", callback)
+    variation = evaluate(identifier: identifier, target: target, expected: "json", callback: callback)
 
     if variation != nil
       return JSON.parse(variation.value)
@@ -81,36 +81,44 @@ class Evaluator < Evaluation
     default_value
   end
 
-  def evaluate(identifier, target, expected, callback)
+  def evaluate(identifier:, target:, expected:, callback:)
 
-    if callback != nil
-      unless callback.kind_of?(FlagEvaluateCallback)
-        raise "The 'callback' parameter must be of '" + FlagEvaluateCallback.to_s + "' data type"
-      end
+    # Validate the callback type if provided
+    if callback && !callback.is_a?(FlagEvaluateCallback)
+      raise "The 'callback' parameter must be of '#{FlagEvaluateCallback}' data type"
     end
 
     flag = @repository.get_flag(identifier)
 
-    if flag != nil && flag.kind == expected
-      unless flag.prerequisites.empty?
-        pre_req = check_pre_requisite(flag, target)
-        unless pre_req
-          return find_variation(flag.variations, flag.off_variation)
-        end
-      end
-
-      variation = evaluate_flag(flag, target)
-
-      if variation != nil
-        if callback != nil
-          callback.process_evaluation(flag, target, variation)
-        end
-        return variation
-      end
+    # Check if flag exists
+    if flag.nil?
+      # Log a warning if the flag is not found
+      @logger.warn "Flag not found for identifier '#{identifier}'. Serving default variation."
+      return nil
     end
 
-    nil
+    # Check if the flag's kind matches the expected type
+    unless flag.kind == expected
+      @logger.warn "Flag kind mismatch: expected '#{expected}', but got '#{flag.kind}' for identifier '#{identifier}'. Serving default variation."
+      return nil
+    end
+
+    # Proceed with prerequisite check if flag type is as expected
+    unless flag.prerequisites.empty?
+      pre_req = check_pre_requisite(flag, target)
+      return find_variation(flag.variations, flag.off_variation) unless pre_req
+    end
+
+    variation = evaluate_flag(flag, target)
+
+    if variation
+      callback&.process_evaluation(feature_config: flag, target: target, variation: variation)
+      return variation
+    end
   end
+
+  # Returning nil will indicate to callers to serve the default variation
+  nil
 
   protected
 
@@ -196,7 +204,6 @@ class Evaluator < Evaluation
 
     nil
   end
-
 
   def evaluate_clauses_v2(clauses, target)
     if clauses.empty?
@@ -485,4 +492,5 @@ class Evaluator < Evaluation
 
     false
   end
+
 end

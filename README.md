@@ -18,7 +18,17 @@ Harness Feature Flags (FF) is a feature management solution that enables users t
 ![FeatureFlags](./docs/images/ff-gui.png)
 
 ## Requirements
-[Ruby 2.7](https://www.ruby-lang.org/en/documentation/installation/) or newer (ruby --version)<br>
+Requirements
+The Harness CF Ruby Server SDK has two versions, each supporting different Ruby versions:
+
+SDK Version 1: Supports Ruby 2.7 up to, but not including, Ruby 3.0.
+SDK Version 2: Required for Ruby 3.0 and newer.
+
+## Version V2 Breaking Change Notice
+- All public methods now enforce keyword arguments. 
+- Singleton Pattern Enforcement: Multiple instances were not supported in V1, but the SDK could allow you to use multiple instance.
+The SDK now follows the Singleton pattern, ensuring only a single instance of the SDK exists throughout the application's lifecycle. 
+Any attempt to create additional SDK instances will reference the existing instance. This prevents unintended behaviors or conflicts that could arise from multiple SDK instances in a single application.
 
 ## Quickstart
 The Feature Flag SDK provides a client that connects to the feature flag service, and fetches the value
@@ -37,9 +47,10 @@ or by adding the following snippet to your project's `Gemfile` file:
 gem "ff-ruby-server-sdk"
 ```
 
-### A Simple Example
-Here is a complete example that will connect to the feature flag service and report the flag value every 10 seconds until the connection is closed.  
+Here are complete example sthat will connect to the feature flag service and report the flag value every 10 seconds until the connection is closed.  
 Any time a flag is toggled from the feature flag service you will receive the updated value.
+
+### SDK Version 1 Example ( Supports Ruby 2.7 up to, but not including, Ruby 3.0.)
 
 ```ruby
 require 'ff/ruby/server/sdk/api/config'
@@ -62,14 +73,51 @@ flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
 # Create a Feature Flag Client and wait for it to initialize
 client = CfClient.instance
 client.init(apiKey, ConfigBuilder.new.logger(logger).build)
-client.wait_for_initialization
+client.wait_for_initialization(timeout_ms: 20000) # timeout_ms is optional. 
 
 # Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
-target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "emea"})
+target = Target.new("RubySDK", "rubysdk", {"location": "emea"})
 
 # Loop forever reporting the state of the flag
 loop do
   result = client.bool_variation(flagName, target, false)
+  logger.info "Flag variation:  #{result}"
+  sleep 10
+end
+
+client.close
+```
+
+### SDK Version 2 Example (for Ruby 3.0 and later)
+```ruby
+require 'ff/ruby/server/sdk/api/config'
+require 'ff/ruby/server/sdk/dto/target'
+require 'ff/ruby/server/sdk/api/cf_client'
+require 'ff/ruby/server/sdk/api/config_builder'
+
+require "logger"
+require "securerandom"
+
+$stdout.sync = true
+logger = Logger.new $stdout
+
+# API Key
+apiKey = ENV['FF_API_KEY'] || 'changeme'
+
+# Flag Name
+flagName = ENV['FF_FLAG_NAME'] || 'harnessappdemodarkmode'
+
+# Create a Feature Flag Client and wait for it to initialize
+client = CfClient.instance
+client.init(api_key: apiKey, config: ConfigBuilder.new.logger(logger).build)
+client.wait_for_initialization(timeout_ms: 20000) # timeout_ms is optional. 
+
+# Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
+target = Target.new(identifier: "RubySDK", name: "rubysdk", attributes: {"location": "emea"})
+
+# Loop forever reporting the state of the flag
+loop do
+  flag_value = client.bool_variation(identifier: flagName, target: target, default_value: false)
   logger.info "Flag variation:  #{result}"
   sleep 10
 end
