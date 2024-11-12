@@ -15,6 +15,11 @@ class MetricsEvent
   end
 
   def eql?(other)
+    unless other.is_a?(MetricsEvent)
+      @logger.warn("Warning: Attempted to compare MetricsEvent with #{other.class.name}" )
+      return false
+    end
+
     feature_config.feature == other.feature_config.feature and
       variation.identifier == other.variation.identifier and
       target.identifier == other.target.identifier

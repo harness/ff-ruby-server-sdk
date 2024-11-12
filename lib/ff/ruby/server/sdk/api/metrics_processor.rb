@@ -188,6 +188,22 @@ class MetricsProcessor < Closeable
 
     total_count = 0
     evaluation_metrics_map.each do |key, value|
+      # Components should not be missing, but as we transition to Ruby 3 support, let's
+      # add validation.
+      # Initialize an array to collect missing components
+      missing_components = []
+
+      # Check each required component and add to missing_components if absent
+      missing_components << 'feature_config' unless key.respond_to?(:feature_config) && key.feature_config
+      missing_components << 'variation' unless key.respond_to?(:variation) && key.variation
+      missing_components << 'target' unless key.respond_to?(:target) && key.target
+
+      # If any components are missing, log a detailed warning and skip processing
+      unless missing_components.empty?
+        @config.logger.warn "Skipping invalid metrics event: missing #{missing_components.join(', ')} in key: #{key.inspect}, full details: #{key.inspect}"
+        next
+      end
+
       total_count += value
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
