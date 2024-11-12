@@ -1,56 +1,23 @@
-
+require 'singleton'
 require_relative "../../generated/lib/openapi_client"
 require_relative "../common/closeable"
 require_relative "inner_client"
 
 class CfClient < Closeable
+  include Singleton
 
-  # Static:
-  class << self
-
-    @@instance = CfClient.new
-
-    def instance
-
-      @@instance
+  def init(api_key, config, connector = nil)
+    # Only initialize if @client is nil to avoid reinitialization
+    unless @client
+      @config = config || ConfigBuilder.new.build
+      @client = InnerClient.new(api_key, @config, connector)
+      @config.logger.debug "Client initialized with API key: #{api_key}"
     end
+    @client
   end
 
-  # Static - End
 
-  def initialize(api_key = nil, config = nil, connector = nil)
-
-    if config == nil
-
-      @config = ConfigBuilder.new.build
-    else
-
-      @config = config
-    end
-
-    @client = InnerClient.new(api_key, config, connector)
-
-    @config.logger.debug "Client (1): " + @client.to_s
-  end
-
-  def init(api_key = nil, config = nil, connector = nil)
-
-    if @client == nil
-
-      @config = config
-
-      @client = InnerClient.new(
-
-        api_key = api_key,
-        config = config,
-        connector = connector
-      )
-
-      @config.logger.debug "Client (2): " + @client.to_s
-    end
-  end
-
-  def wait_for_initialization(timeout_ms: nil)
+def wait_for_initialization(timeout_ms: nil)
     if @client != nil
       @client.wait_for_initialization(timeout: timeout_ms)
     end
