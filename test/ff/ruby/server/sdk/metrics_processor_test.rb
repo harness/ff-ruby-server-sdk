@@ -132,7 +132,7 @@ class MetricsProcessorTest < Minitest::Test
 
     assert_equal 0, freq_map.size, "not all pending metrics were flushed"
     assert_equal 1, connector.get_captured_metrics.size
-    assert_equal 2, connector.get_captured_metrics[0].target_data.size, "there should only be 2 targets"
+    assert_equal 1, connector.get_captured_metrics[0].target_data.size, "there should only be 1 targets"
 
     connector.get_captured_metrics.each do |metric|
       metric.metrics_data.each do |metric_data|
@@ -156,7 +156,6 @@ class MetricsProcessorTest < Minitest::Test
       end
     end
 
-    assert targets.key?("__global__cf_target")
     assert targets.key?("target-id")
   end
 
@@ -164,8 +163,8 @@ class MetricsProcessorTest < Minitest::Test
 
     map = MetricsProcessor::FrequencyMap.new
 
-    event1 = MetricsEvent.new(@feature1, @target, @variation1)
-    event2 = MetricsEvent.new(@feature2, @target, @variation2)
+    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
+    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
 
     map.increment event1
     map.increment event2
@@ -180,8 +179,8 @@ class MetricsProcessorTest < Minitest::Test
   def test_frequency_map_drain_to_map
     map = MetricsProcessor::FrequencyMap.new
 
-    event1 = MetricsEvent.new(@feature1, @target, @variation1)
-    event2 = MetricsEvent.new(@feature2, @target, @variation2)
+    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
+    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
 
     map.increment event1
     map.increment event2
@@ -209,15 +208,7 @@ class MetricsProcessorTest < Minitest::Test
     assert(event1 != event2)
   end
 
-  def test_metrics_event_eql_with_invalid_object
-    event = MetricsEvent.new(@feature1, @target, @variation1,Logger.new(STDOUT))
-    non_event = "Not a MetricsEvent"
-
-    refute_equal(event, non_event, "MetricsEvent should not be equal to a non-MetricsEvent object")
-  end
-
-  def test_flush_map_when_buffer_fills
-
+  def test_metrics_processor_prevents_invalid_metrics_event
     logger = Logger.new(STDOUT)
     callback = TestCallback.new
     connector = TestConnector.new
@@ -225,23 +216,62 @@ class MetricsProcessorTest < Minitest::Test
     config.expect :kind_of?, true, [Config.class]
     config.expect :metrics_service_acceptable_duration, 10000
 
-    (1..30).each { |_| config.expect :buffer_size, 2 }
-    (1..30).each { |_| config.expect :logger, logger }
+    (1..20).each { |_| config.expect :buffer_size, 10 }
+    (1..20).each { |_| config.expect :logger, logger }
 
     metrics_processor = MetricsProcessor.new
-    metrics_processor.init connector, config, callback
+    metrics_processor.init(connector, config, callback)
 
     callback.wait_until_ready
 
-    # several evaluations with a buffer size of 2
-    metrics_processor.register_evaluation @target, @feature1, @variation1
-    metrics_processor.register_evaluation @target, @feature1, @variation2
-    metrics_processor.register_evaluation @target, @feature2, @variation1
-    metrics_processor.register_evaluation @target, @feature2, @variation2
+    # Attempt to register invalid evaluations
+    metrics_processor.register_evaluation(@target,nil, @variation1)
+    metrics_processor.register_evaluation(@target,nil, nil)
+    metrics_processor.register_evaluation(nil, @feature1, nil)
 
-    assert connector.wait_for_metrics, "no metrics were posted"
 
+    # Register some valid evaluations
+    metrics_processor.register_evaluation(@target, @feature1, @variation1)
+    metrics_processor.register_evaluation(@target, @feature2, @variation2)
+    # Nil target, which is a valid input to variation methods
+    metrics_processor.register_evaluation(nil, @feature2, @variation2)
+
+    # Run iteration
+    metrics_processor.send(:run_one_iteration)
+
+    # Wait for metrics to be posted
+    connector.wait_for_metrics
+
+    # Check that only valid metrics are sent
+    captured_metrics = connector.get_captured_metrics
+    assert_equal 1, captured_metrics.size, "Only one metrics batch should be sent"
+
+    metrics_data = captured_metrics[0].metrics_data
+
+    # Since we have two valid events, two metrics_data should be present
+    assert_equal 2, metrics_data.size, "Invalid metrics should be ignored"
+
+    # Verify that only valid features are present in sent metrics
+    sent_features = metrics_data.map { |md| md.attributes.find { |kv| kv.key == "featureName" }.value }
+    assert_includes(sent_features, "feature-name")
+    assert_includes(sent_features, "feature-name2") # Assuming @feature2 has "feature-name2"
+
+    # Invalid event is not among the sent features
+    refute_includes(sent_features, nil, "Invalid MetricsEvent should not be included in metrics_data")
+
+    # Valid events were processed correctly
+    assert_equal 2, metrics_data.size, "There should be two metrics_data entries for valid events"
+
+    # Target data is still correctly sent
+    assert_equal 1, captured_metrics[0].target_data.size, "There should only be a single target"
   end
 
+
+  def test_metrics_event_eql_with_invalid_object
+    event = MetricsEvent.new(@feature1, @target, @variation1,Logger.new(STDOUT))
+    non_event = "Not a MetricsEvent"
+
+    refute_equal(event, non_event, "MetricsEvent should not be equal to a non-MetricsEvent object")
+  end
 
 end

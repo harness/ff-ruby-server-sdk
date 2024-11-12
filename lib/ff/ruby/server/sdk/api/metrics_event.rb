@@ -16,6 +16,10 @@ class MetricsEvent
   end
 
   def eql?(other)
+    # Guard clause other is the same type.
+    # While it should be, this adds protection for an edge case we are seeing with very large
+    # project sizes. Issue being tracked in FFM-12192, and once resolved, can feasibly remove
+    # these checks in a future release.
     unless other.is_a?(MetricsEvent)
       @logger.warn("Warning: Attempted to compare MetricsEvent with #{other.class.name}" )
       return false

@@ -9,6 +9,7 @@ require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
+  GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
 
   class FrequencyMap < Concurrent::Map
     def initialize(options = nil, &block)
@@ -66,7 +67,6 @@ class MetricsProcessor < Closeable
     @target_attribute = "target"
     @global_target_identifier = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
-    @global_target = Target.new("RubySDK1", identifier = @global_target_identifier, name = @global_target_name)
     @ready = false
     @jar_version = Ff::Ruby::Server::Sdk::VERSION
     @server = "server"
@@ -112,7 +112,9 @@ class MetricsProcessor < Closeable
 
   def register_evaluation(target, feature_config, variation)
     register_evaluation_metric(feature_config, variation)
-    register_target_metric(target)
+    if target
+      register_target_metric(target)
+    end
   end
 
   private
@@ -123,17 +125,17 @@ class MetricsProcessor < Closeable
     # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
     # these checks in a future release.
     if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
-      @config.logger.warn("Invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
+      @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
       return
     end
 
-    if @global_target.nil? || !@global_target.respond_to?(:identifier) || @global_target.identifier.nil?
-      @config.logger.warn("Invalid MetricsEvent: global_target is missing or incomplete. global_target=#{@global_target.inspect}")
+    if GLOBAL_TARGET.nil? || !GLOBAL_TARGET.respond_to?(:identifier) || GLOBAL_TARGET.identifier.nil?
+      @config.logger.warn("Skipping invalid MetricsEvent: global_target is missing or incomplete. global_target=#{GLOBAL_TARGET.inspect}")
       return
     end
 
     if variation.nil? || !variation.respond_to?(:identifier) || variation.identifier.nil?
-      @config.logger.warn("Invalid MetricsEvent: variation is missing or incomplete. variation=#{variation.inspect}")
+      @config.logger.warn("Skipping iInvalid MetricsEvent: variation is missing or incomplete. variation=#{variation.inspect}")
       return
     end
 
@@ -146,7 +148,7 @@ class MetricsProcessor < Closeable
       return
     end
 
-    event = MetricsEvent.new(feature_config, @global_target, variation, @config.logger)
+    event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
     @evaluation_metrics.increment event
   end
 

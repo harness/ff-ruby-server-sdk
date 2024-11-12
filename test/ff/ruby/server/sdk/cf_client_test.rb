@@ -37,7 +37,7 @@ class CfClientTest < Minitest::Test
                                             .event_url("http://localhost:#{port}/api/1.0")
                                             .config_url("http://localhost:#{port}/api/1.0").build)
 
-      client.wait_for_initialization
+      client.wait_for_initialization(timeout_ms: 5000)
 
       target = Target.new("RubyTestSDK", identifier="rubytestsdk", attributes={"location": "emea"})
 
