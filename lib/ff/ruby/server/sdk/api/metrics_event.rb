@@ -2,11 +2,12 @@ class MetricsEvent
 
   attr_accessor :feature_config, :target, :variation
 
-  def initialize(feature_config, target, variation)
+  def initialize(feature_config, target, variation, logger)
 
     @target = target
     @variation = variation
     @feature_config = feature_config
+    @logger = logger
     freeze
   end
 

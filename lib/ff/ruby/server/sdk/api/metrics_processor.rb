@@ -118,6 +118,26 @@ class MetricsProcessor < Closeable
   private
 
   def register_evaluation_metric(feature_config, variation)
+    # Guard clause to ensure feature_config, @global_target, and variation are valid.
+    # While they should be, this adds protection for an edge case we are seeing with very large
+    # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
+    # these checks in a future release.
+    if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
+      @config.logger.warn("Invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
+      return
+    end
+
+    if @global_target.nil? || !@global_target.respond_to?(:identifier) || @global_target.identifier.nil?
+      @config.logger.warn("Invalid MetricsEvent: global_target is missing or incomplete. global_target=#{@global_target.inspect}")
+      return
+    end
+
+    if variation.nil? || !variation.respond_to?(:identifier) || variation.identifier.nil?
+      @config.logger.warn("Invalid MetricsEvent: variation is missing or incomplete. variation=#{variation.inspect}")
+      return
+    end
+
+
     if @evaluation_metrics.size > @max_buffer_size
       unless @evaluation_warning_issued.true?
         SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
@@ -126,7 +146,7 @@ class MetricsProcessor < Closeable
       return
     end
 
-    event = MetricsEvent.new(feature_config, @global_target, variation)
+    event = MetricsEvent.new(feature_config, @global_target, variation, @config.logger)
     @evaluation_metrics.increment event
   end
 
@@ -195,8 +215,9 @@ class MetricsProcessor < Closeable
 
     total_count = 0
     evaluation_metrics_map.each do |key, value|
-      # Components should not be missing, but as we transition to Ruby 3 support, let's
-      # add validation.
+      # While Components should not be missing, this adds protection for an edge case we are seeing with very large
+      # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
+      # these checks in a future release.
       # Initialize an array to collect missing components
       missing_components = []
 
@@ -204,6 +225,7 @@ class MetricsProcessor < Closeable
       missing_components << 'feature_config' unless key.respond_to?(:feature_config) && key.feature_config
       missing_components << 'variation' unless key.respond_to?(:variation) && key.variation
       missing_components << 'target' unless key.respond_to?(:target) && key.target
+      missing_components << 'count' if value.nil?
 
       # If any components are missing, log a detailed warning and skip processing
       unless missing_components.empty?

@@ -198,15 +198,22 @@ class MetricsProcessorTest < Minitest::Test
 
   def test_comparable_metrics_event_equals_and_hash
 
-    event1 = MetricsEvent.new(@feature1, @target, @variation1)
-    event2 = MetricsEvent.new(@feature1, @target, @variation1)
+    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
+    event2 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
 
     assert(event1 == event2)
 
-    event1 = MetricsEvent.new(@feature1, @target, @variation1)
-    event2 = MetricsEvent.new(@feature2, @target, @variation2)
+    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
+    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
 
     assert(event1 != event2)
+  end
+
+  def test_metrics_event_eql_with_invalid_object
+    event = MetricsEvent.new(@feature1, @target, @variation1,Logger.new(STDOUT))
+    non_event = "Not a MetricsEvent"
+
+    refute_equal(event, non_event, "MetricsEvent should not be equal to a non-MetricsEvent object")
   end
 
   def test_flush_map_when_buffer_fills
