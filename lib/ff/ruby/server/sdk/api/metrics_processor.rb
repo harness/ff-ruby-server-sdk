@@ -78,6 +78,8 @@ class MetricsProcessor < Closeable
 
     @executor = Concurrent::FixedThreadPool.new(10)
 
+    # Used for locking the evalution and target metrics maps before we clone them
+    @metric_maps_mutex = Mutex.new
     @evaluation_metrics = FrequencyMap.new
     @target_metrics = Concurrent::Map.new
 
@@ -181,21 +183,27 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    # Clone and clear evaluation metrics map
+
     evaluation_metrics_map_clone = Concurrent::Map.new
-
-    evaluation_metrics_map.each_pair do |key, value|
-      evaluation_metrics_map_clone[key] = value
-    end
-
-    evaluation_metrics_map.clear
     target_metrics_map_clone = Concurrent::Map.new
 
-    target_metrics_map.each_pair do |key, value|
-      target_metrics_map_clone[key] = value
-    end
+    # A single lock is used to synchronise access to both the evaluation and target metrics maps.
+    # While separate locks could be applied to each map individually, we want an interval's eval/target
+    # metrics to be processed in an atomic unit.
+    @metric_maps_mutex.synchronize do
+      # Clone and clear evaluation metrics map
+      evaluation_metrics_map.each_pair do |key, value|
+        evaluation_metrics_map_clone[key] = value
+      end
 
-    target_metrics_map.clear
+      evaluation_metrics_map.clear
+
+      target_metrics_map.each_pair do |key, value|
+        target_metrics_map_clone[key] = value
+      end
+
+      target_metrics_map.clear
+    end
 
     @evaluation_warning_issued.make_false
     @target_warning_issued.make_false

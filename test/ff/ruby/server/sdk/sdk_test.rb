@@ -31,38 +31,55 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
   end
 
   def test_client_singleton_inst
-
     instance = CfClient.instance
-    (0..@counter).each {
-
+    (0..@counter).each do
       compare_equal = CfClient.instance
-      compare_not_equal = CfClient.new("test")
-
-      refute_nil compare_equal
-      refute_nil compare_not_equal
-
       assert_equal(instance, compare_equal)
-      assert(instance != compare_not_equal)
-    }
+    end
   end
 
-  def test_client_constructor_inst
+  def test_client_singleton_init
+    instance = CfClient.instance
+    (0..@counter).each do
+      compare_equal = CfClient.instance
+      assert_equal(instance, compare_equal)
+    end
+  end
 
-    test_string = "test"
+  def test_client_initialization
     config = ConfigBuilder.new.build
-    connector = HarnessConnector.new(test_string, config, nil)
+    connector = HarnessConnector.new(@string, config, nil)
+    api_key = "test_api_key"
 
-    instance_with_no_config = CfClient.new(test_string)
-    instance_with_config = CfClient.new(test_string, config)
-    instance_with_connector = CfClient.new(test_string, config, connector)
+    client = CfClient.instance
+    client.init(api_key, config, connector)
 
-    refute_nil instance_with_config
-    refute_nil instance_with_connector
-    refute_nil instance_with_no_config
+    # Verify that @client is initialized and is an instance of InnerClient
+    inner_client = client.instance_variable_get(:@client)
+    refute_nil(inner_client, "InnerClient should be initialized")
+    assert_instance_of(InnerClient, inner_client, "InnerClient should be an instance of InnerClient")
+  end
 
-    assert(instance_with_config != instance_with_no_config)
-    assert(instance_with_connector != instance_with_no_config)
-    assert(instance_with_connector != instance_with_config)
+  def test_client_reinitialization
+    config1 = ConfigBuilder.new.build
+    connector1 = HarnessConnector.new(@string, config1, nil)
+    api_key1 = "api_key_1"
+
+    client = CfClient.instance
+    client.init(api_key1, config1, connector1)
+
+    # Capture the initial @client instance
+    initial_inner_client = client.instance_variable_get(:@client)
+
+    # Attempt to reinitialize with different parameters
+    config2 = ConfigBuilder.new.build
+    connector2 = HarnessConnector.new(@string, config2, nil)
+    api_key2 = "api_key_2"
+
+    client.init(api_key2, config2, connector2)
+
+    # Verify that the @client instance remains the same
+    assert_same(initial_inner_client, client.instance_variable_get(:@client))
   end
 
   def test_config_constructor_inst
@@ -74,6 +91,28 @@ class Ff::Ruby::Server::SdkTest < Minitest::Test
     refute_nil config_not_equal != nil
 
     assert(config != config_not_equal)
+  end
+
+  def test_client_methods
+    config = ConfigBuilder.new.build
+    connector = HarnessConnector.new(@string, config, nil)
+    api_key = "test_api_key"
+
+    client = CfClient.instance
+    client.init(api_key, config, connector)
+
+    inner_client = client.instance_variable_get(:@client)
+    inner_client.stub :bool_variation, true do
+      assert_equal(true, client.bool_variation("identifier", "target", false))
+    end
+
+    inner_client.stub :string_variation, "variation" do
+      assert_equal("variation", client.string_variation("identifier", "target", "default"))
+    end
+
+    inner_client.stub :number_variation, 42 do
+      assert_equal(42, client.number_variation("identifier", "target", 0))
+    end
   end
 
   def test_config_properties
