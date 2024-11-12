@@ -23,7 +23,7 @@ class InnerClientFlagEvaluateCallback < FlagEvaluateCallback
 
   def process_evaluation(feature_config, target, variation)
 
-    @logger.debug "Processing evaluation: " + feature_config.feature.to_s + ", " + target.identifier.to_s
+    @logger.debug "Processing evaluation: #{feature_config&.feature || 'nil feature'}, #{target&.identifier || 'nil target'}"
 
     @metrics_processor.register_evaluation(target, feature_config, variation)
   end

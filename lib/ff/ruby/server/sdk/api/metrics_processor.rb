@@ -9,6 +9,7 @@ require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
+  GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
 
   class FrequencyMap < Concurrent::Map
     def initialize(options = nil, &block)
@@ -29,6 +30,7 @@ class MetricsProcessor < Closeable
       self[key]
     end
 
+    # TODO Will be removed in V2 in favour of simplified clearing. Currently not used outside of tests.
     def drain_to_map
       result = {}
       each_key do |key|
@@ -65,7 +67,6 @@ class MetricsProcessor < Closeable
     @target_attribute = "target"
     @global_target_identifier = "__global__cf_target" # <--- This target identifier is used to aggregate and send data for all
     #                                             targets as a summary
-    @global_target = Target.new("RubySDK1", identifier = @global_target_identifier, name = @global_target_name)
     @ready = false
     @jar_version = Ff::Ruby::Server::Sdk::VERSION
     @server = "server"
@@ -111,12 +112,34 @@ class MetricsProcessor < Closeable
 
   def register_evaluation(target, feature_config, variation)
     register_evaluation_metric(feature_config, variation)
-    register_target_metric(target)
+    if target
+      register_target_metric(target)
+    end
   end
 
   private
 
   def register_evaluation_metric(feature_config, variation)
+    # Guard clause to ensure feature_config, @global_target, and variation are valid.
+    # While they should be, this adds protection for an edge case we are seeing with very large
+    # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
+    # these checks in a future release.
+    if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
+      @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
+      return
+    end
+
+    if GLOBAL_TARGET.nil? || !GLOBAL_TARGET.respond_to?(:identifier) || GLOBAL_TARGET.identifier.nil?
+      @config.logger.warn("Skipping invalid MetricsEvent: global_target is missing or incomplete. global_target=#{GLOBAL_TARGET.inspect}")
+      return
+    end
+
+    if variation.nil? || !variation.respond_to?(:identifier) || variation.identifier.nil?
+      @config.logger.warn("Skipping iInvalid MetricsEvent: variation is missing or incomplete. variation=#{variation.inspect}")
+      return
+    end
+
+
     if @evaluation_metrics.size > @max_buffer_size
       unless @evaluation_warning_issued.true?
         SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
@@ -125,7 +148,7 @@ class MetricsProcessor < Closeable
       return
     end
 
-    event = MetricsEvent.new(feature_config, @global_target, variation)
+    event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
     @evaluation_metrics.increment event
   end
 
@@ -158,8 +181,14 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    evaluation_metrics_map_clone = evaluation_metrics_map.drain_to_map
+    # Clone and clear evaluation metrics map
+    evaluation_metrics_map_clone = Concurrent::Map.new
 
+    evaluation_metrics_map.each_pair do |key, value|
+      evaluation_metrics_map_clone[key] = value
+    end
+
+    evaluation_metrics_map.clear
     target_metrics_map_clone = Concurrent::Map.new
 
     target_metrics_map.each_pair do |key, value|
@@ -188,6 +217,24 @@ class MetricsProcessor < Closeable
 
     total_count = 0
     evaluation_metrics_map.each do |key, value|
+      # While Components should not be missing, this adds protection for an edge case we are seeing with very large
+      # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
+      # these checks in a future release.
+      # Initialize an array to collect missing components
+      missing_components = []
+
+      # Check each required component and add to missing_components if absent
+      missing_components << 'feature_config' unless key.respond_to?(:feature_config) && key.feature_config
+      missing_components << 'variation' unless key.respond_to?(:variation) && key.variation
+      missing_components << 'target' unless key.respond_to?(:target) && key.target
+      missing_components << 'count' if value.nil?
+
+      # If any components are missing, log a detailed warning and skip processing
+      unless missing_components.empty?
+        @config.logger.warn "Skipping invalid metrics event: missing #{missing_components.join(', ')} in key: #{key.inspect}, full details: #{key.inspect}"
+        next
+      end
+
       total_count += value
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
