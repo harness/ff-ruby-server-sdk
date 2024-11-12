@@ -139,7 +139,7 @@ class MetricsProcessorTest < Minitest::Test
 
     # Verify that the target_data includes just the single target used
     captured_metrics = @connector.captured_metrics.first
-    assert_equal 1, captured_metrics.target_data.size, "There should only be 2 targets (global and specific)"
+    assert_equal 1, captured_metrics.target_data.size, "There should only be 1 target"
 
     # Verify target attributes
     assert_target_data(captured_metrics.target_data)
@@ -264,7 +264,7 @@ class MetricsProcessorTest < Minitest::Test
     assert_equal 2, captured_metrics.metrics_data.size, "Only two metrics should have been sent"
 
     # Check that target_data includes only the single target
-    assert_equal 1, captured_metrics.target_data.size, "There should only be 2 targets (global and specific)"
+    assert_equal 1, captured_metrics.target_data.size, "There should only be 1"
   end
 
   # Additional tests can be added here to cover more scenarios
