@@ -29,6 +29,7 @@ class MetricsProcessor < Closeable
       self[key]
     end
 
+    # TODO Will be removed in V2 in favour of simplified clearing. Currently not used outside of tests.
     def drain_to_map
       result = {}
       each_key do |key|
@@ -158,8 +159,14 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    evaluation_metrics_map_clone = evaluation_metrics_map.drain_to_map
+    # Clone and clear evaluation metrics map
+    evaluation_metrics_map_clone = Concurrent::Map.new
 
+    evaluation_metrics_map.each_pair do |key, value|
+      evaluation_metrics_map_clone[key] = value
+    end
+
+    evaluation_metrics_map.clear
     target_metrics_map_clone = Concurrent::Map.new
 
     target_metrics_map.each_pair do |key, value|
