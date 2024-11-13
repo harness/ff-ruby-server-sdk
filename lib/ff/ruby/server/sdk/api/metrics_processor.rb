@@ -86,14 +86,6 @@ class MetricsProcessor < Closeable
     # Keep track of targets that have already been sent to avoid sending them again
     @seen_targets = Concurrent::Map.new
 
-    @max_buffer_size = config.buffer_size - 1
-
-    # Max 100k targets per interval
-    @max_targets_buffer_size = 100000
-
-    @evaluation_warning_issued = Concurrent::AtomicBoolean.new
-    @target_warning_issued = Concurrent::AtomicBoolean.new
-
     @callback.on_metrics_ready
   end
 
@@ -141,28 +133,13 @@ class MetricsProcessor < Closeable
       return
     end
 
-
-    if @evaluation_metrics.size > @max_buffer_size
-      unless @evaluation_warning_issued.true?
-        SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
-        @evaluation_warning_issued.make_true
-      end
-      return
-    end
-
     event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
-    @evaluation_metrics.increment event
+    @metric_maps_mutex.synchronize do
+      @evaluation_metrics.increment event
+    end
   end
 
   def register_target_metric(target)
-    if @target_metrics.size > @max_targets_buffer_size
-      unless @target_warning_issued.true?
-        SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
-        @target_warning_issued.make_true
-      end
-      return
-    end
-
     if target.is_private
       return
     end
@@ -173,13 +150,13 @@ class MetricsProcessor < Closeable
       return
     end
 
-    @target_metrics.put(target.identifier, target)
+    @metric_maps_mutex.synchronize do
+      @target_metrics.put(target.identifier, target)
+    end
   end
 
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics, @target_metrics)
-
-    @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. targets map size #{@target_metrics.size} global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
@@ -204,9 +181,6 @@ class MetricsProcessor < Closeable
 
       target_metrics_map.clear
     end
-
-    @evaluation_warning_issued.make_false
-    @target_warning_issued.make_false
 
     metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
