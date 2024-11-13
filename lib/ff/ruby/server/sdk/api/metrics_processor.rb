@@ -86,22 +86,17 @@ class MetricsProcessor < Closeable
     # Keep track of targets that have already been sent to avoid sending them again
     @seen_targets = Concurrent::Map.new
 
-    @max_buffer_size = config.buffer_size - 1
-
-    # Max 100k targets per interval
-    @max_targets_buffer_size = 100000
-
-    @evaluation_warning_issued = Concurrent::AtomicBoolean.new
-    @target_warning_issued = Concurrent::AtomicBoolean.new
-
     @callback.on_metrics_ready
   end
 
   def start
-    @config.logger.debug "Starting metrics processor with request interval: " + @config.frequency.to_s
-    start_async
+    @config.logger.debug "Starting metrics processor with request interval: #{@config.frequency}"
+    if @running
+      @config.logger.warn "Metrics processor is already running."
+    else
+      start_async
+    end
   end
-
   def stop
     @config.logger.debug "Stopping metrics processor"
     stop_async
@@ -141,28 +136,13 @@ class MetricsProcessor < Closeable
       return
     end
 
-
-    if @evaluation_metrics.size > @max_buffer_size
-      unless @evaluation_warning_issued.true?
-        SdkCodes.warn_metrics_evaluations_max_size_exceeded(@config.logger)
-        @evaluation_warning_issued.make_true
-      end
-      return
-    end
-
     event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
-    @evaluation_metrics.increment event
+    @metric_maps_mutex.synchronize do
+      @evaluation_metrics.increment event
+    end
   end
 
   def register_target_metric(target)
-    if @target_metrics.size > @max_targets_buffer_size
-      unless @target_warning_issued.true?
-        SdkCodes.warn_metrics_targets_max_size_exceeded(@config.logger)
-        @target_warning_issued.make_true
-      end
-      return
-    end
-
     if target.is_private
       return
     end
@@ -173,40 +153,39 @@ class MetricsProcessor < Closeable
       return
     end
 
-    @target_metrics.put(target.identifier, target)
+    @metric_maps_mutex.synchronize do
+      @target_metrics.put(target.identifier, target)
+    end
   end
 
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics, @target_metrics)
-
-    @config.logger.debug "metrics: frequency map size #{@evaluation_metrics.size}. targets map size #{@target_metrics.size} global target size #{@seen_targets.size}"
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-
-    evaluation_metrics_map_clone = Concurrent::Map.new
-    target_metrics_map_clone = Concurrent::Map.new
-
     # A single lock is used to synchronise access to both the evaluation and target metrics maps.
     # While separate locks could be applied to each map individually, we want an interval's eval/target
     # metrics to be processed in an atomic unit.
-    @metric_maps_mutex.synchronize do
+    evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+
+      clone_evaluations = Concurrent::Map.new
+      clone_targets = Concurrent::Map.new
       # Clone and clear evaluation metrics map
       evaluation_metrics_map.each_pair do |key, value|
-        evaluation_metrics_map_clone[key] = value
+        clone_evaluations[key] = value
       end
 
       evaluation_metrics_map.clear
 
       target_metrics_map.each_pair do |key, value|
-        target_metrics_map_clone[key] = value
+        clone_targets[key] = value
       end
 
       target_metrics_map.clear
-    end
 
-    @evaluation_warning_issued.make_false
-    @target_warning_issued.make_false
+      [clone_evaluations, clone_targets]
+
+    end
 
     metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
@@ -294,6 +273,7 @@ class MetricsProcessor < Closeable
   def start_async
     @config.logger.debug "Async starting: " + self.to_s
     @ready = true
+    @running = true
     @thread = Thread.new do
       @config.logger.debug "Async started: " + self.to_s
       while @ready do
@@ -311,7 +291,13 @@ class MetricsProcessor < Closeable
   def stop_async
     @ready = false
     @initialized = false
+    if @thread && @thread.alive?
+      @thread.join
+      @config.logger.debug "Metrics processor thread has been stopped."
+    end
+    @running = false
   end
+
 
   def get_version
     Ff::Ruby::Server::Sdk::VERSION
