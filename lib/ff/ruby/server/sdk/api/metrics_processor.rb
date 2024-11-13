@@ -90,10 +90,13 @@ class MetricsProcessor < Closeable
   end
 
   def start
-    @config.logger.debug "Starting metrics processor with request interval: " + @config.frequency.to_s
-    start_async
+    @config.logger.debug "Starting metrics processor with request interval: #{@config.frequency}"
+    if @running
+      @config.logger.warn "Metrics processor is already running."
+    else
+      start_async
+    end
   end
-
   def stop
     @config.logger.debug "Stopping metrics processor"
     stop_async
@@ -160,26 +163,28 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-
-    evaluation_metrics_map_clone = Concurrent::Map.new
-    target_metrics_map_clone = Concurrent::Map.new
-
     # A single lock is used to synchronise access to both the evaluation and target metrics maps.
     # While separate locks could be applied to each map individually, we want an interval's eval/target
     # metrics to be processed in an atomic unit.
-    @metric_maps_mutex.synchronize do
+    evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+
+      clone_evaluations = Concurrent::Map.new
+      clone_targets = Concurrent::Map.new
       # Clone and clear evaluation metrics map
       evaluation_metrics_map.each_pair do |key, value|
-        evaluation_metrics_map_clone[key] = value
+        clone_evaluations[key] = value
       end
 
       evaluation_metrics_map.clear
 
       target_metrics_map.each_pair do |key, value|
-        target_metrics_map_clone[key] = value
+        clone_targets[key] = value
       end
 
       target_metrics_map.clear
+
+      [clone_evaluations, clone_targets]
+
     end
 
     metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
@@ -268,6 +273,7 @@ class MetricsProcessor < Closeable
   def start_async
     @config.logger.debug "Async starting: " + self.to_s
     @ready = true
+    @running = true
     @thread = Thread.new do
       @config.logger.debug "Async started: " + self.to_s
       while @ready do
@@ -285,7 +291,13 @@ class MetricsProcessor < Closeable
   def stop_async
     @ready = false
     @initialized = false
+    if @thread && @thread.alive?
+      @thread.join
+      @config.logger.debug "Metrics processor thread has been stopped."
+    end
+    @running = false
   end
+
 
   def get_version
     Ff::Ruby::Server::Sdk::VERSION
