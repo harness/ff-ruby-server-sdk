@@ -257,17 +257,26 @@ class MetricsProcessor < Closeable
     @running = true
     @thread = Thread.new do
       @config.logger.debug "Async started: " + self.to_s
-      while @ready do
+      mutex = Mutex.new
+      condition = ConditionVariable.new
+
+      while @ready
         unless @initialized
           @initialized = true
-          SdkCodes::info_metrics_thread_started @config.logger
+          SdkCodes::info_metrics_thread_started(@config.logger)
         end
-        sleep(@config.frequency)
-        run_one_iteration
+
+        mutex.synchronize do
+          # Wait for the specified interval or until notified
+          condition.wait(mutex, @config.frequency)
+        end
+
+        # Re-check @ready before running the iteration
+        run_one_iteration if @ready
       end
     end
-    @thread.run
   end
+
 
   def stop_async
     @ready = false
