@@ -333,6 +333,72 @@ class MetricsProcessorTest < Minitest::Test
 
   end
 
+  def test_error_during_send_data_and_reset_cache
+    logger = Logger.new(STDOUT)
+    callback = TestCallback.new
+    connector = TestConnector.new
+    config = Minitest::Mock.new
+    config.expect :kind_of?, true, [Config]
+    config.expect :metrics_service_acceptable_duration, 10000
+
+    def config.logger
+      @logger ||= Logger.new(STDOUT)
+    end
+
+    # Mock the connector to raise an exception when post_metrics is called
+    connector.stub :post_metrics, proc { raise StandardError, "Simulated connector failure" } do
+      metrics_processor = MetricsProcessor.new
+      metrics_processor.init(connector, config, callback)
+
+      callback.wait_until_ready
+
+      # Register some evaluations
+      feature = OpenapiClient::FeatureConfig.new
+      feature.feature = "feature-error-test"
+      variation = OpenapiClient::Variation.new
+      variation.identifier = "variation-error-test"
+      variation.value = "value-error-test"
+      variation.name = "Test-Error"
+
+      variation2 = OpenapiClient::Variation.new
+      variation2.identifier = "variation2-error-test"
+      variation2.value = "value2-error-test"
+      variation2.name = "Test2-Error"
+
+      feature.variations = [variation, variation2]
+      metrics_processor.register_evaluation(@target, feature, variation)
+
+      # Attempt to send data, which should raise an exception
+      metrics_processor.send(:send_data_and_reset_cache, metrics_processor.send(:get_frequency_map), metrics_processor.instance_variable_get(:@target_metrics))
+
+      # Verify that metrics maps are cleared despite the error
+      freq_map = metrics_processor.send(:get_frequency_map)
+      assert_empty freq_map, "Evaluation metrics map should be cleared even if an error occurs"
+
+      target_metrics_map = metrics_processor.instance_variable_get(:@target_metrics)
+      assert_empty target_metrics_map, "Target metrics map should be cleared even if an error occurs"
+
+      # Verify that the MetricsProcessor remains operational by registering another evaluation
+      feature_new = OpenapiClient::FeatureConfig.new
+      feature_new.feature = "feature-new"
+      variation_new = OpenapiClient::Variation.new
+      variation_new.identifier = "variation-new"
+      variation_new.value = "value-new"
+      variation_new.name = "Test-New"
+
+      variation2_new = OpenapiClient::Variation.new
+      variation2_new.identifier = "variation2-new"
+      variation2_new.value = "value2-new"
+      variation2_new.name = "Test2-New"
+
+      # Ensure that the new evaluation is registered correctly
+      freq_map = metrics_processor.send(:get_frequency_map)
+      assert_equal 1, freq_map.size, "New evaluation should be registered successfully after an error"
+
+      assert_equal 1, freq_map.values.first, "New evaluation count should be 1"
+    end
+  end
+
   def assert_target_data(target_data)
     targets = {}
 
