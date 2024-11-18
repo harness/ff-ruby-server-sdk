@@ -142,39 +142,37 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-
     @send_data_mutex.synchronize do
       begin
+        
+        evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+          # Check if both cloned maps are empty; if so, skip sending metrics
+          if evaluation_metrics_map.empty? && target_metrics_map.empty?
+            @config.logger.debug "No metrics to send. Skipping sending metrics this interval"
+            return
+          end
 
+          # Deep clone the evaluation metrics
+          cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map)).freeze
+          evaluation_metrics_map.clear
 
-      evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
-        # Check if both cloned maps are empty; if so, skip sending metrics
-        if evaluation_metrics_map.empty? && target_metrics_map.empty?
-          @config.logger.debug "No metrics to send. Skipping sending metrics this interval"
-          return
+          # Deep clone the target metrics
+          cloned_targets = Marshal.load(Marshal.dump(target_metrics_map)).freeze
+          target_metrics_map.clear
+          [cloned_evaluations, cloned_targets]
+
         end
 
-        # Deep clone the evaluation metrics
-        cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map)).freeze
-        evaluation_metrics_map.clear
+        metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
-        # Deep clone the target metrics
-        cloned_targets = Marshal.load(Marshal.dump(target_metrics_map)).freeze
-        target_metrics_map.clear
-        [cloned_evaluations, cloned_targets]
-
-      end
-
-      metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
-
-      unless metrics.metrics_data.empty?
-        start_time = (Time.now.to_f * 1000).to_i
-        @connector.post_metrics(metrics)
-        end_time = (Time.now.to_f * 1000).to_i
-        if end_time - start_time > @config.metrics_service_acceptable_duration
-          @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+        unless metrics.metrics_data.empty?
+          start_time = (Time.now.to_f * 1000).to_i
+          @connector.post_metrics(metrics)
+          end_time = (Time.now.to_f * 1000).to_i
+          if end_time - start_time > @config.metrics_service_acceptable_duration
+            @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+          end
         end
-      end
       rescue => e
         @config.logger.warn "Error when preparing and sending metrics: #{e.message}"
         @config.logger.warn e.backtrace&.join("\n") || "No backtrace available"
@@ -182,11 +180,11 @@ class MetricsProcessor < Closeable
     end
   end
 
-  def prepare_summary_metrics_body(evaluation_metrics_map, target_metrics_map)
+  def prepare_summary_metrics_body(evaluation_metrics_clone, target_metrics_clone)
     metrics = OpenapiClient::Metrics.new({ :target_data => [], :metrics_data => [] })
 
     total_count = 0
-    evaluation_metrics_map.each do |key, value|
+    evaluation_metrics_clone.each do |key, value|
       # While Components should not be missing, this adds protection for an edge case we are seeing with very large
       # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
       # these checks in a future release.
@@ -218,9 +216,9 @@ class MetricsProcessor < Closeable
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
       metrics.metrics_data.push(metrics_data)
     end
-    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_map.size}.  target_data count is #{target_metrics_map.size}"
+    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_clone.size}.  target_data count is #{target_metrics_clone.size}"
 
-    target_metrics_map.each_pair do |_, value|
+    target_metrics_clone.each_pair do |_, value|
       add_target_data(metrics, value)
     end
 

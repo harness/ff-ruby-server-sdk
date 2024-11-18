@@ -418,11 +418,11 @@ class MetricsProcessorTest < Minitest::Test
     callback.wait_until_ready
 
     # Set the max size for seen_targets
-    max_seen_targets = 5
+    max_seen_targets = 5000
     metrics_processor.instance_variable_set(:@max_seen_targets, max_seen_targets)
 
-    # Add targets up to the max size
-    (1..max_seen_targets).each do |i|
+    # Add targets up to and over the max size
+    (1..max_seen_targets * 3).each do |i|
       target = Target.new("target-#{i}", "target-#{i}")
       metrics_processor.send(:register_target_metric, target)
     end
