@@ -142,6 +142,66 @@ class MetricsProcessorTest < Minitest::Test
     assert_target_data connector.get_captured_metrics[0].target_data
   end
 
+  def test_multiple_threads_calling_send_data_and_reset_cache
+    logger = Logger.new(STDOUT)
+    callback = TestCallback.new
+    connector = TestConnector.new
+    config = Minitest::Mock.new
+    config.expect :kind_of?, true, [Config]
+    config.expect :metrics_service_acceptable_duration, 10000
+    def config.logger
+      @logger ||= Logger.new(STDOUT)
+    end
+    metrics_processor = MetricsProcessor.new
+    metrics_processor.init(connector, config, callback)
+
+    callback.wait_until_ready
+
+    # Register evaluations
+    (1..10).each do |i|
+      feature = OpenapiClient::FeatureConfig.new
+      feature.feature = "feature-#{i}"
+      variation = OpenapiClient::Variation.new
+      variation.identifier = "variation-#{i}"
+      variation.value = "value-#{i}"
+      variation.name = "Test-#{i}"
+
+      variation2 = OpenapiClient::Variation.new
+      variation2.identifier = "variation2-#{i}"
+      variation2.value = "value2-#{i}"
+      variation2.name = "Test2-#{i}"
+      feature.variations = [variation, @variation2]
+      metrics_processor.register_evaluation(@target, feature, variation)
+    end
+
+    # Define a method to call send_data_and_reset_cache
+    send_metrics = Proc.new do
+      metrics_processor.send(:send_data_and_reset_cache, metrics_processor.send(:get_frequency_map), metrics_processor.instance_variable_get(:@target_metrics))
+    end
+
+    # Spawn multiple threads to call send_data_and_reset_cache concurrently
+    threads = []
+    5.times do
+      threads << Thread.new { send_metrics.call }
+    end
+
+    # Wait for all threads to complete
+    threads.each(&:join)
+
+    # Verify that post_metrics was called exactly once
+    assert_equal 1, connector.get_captured_metrics.size, "post_metrics should be called only once despite multiple concurrent calls"
+
+    # Verify that metrics_data contains all registered metrics
+    metrics_data = connector.get_captured_metrics[0].metrics_data
+    assert_equal 10, metrics_data.size, "All 10 metrics should be sent"
+
+    # Verify that target_data contains the global target
+    assert_equal 1, connector.get_captured_metrics[0].target_data.size, "There should be one target data entry"
+    target_data = connector.get_captured_metrics[0].target_data.first
+    assert_equal @target.identifier, target_data.identifier, "Target should be included in target metrics"
+  end
+
+
   def assert_target_data(target_data)
     targets = {}
 
