@@ -67,22 +67,34 @@ class InnerClient < ClientCallback
   end
 
   def bool_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.bool_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def string_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.string_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def number_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.number_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def json_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.json_variation(identifier, target, default_value, @evaluator_callback)
   end
 
@@ -263,8 +275,6 @@ class InnerClient < ClientCallback
     end
   end
 
-
-
   protected
 
   def handle_initialization_failure
@@ -324,5 +334,9 @@ class InnerClient < ClientCallback
   end
 
   private
+
+  def log_sdk_not_initialized_warning(identifier, default_value)
+    @config.logger.warn "SDKCODE:6001: SDK is not initialized; serving default variation for bool variation: identifier=#{identifier}, default=#{default_value}"
+  end
 
 end
