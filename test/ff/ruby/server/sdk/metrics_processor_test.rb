@@ -1,6 +1,5 @@
 require "minitest/autorun"
 require "ff/ruby/server/sdk"
-require "concurrent/atomics"
 
 class MetricsProcessorTest < Minitest::Test
 

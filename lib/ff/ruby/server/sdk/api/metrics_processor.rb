@@ -136,6 +136,8 @@ class MetricsProcessor < Closeable
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
 
     @send_data_mutex.synchronize do
+      begin
+
 
       evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
         # Deep clone the evaluation metrics
@@ -158,6 +160,9 @@ class MetricsProcessor < Closeable
         if end_time - start_time > @config.metrics_service_acceptable_duration
           @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
         end
+      end
+      rescue => e
+        @config.logger.warn "Error when preparing and sending metrics: #{e.message}"
       end
     end
   end
