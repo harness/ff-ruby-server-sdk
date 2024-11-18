@@ -144,9 +144,9 @@ class MetricsProcessor < Closeable
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
     @send_data_mutex.synchronize do
       begin
-        
+
         evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
-          # Check if both cloned maps are empty; if so, skip sending metrics
+          # Check if we have metrics to send; if not, skip sending metrics
           if evaluation_metrics_map.empty? && target_metrics_map.empty?
             @config.logger.debug "No metrics to send. Skipping sending metrics this interval"
             return
