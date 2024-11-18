@@ -76,15 +76,20 @@ class MetricsProcessor < Closeable
     @feature_name_attribute = "featureName"
     @variation_identifier_attribute = "variationIdentifier"
 
+    # TODO - this isn't used and can be removed.
     @executor = Concurrent::FixedThreadPool.new(10)
 
-    # Used for locking the evalution and target metrics maps before we clone them
+    # Evaluation and target metrics
     @metric_maps_mutex = Mutex.new
-    @evaluation_metrics = FrequencyMap.new
-    @target_metrics = Concurrent::Map.new
+    @evaluation_metrics = {}
+    @target_metrics = {}
+
+    # Mutex to protect aggregation and sending metrics at the end of an interval
+    @send_data_mutex = Mutex.new  # New mutex for send_data_and_reset_cache
 
     # Keep track of targets that have already been sent to avoid sending them again
-    @seen_targets = Concurrent::Map.new
+    @seen_targets_mutex = Mutex.new
+    @seen_targets = {}
 
     @callback.on_metrics_ready
   end
@@ -138,7 +143,7 @@ class MetricsProcessor < Closeable
 
     event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
     @metric_maps_mutex.synchronize do
-      @evaluation_metrics.increment event
+      @evaluation_metrics[event] = (@evaluation_metrics[event] || 0) + 1
     end
   end
 
@@ -147,7 +152,15 @@ class MetricsProcessor < Closeable
       return
     end
 
-    already_seen = @seen_targets.put_if_absent(target.identifier, true)
+    already_seen = false
+
+    @seen_targets_mutex.synchronize do
+      if @seen_targets.key?(target.identifier)
+        already_seen = true
+      else
+        @seen_targets[target.identifier] = true
+      end
+    end
 
     if already_seen
       return
@@ -163,38 +176,30 @@ class MetricsProcessor < Closeable
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    # A single lock is used to synchronise access to both the evaluation and target metrics maps.
-    # While separate locks could be applied to each map individually, we want an interval's eval/target
-    # metrics to be processed in an atomic unit.
-    evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
 
-      clone_evaluations = Concurrent::Map.new
-      clone_targets = Concurrent::Map.new
-      # Clone and clear evaluation metrics map
-      evaluation_metrics_map.each_pair do |key, value|
-        clone_evaluations[key] = value
+    @send_data_mutex.synchronize do
+
+      evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+        # Deep clone the evaluation metrics
+        cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map))
+        evaluation_metrics_map.clear
+
+        # Deep clone the target metrics
+        cloned_targets = Marshal.load(Marshal.dump(target_metrics_map))
+        target_metrics_map.clear
+        [cloned_evaluations, cloned_targets]
+
       end
 
-      evaluation_metrics_map.clear
+      metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
-      target_metrics_map.each_pair do |key, value|
-        clone_targets[key] = value
-      end
-
-      target_metrics_map.clear
-
-      [clone_evaluations, clone_targets]
-
-    end
-
-    metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
-
-    unless metrics.metrics_data.empty?
-      start_time = (Time.now.to_f * 1000).to_i
-      @connector.post_metrics(metrics)
-      end_time = (Time.now.to_f * 1000).to_i
-      if end_time - start_time > @config.metrics_service_acceptable_duration
-        @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+      unless metrics.metrics_data.empty?
+        start_time = (Time.now.to_f * 1000).to_i
+        @connector.post_metrics(metrics)
+        end_time = (Time.now.to_f * 1000).to_i
+        if end_time - start_time > @config.metrics_service_acceptable_duration
+          @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+        end
       end
     end
   end
