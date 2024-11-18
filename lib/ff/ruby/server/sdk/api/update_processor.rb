@@ -15,7 +15,7 @@ class UpdateProcessor < Closeable
     @connector = connector
     @repository = repository
     @updater = callback
-    @executor = Concurrent::FixedThreadPool.new(100)
+    @executor = Concurrent::FixedThreadPool.new(20)
 
     if logger != nil
 

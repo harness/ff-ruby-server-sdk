@@ -21,7 +21,11 @@ class MetricsEvent
     # project sizes. Issue being tracked in FFM-12192, and once resolved, can feasibly remove
     # these checks in a future release.
     unless other.is_a?(MetricsEvent)
-      @logger.warn("Warning: Attempted to compare MetricsEvent with #{other.class.name}" )
+      # We should always have a logger available except when we've deep cloned this class.  We don't do any
+      # equality check on clones in metrics code anyway, so this is just a safety check.
+      if @logger
+        @logger.warn("Warning: Attempted to compare MetricsEvent with #{other.class.name}")
+      end
       return false
     end
 
@@ -32,6 +36,17 @@ class MetricsEvent
 
   def hash
     feature_config.feature.hash | variation.identifier.hash | target.identifier.hash
+  end
+
+
+  # Exclude logger from serialization
+  def marshal_dump
+    [@feature_config, @target, @variation]
+  end
+
+  def marshal_load(array)
+    @feature_config, @target, @variation = array
+    @logger = nil
   end
 
 

@@ -1,5 +1,6 @@
 require "time"
-require "concurrent-ruby"
+require 'thread'
+require "set"
 
 require_relative "../dto/target"
 require_relative "../../sdk/version"
@@ -10,40 +11,6 @@ require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
   GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
-
-  class FrequencyMap < Concurrent::Map
-    def initialize(options = nil, &block)
-      super
-    end
-
-    def increment(key)
-      compute(key) do |old_value|
-        if old_value == nil;
-          1
-        else
-          old_value + 1
-        end
-      end
-    end
-
-    def get(key)
-      self[key]
-    end
-
-    # TODO Will be removed in V2 in favour of simplified clearing. Currently not used outside of tests.
-    def drain_to_map
-      result = {}
-      each_key do |key|
-        result[key] = 0
-      end
-      result.each_key do |key|
-        value = get_and_set(key, 0)
-        result[key] = value
-        delete_pair(key, 0)
-      end
-      result
-    end
-  end
 
   def init(connector, config, callback)
 
@@ -76,15 +43,20 @@ class MetricsProcessor < Closeable
     @feature_name_attribute = "featureName"
     @variation_identifier_attribute = "variationIdentifier"
 
-    @executor = Concurrent::FixedThreadPool.new(10)
-
-    # Used for locking the evalution and target metrics maps before we clone them
+    # Evaluation and target metrics
     @metric_maps_mutex = Mutex.new
-    @evaluation_metrics = FrequencyMap.new
-    @target_metrics = Concurrent::Map.new
+    @evaluation_metrics = {}
+    @target_metrics = {}
 
-    # Keep track of targets that have already been sent to avoid sending them again
-    @seen_targets = Concurrent::Map.new
+    # Keep track of targets that have already been sent to avoid sending them again. We track a max 500K targets
+    # to prevent unbounded growth.
+    @seen_targets_mutex = Mutex.new
+    @seen_targets = Set.new
+    @max_seen_targets = 500000
+    @seen_targets_full = false
+
+    # Mutex to protect aggregation and sending metrics at the end of an interval
+    @send_data_mutex = Mutex.new
 
     @callback.on_metrics_ready
   end
@@ -118,9 +90,9 @@ class MetricsProcessor < Closeable
 
   def register_evaluation_metric(feature_config, variation)
     # Guard clause to ensure feature_config, @global_target, and variation are valid.
-    # While they should be, this adds protection for an edge case we are seeing with very large
-    # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
-    # these checks in a future release.
+    # While they should be, this adds protection for an edge case we are seeing where the the ConcurrentMap (now replaced with our own thread safe hash)
+    # seemed to be accessing invalid areas of memory and seg faulting.
+    # Issue being tracked in FFM-12192, and once resolved, can remove these checks in a future release && once the issue is resolved.
     if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
       @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
       return
@@ -138,72 +110,81 @@ class MetricsProcessor < Closeable
 
     event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
     @metric_maps_mutex.synchronize do
-      @evaluation_metrics.increment event
+      @evaluation_metrics[event] = (@evaluation_metrics[event] || 0) + 1
     end
   end
 
   def register_target_metric(target)
-    if target.is_private
-      return
+    return if target.is_private
+
+    add_to_target_metrics = @seen_targets_mutex.synchronize do
+      # If the set is full, directly allow adding to target_metrics
+      if @seen_targets_full
+        true
+      elsif @seen_targets.include?(target.identifier)
+        false
+      else
+        @seen_targets.add(target.identifier)
+        @seen_targets_full = @seen_targets.size >= @max_seen_targets
+        true
+      end
     end
 
-    already_seen = @seen_targets.put_if_absent(target.identifier, true)
-
-    if already_seen
-      return
-    end
-
+    # Add to target_metrics if marked for inclusion
     @metric_maps_mutex.synchronize do
-      @target_metrics.put(target.identifier, target)
-    end
+      @target_metrics[target.identifier] = target
+    end if add_to_target_metrics
   end
+
 
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics, @target_metrics)
   end
 
   def send_data_and_reset_cache(evaluation_metrics_map, target_metrics_map)
-    # A single lock is used to synchronise access to both the evaluation and target metrics maps.
-    # While separate locks could be applied to each map individually, we want an interval's eval/target
-    # metrics to be processed in an atomic unit.
-    evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+    @send_data_mutex.synchronize do
+      begin
 
-      clone_evaluations = Concurrent::Map.new
-      clone_targets = Concurrent::Map.new
-      # Clone and clear evaluation metrics map
-      evaluation_metrics_map.each_pair do |key, value|
-        clone_evaluations[key] = value
-      end
+        evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
+          # Check if we have metrics to send; if not, skip sending metrics
+          if evaluation_metrics_map.empty? && target_metrics_map.empty?
+            @config.logger.debug "No metrics to send. Skipping sending metrics this interval"
+            return
+          end
 
-      evaluation_metrics_map.clear
+          # Deep clone the evaluation metrics
+          cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map)).freeze
+          evaluation_metrics_map.clear
 
-      target_metrics_map.each_pair do |key, value|
-        clone_targets[key] = value
-      end
+          # Deep clone the target metrics
+          cloned_targets = Marshal.load(Marshal.dump(target_metrics_map)).freeze
+          target_metrics_map.clear
+          [cloned_evaluations, cloned_targets]
 
-      target_metrics_map.clear
+        end
 
-      [clone_evaluations, clone_targets]
+        metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
 
-    end
-
-    metrics = prepare_summary_metrics_body(evaluation_metrics_map_clone, target_metrics_map_clone)
-
-    unless metrics.metrics_data.empty?
-      start_time = (Time.now.to_f * 1000).to_i
-      @connector.post_metrics(metrics)
-      end_time = (Time.now.to_f * 1000).to_i
-      if end_time - start_time > @config.metrics_service_acceptable_duration
-        @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+        unless metrics.metrics_data.empty?
+          start_time = (Time.now.to_f * 1000).to_i
+          @connector.post_metrics(metrics)
+          end_time = (Time.now.to_f * 1000).to_i
+          if end_time - start_time > @config.metrics_service_acceptable_duration
+            @config.logger.debug "Metrics service API duration=[" + (end_time - start_time).to_s + "]"
+          end
+        end
+      rescue => e
+        @config.logger.warn "Error when preparing and sending metrics: #{e.message}"
+        @config.logger.warn e.backtrace&.join("\n") || "No backtrace available"
       end
     end
   end
 
-  def prepare_summary_metrics_body(evaluation_metrics_map, target_metrics_map)
+  def prepare_summary_metrics_body(evaluation_metrics_clone, target_metrics_clone)
     metrics = OpenapiClient::Metrics.new({ :target_data => [], :metrics_data => [] })
 
     total_count = 0
-    evaluation_metrics_map.each do |key, value|
+    evaluation_metrics_clone.each do |key, value|
       # While Components should not be missing, this adds protection for an edge case we are seeing with very large
       # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
       # these checks in a future release.
@@ -235,9 +216,9 @@ class MetricsProcessor < Closeable
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_version, :value => @jar_version }))
       metrics.metrics_data.push(metrics_data)
     end
-    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_map.size}.  target_data count is #{target_metrics_map.size}"
+    @config.logger.debug "Pushed #{total_count} metric evaluations to server. metrics_data count is #{evaluation_metrics_clone.size}.  target_data count is #{target_metrics_clone.size}"
 
-    target_metrics_map.each_pair do |_, value|
+    target_metrics_clone.each_pair do |_, value|
       add_target_data(metrics, value)
     end
 
@@ -276,17 +257,26 @@ class MetricsProcessor < Closeable
     @running = true
     @thread = Thread.new do
       @config.logger.debug "Async started: " + self.to_s
-      while @ready do
+      mutex = Mutex.new
+      condition = ConditionVariable.new
+
+      while @ready
         unless @initialized
           @initialized = true
-          SdkCodes::info_metrics_thread_started @config.logger
+          SdkCodes::info_metrics_thread_started(@config.logger)
         end
-        sleep(@config.frequency)
-        run_one_iteration
+
+        mutex.synchronize do
+          # Wait for the specified interval or until notified
+          condition.wait(mutex, @config.frequency)
+        end
+
+        # Re-check @ready before running the iteration
+        run_one_iteration if @ready
       end
     end
-    @thread.run
   end
+
 
   def stop_async
     @ready = false

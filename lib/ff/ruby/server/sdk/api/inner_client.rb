@@ -50,6 +50,7 @@ class InnerClient < ClientCallback
 
       @connector = connector
     end
+    @condition = ConditionVariable.new
 
     @closing = false
     @failure = false
@@ -66,22 +67,34 @@ class InnerClient < ClientCallback
   end
 
   def bool_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.bool_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def string_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.string_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def number_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.number_variation(identifier, target, default_value, @evaluator_callback)
   end
 
   def json_variation(identifier, target, default_value)
-
+    unless @initialized
+      log_sdk_not_initialized_warning(identifier, default_value)
+      return default_value
+    end
     @evaluator.json_variation(identifier, target, default_value, @evaluator_callback)
   end
 
@@ -109,6 +122,7 @@ class InnerClient < ClientCallback
   def on_auth_failed
     SdkCodes::warn_auth_failed_srv_defaults @config.logger
     @initialized = true
+    @condition.signal
   end
 
   def close
@@ -195,66 +209,73 @@ class InnerClient < ClientCallback
   end
 
   def on_processor_ready(processor)
+    @my_mutex.synchronize do
 
-    if @closing
+      if @closing
 
-      return
+        return
+      end
+
+      if processor == @poll_processor
+
+        @poller_ready = true
+        @config.logger.debug "PollingProcessor ready"
+      end
+
+      if processor == @update_processor
+
+        @stream_ready = true
+        @config.logger.debug "Updater ready"
+      end
+
+      if processor == @metrics_processor
+
+        @metrics_ready = true
+        @config.logger.debug "Metrics ready"
+      end
+
+      if (@config.stream_enabled && !@stream_ready) ||
+        (@config.analytics_enabled && !@metrics_ready) ||
+        !@poller_ready
+
+        return
+      end
+
+      SdkCodes.info_sdk_init_ok @config.logger
+
+      @condition.signal
+      @initialized = true
     end
-
-    if processor == @poll_processor
-
-      @poller_ready = true
-      @config.logger.debug "PollingProcessor ready"
-    end
-
-    if processor == @update_processor
-
-      @stream_ready = true
-      @config.logger.debug "Updater ready"
-    end
-
-    if processor == @metrics_processor
-
-      @metrics_ready = true
-      @config.logger.debug "Metrics ready"
-    end
-
-    if (@config.stream_enabled && !@stream_ready) ||
-      (@config.analytics_enabled && !@metrics_ready) ||
-      !@poller_ready
-
-      return
-    end
-
-    SdkCodes.info_sdk_init_ok @config.logger
-
-    @initialized = true
   end
 
   def wait_for_initialization(timeout: nil)
-    synchronize do
-      SdkCodes::info_sdk_waiting_to_initialize(@config.logger, timeout)
+    SdkCodes::info_sdk_waiting_to_initialize(@config.logger, timeout)
+    return if @initialized
 
+    @my_mutex.synchronize do
       start_time = Time.now
+      remaining = timeout ? timeout / 1000.0 : nil # Convert timeout to seconds
 
       until @initialized
-        # Check if a timeout is specified and has been exceeded
-        if timeout && (Time.now - start_time) > (timeout / 1000.0)
-          @config.logger.warn "The SDK has timed out waiting to initialize with supplied timeout #{timeout} ms"
-          handle_initialization_failure
+
+        # Break if timeout has elapsed
+        if remaining && remaining <= 0
+          @config.logger.warn "The SDK has timed out waiting to initialize with supplied timeout #{timeout} ms. The SDK will continue to initialize in the background.  Default variations will be served until the SDK initializes."
+          break
         end
+        # Wait for the signal or timeout
+        @condition.wait(@my_mutex, remaining)
 
-        sleep(1)
+        # Recalculate the remaining time after the wait
+        if timeout
+          elapsed = Time.now - start_time
+          remaining = (timeout / 1000.0) - elapsed
+        end
       end
 
-      if @failure
-        raise "Initialization failed"
-      end
-
-      @config.logger.debug "Waiting for initialization has completed"
+      @config.logger.debug "Waiting for initialization has completed" if @initialized
     end
   end
-
 
   protected
 
@@ -316,9 +337,8 @@ class InnerClient < ClientCallback
 
   private
 
-  def synchronize(&block)
-
-    @my_mutex.synchronize(&block)
+  def log_sdk_not_initialized_warning(identifier, default_value)
+    @config.logger.warn "SDKCODE:6001: SDK is not initialized; serving default variation for bool variation: identifier=#{identifier}, default=#{default_value}"
   end
 
 end
