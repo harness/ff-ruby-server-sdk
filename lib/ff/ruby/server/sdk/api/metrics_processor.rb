@@ -147,7 +147,7 @@ class MetricsProcessor < Closeable
           @config.logger.debug "No metrics to send. Skipping sending metrics this interval"
           return
         end
-        
+
         # Deep clone the evaluation metrics
         cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map)).freeze
         evaluation_metrics_map.clear
