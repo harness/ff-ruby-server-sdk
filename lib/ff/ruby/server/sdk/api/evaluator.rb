@@ -91,6 +91,20 @@ class Evaluator < Evaluation
 
     flag = @repository.get_flag(identifier)
 
+    # Check if flag exists
+    if flag.nil?
+      # Log a warning if the flag is not found
+      @logger.warn "Flag not found for identifier '#{identifier}'. Serving default variation."
+      return nil
+    end
+
+    # Check if the flag's kind matches the expected type
+    unless flag.kind == expected
+      @logger.warn "Flag kind mismatch: expected '#{expected}', but got '#{flag.kind}' for identifier '#{identifier}'. Serving default variation."
+      return nil
+    end
+
+    # Proceed with prerequisite check if flag type is as expected
     if flag != nil && flag.kind == expected
       unless flag.prerequisites.empty?
         pre_req = check_pre_requisite(flag, target)
@@ -109,6 +123,7 @@ class Evaluator < Evaluation
       end
     end
 
+    # Returning nil will indicate to callers to serve the default variation
     nil
   end
 
