@@ -390,6 +390,7 @@ class MetricsProcessorTest < Minitest::Test
       variation2_new.identifier = "variation2-new"
       variation2_new.value = "value2-new"
       variation2_new.name = "Test2-New"
+      metrics_processor.register_evaluation(@target, feature, variation)
 
       # Ensure that the new evaluation is registered correctly
       freq_map = metrics_processor.send(:get_frequency_map)
