@@ -122,6 +122,7 @@ class InnerClient < ClientCallback
   def on_auth_failed
     SdkCodes::warn_auth_failed_srv_defaults @config.logger
     @initialized = true
+    @condition.signal
   end
 
   def close
@@ -249,6 +250,7 @@ class InnerClient < ClientCallback
 
   def wait_for_initialization(timeout: nil)
     SdkCodes::info_sdk_waiting_to_initialize(@config.logger, timeout)
+    return if @initialized
 
     @my_mutex.synchronize do
       start_time = Time.now
