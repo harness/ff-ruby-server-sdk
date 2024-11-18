@@ -48,9 +48,12 @@ class MetricsProcessor < Closeable
     @evaluation_metrics = {}
     @target_metrics = {}
 
-    # Keep track of targets that have already been sent to avoid sending them again
+    # Keep track of targets that have already been sent to avoid sending them again. We track a max 500K targets
+    # to prevent unbounded growth.
     @seen_targets_mutex = Mutex.new
     @seen_targets = Set.new
+    @max_seen_targets = 500000
+    @seen_targets_full = false
 
     # Mutex to protect aggregation and sending metrics at the end of an interval
     @send_data_mutex = Mutex.new
@@ -114,22 +117,25 @@ class MetricsProcessor < Closeable
   def register_target_metric(target)
     return if target.is_private
 
-    already_seen = false
-
-    @seen_targets_mutex.synchronize do
-      if @seen_targets.include?(target.identifier)
-        already_seen = true
+    add_to_target_metrics = @seen_targets_mutex.synchronize do
+      # If the set is full, directly allow adding to target_metrics
+      if @seen_targets_full
+        true
+      elsif @seen_targets.include?(target.identifier)
+        false
       else
         @seen_targets.add(target.identifier)
+        @seen_targets_full = @seen_targets.size >= @max_seen_targets
+        true
       end
     end
 
-    return if already_seen
-
+    # Add to target_metrics if marked for inclusion
     @metric_maps_mutex.synchronize do
       @target_metrics[target.identifier] = target
-    end
+    end if add_to_target_metrics
   end
+
 
   def run_one_iteration
     send_data_and_reset_cache(@evaluation_metrics, @target_metrics)

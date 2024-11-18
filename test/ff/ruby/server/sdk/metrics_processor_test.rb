@@ -400,6 +400,55 @@ class MetricsProcessorTest < Minitest::Test
     end
   end
 
+  def test_seen_targets_max_size
+    logger = Logger.new(STDOUT)
+    callback = TestCallback.new
+    connector = TestConnector.new
+    config = Minitest::Mock.new
+    config.expect :kind_of?, true, [Config]
+    config.expect :metrics_service_acceptable_duration, 10000
+
+    def config.logger
+      @logger ||= Logger.new(STDOUT)
+    end
+
+    metrics_processor = MetricsProcessor.new
+    metrics_processor.init(connector, config, callback)
+
+    callback.wait_until_ready
+
+    # Set the max size for seen_targets
+    max_seen_targets = 5
+    metrics_processor.instance_variable_set(:@max_seen_targets, max_seen_targets)
+
+    # Add targets up to the max size
+    (1..max_seen_targets).each do |i|
+      target = Target.new("target-#{i}", "target-#{i}")
+      metrics_processor.send(:register_target_metric, target)
+    end
+
+    # Ensure all targets were added to seen_targets
+    seen_targets = metrics_processor.instance_variable_get(:@seen_targets)
+    assert_equal max_seen_targets, seen_targets.size, "Seen targets should have exactly #{max_seen_targets} entries"
+
+    # Attempt to add another target beyond the max size
+    extra_target = Target.new("target-extra", "target-extra")
+    metrics_processor.send(:register_target_metric, extra_target)
+
+    # Verify that seen_targets has not exceeded the max size
+    seen_targets = metrics_processor.instance_variable_get(:@seen_targets)
+    assert_equal max_seen_targets, seen_targets.size, "Seen targets should not exceed the max size of #{max_seen_targets}"
+
+    # Verify that the extra target was still added to target_metrics
+    target_metrics = metrics_processor.instance_variable_get(:@target_metrics)
+    assert_includes target_metrics.keys, "target-extra", "Extra target should be added to target_metrics even if seen_targets is full"
+
+    # Verify that existing targets are still present in target_metrics
+    (1..max_seen_targets).each do |i|
+      assert_includes target_metrics.keys, "target-#{i}", "Target #{i} should still be present in target_metrics"
+    end
+  end
+
   def assert_target_data(target_data)
     targets = {}
 
