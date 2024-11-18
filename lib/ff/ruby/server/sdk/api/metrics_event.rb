@@ -42,7 +42,7 @@ class MetricsEvent
 
   def marshal_load(array)
     @feature_config, @target, @variation = array
-    @logger = nil  # Reinitialize logger if needed
+    @logger = nil  
   end
 
 
