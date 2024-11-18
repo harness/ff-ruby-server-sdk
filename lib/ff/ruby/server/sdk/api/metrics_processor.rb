@@ -139,11 +139,11 @@ class MetricsProcessor < Closeable
 
       evaluation_metrics_map_clone, target_metrics_map_clone = @metric_maps_mutex.synchronize do
         # Deep clone the evaluation metrics
-        cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map))
+        cloned_evaluations = Marshal.load(Marshal.dump(evaluation_metrics_map)).freeze
         evaluation_metrics_map.clear
 
         # Deep clone the target metrics
-        cloned_targets = Marshal.load(Marshal.dump(target_metrics_map))
+        cloned_targets = Marshal.load(Marshal.dump(target_metrics_map)).freeze
         target_metrics_map.clear
         [cloned_evaluations, cloned_targets]
 

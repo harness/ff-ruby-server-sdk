@@ -158,7 +158,7 @@ class MetricsProcessorTest < Minitest::Test
 
     assert targets.key?("target-id")
   end
-  
+
   def test_comparable_metrics_event_equals_and_hash
 
     event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
