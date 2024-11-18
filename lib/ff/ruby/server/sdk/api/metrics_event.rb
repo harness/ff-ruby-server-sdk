@@ -35,4 +35,15 @@ class MetricsEvent
   end
 
 
+  # Exclude logger from serialization
+  def marshal_dump
+    [@feature_config, @target, @variation]
+  end
+
+  def marshal_load(array)
+    @feature_config, @target, @variation = array
+    @logger = nil  # Reinitialize logger if needed
+  end
+
+
 end

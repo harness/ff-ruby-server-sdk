@@ -1,5 +1,4 @@
 require "time"
-require "concurrent-ruby"
 
 require_relative "../dto/target"
 require_relative "../../sdk/version"
@@ -10,40 +9,6 @@ require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
   GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
-
-  class FrequencyMap < Concurrent::Map
-    def initialize(options = nil, &block)
-      super
-    end
-
-    def increment(key)
-      compute(key) do |old_value|
-        if old_value == nil;
-          1
-        else
-          old_value + 1
-        end
-      end
-    end
-
-    def get(key)
-      self[key]
-    end
-
-    # TODO Will be removed in V2 in favour of simplified clearing. Currently not used outside of tests.
-    def drain_to_map
-      result = {}
-      each_key do |key|
-        result[key] = 0
-      end
-      result.each_key do |key|
-        value = get_and_set(key, 0)
-        result[key] = value
-        delete_pair(key, 0)
-      end
-      result
-    end
-  end
 
   def init(connector, config, callback)
 
@@ -76,9 +41,6 @@ class MetricsProcessor < Closeable
     @feature_name_attribute = "featureName"
     @variation_identifier_attribute = "variationIdentifier"
 
-    # TODO - this isn't used and can be removed.
-    @executor = Concurrent::FixedThreadPool.new(10)
-
     # Evaluation and target metrics
     @metric_maps_mutex = Mutex.new
     @evaluation_metrics = {}
@@ -89,7 +51,7 @@ class MetricsProcessor < Closeable
 
     # Keep track of targets that have already been sent to avoid sending them again
     @seen_targets_mutex = Mutex.new
-    @seen_targets = {}
+    @seen_targets = Set.new
 
     @callback.on_metrics_ready
   end
@@ -123,9 +85,9 @@ class MetricsProcessor < Closeable
 
   def register_evaluation_metric(feature_config, variation)
     # Guard clause to ensure feature_config, @global_target, and variation are valid.
-    # While they should be, this adds protection for an edge case we are seeing with very large
-    # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
-    # these checks in a future release.
+    # While they should be, this adds protection for an edge case we are seeing where the the ConcurrentMap (now replaced with our own thread safe hash)
+    # seemed to be accessing invalid areas of memory and seg faulting.
+    # Issue being tracked in FFM-12192, and once resolved, can remove these checks in a future release && once the issue is resolved.
     if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
       @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
       return
@@ -148,26 +110,22 @@ class MetricsProcessor < Closeable
   end
 
   def register_target_metric(target)
-    if target.is_private
-      return
-    end
+    return if target.is_private
 
     already_seen = false
 
     @seen_targets_mutex.synchronize do
-      if @seen_targets.key?(target.identifier)
+      if @seen_targets.include?(target.identifier)
         already_seen = true
       else
-        @seen_targets[target.identifier] = true
+        @seen_targets.add(target.identifier)
       end
     end
 
-    if already_seen
-      return
-    end
+    return if already_seen
 
     @metric_maps_mutex.synchronize do
-      @target_metrics.put(target.identifier, target)
+      @target_metrics[target.identifier] = target
     end
   end
 

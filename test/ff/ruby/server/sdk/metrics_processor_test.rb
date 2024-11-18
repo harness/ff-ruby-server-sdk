@@ -158,43 +158,7 @@ class MetricsProcessorTest < Minitest::Test
 
     assert targets.key?("target-id")
   end
-
-  def test_frequency_map_increment
-
-    map = MetricsProcessor::FrequencyMap.new
-
-    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
-
-    map.increment event1
-    map.increment event2
-
-    map.increment event1
-    map.increment event2
-
-    assert_equal 2, map[event1]
-    assert_equal 2, map[event2]
-  end
-
-  def test_frequency_map_drain_to_map
-    map = MetricsProcessor::FrequencyMap.new
-
-    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
-
-    map.increment event1
-    map.increment event2
-
-    map.increment event1
-    map.increment event2
-
-    new_map = map.drain_to_map
-
-    assert_equal 0, map.size
-    assert_equal 2, new_map[event1]
-    assert_equal 2, new_map[event2]
-  end
-
+  
   def test_comparable_metrics_event_equals_and_hash
 
     event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
