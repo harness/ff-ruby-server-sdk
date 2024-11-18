@@ -1,4 +1,6 @@
 require "time"
+require 'thread'
+require "set"
 
 require_relative "../dto/target"
 require_relative "../../sdk/version"
@@ -46,12 +48,12 @@ class MetricsProcessor < Closeable
     @evaluation_metrics = {}
     @target_metrics = {}
 
-    # Mutex to protect aggregation and sending metrics at the end of an interval
-    @send_data_mutex = Mutex.new  # New mutex for send_data_and_reset_cache
-
     # Keep track of targets that have already been sent to avoid sending them again
     @seen_targets_mutex = Mutex.new
     @seen_targets = Set.new
+
+    # Mutex to protect aggregation and sending metrics at the end of an interval
+    @send_data_mutex = Mutex.new
 
     @callback.on_metrics_ready
   end
@@ -163,6 +165,7 @@ class MetricsProcessor < Closeable
       end
       rescue => e
         @config.logger.warn "Error when preparing and sending metrics: #{e.message}"
+        @config.logger.warn e.backtrace&.join("\n") || "No backtrace available"
       end
     end
   end
