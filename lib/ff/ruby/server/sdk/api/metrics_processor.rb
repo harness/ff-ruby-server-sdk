@@ -179,12 +179,13 @@ class MetricsProcessor < Closeable
     evaluation_metrics_clone.each do |key, value|
       feature_name, variation_identifier = key.split("\0", 2)
 
-      # While feature name and variation identifier should not be missing, this adds protection for an edge case we are seeing where keys
-      # are referencing other objects in memory. In <= 1.4.4, we have been keying on the MetricsEvent class, and in an attempt
-      # to remediate this, we now key on a string.
-      # Issue being tracked in FFM-12192, and once resolved, can feasibly remove
-      # these checks in a future release.
-      # If any required data is missing, log a detailed warning and skip processing
+      # Although feature_name and variation_identifier should always be present,
+      # this guard provides protection against an edge case where keys reference
+      # other objects in memory. In versions <= 1.4.4, we were keying on the MetricsEvent
+      # class (now deleted). To remediate this, we have transitioned to using strings as keys.
+      # This issue is being tracked in FFM-12192. Once resolved, these checks can be safely
+      # removed in a future release.
+      # If any required data is missing, log a detailed warning and skip processing.
       unless feature_name && variation_identifier && value.is_a?(Integer) && value > 0
         @config.logger.warn "Skipping invalid metrics event: missing or invalid feature_name, variation_identifier, or count. Key: #{key.inspect}, Count: #{value.inspect}"
         next
