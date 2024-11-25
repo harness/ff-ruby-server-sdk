@@ -118,10 +118,10 @@ class MetricsProcessorTest < Minitest::Test
     callback.wait_until_ready
 
     # Here we test register_evaluation then run_one_iteration
-    (1..3).each { metrics_processor.register_evaluation @target, @feature1, @variation1 }
-    (1..3).each { metrics_processor.register_evaluation @target, @feature1, @variation2 }
-    (1..3).each { metrics_processor.register_evaluation @target, @feature2, @variation1 }
-    (1..3).each { metrics_processor.register_evaluation @target, @feature2, @variation2 }
+    (1..3).each { metrics_processor.register_evaluation @target, @feature1.feature, @variation1.identifier }
+    (1..3).each { metrics_processor.register_evaluation @target, @feature1.feature, @variation2.identifier }
+    (1..3).each { metrics_processor.register_evaluation @target, @feature2.feature, @variation1.identifier }
+    (1..3).each { metrics_processor.register_evaluation @target, @feature2.feature, @variation2.identifier }
 
     freq_map = metrics_processor.send :get_frequency_map
     assert_equal 4, freq_map.size, "not enough pending metrics"
@@ -162,18 +162,8 @@ class MetricsProcessorTest < Minitest::Test
 
     # Register evaluations
     (1..10).each do |i|
-      feature = OpenapiClient::FeatureConfig.new
-      feature.feature = "feature-#{i}"
-      variation = OpenapiClient::Variation.new
-      variation.identifier = "variation-#{i}"
-      variation.value = "value-#{i}"
-      variation.name = "Test-#{i}"
-
-      variation2 = OpenapiClient::Variation.new
-      variation2.identifier = "variation2-#{i}"
-      variation2.value = "value2-#{i}"
-      variation2.name = "Test2-#{i}"
-      feature.variations = [variation, @variation2]
+      feature = "feature-#{i}"
+      variation = "variation-#{i}"
       metrics_processor.register_evaluation(@target, feature, variation)
     end
 
@@ -258,19 +248,9 @@ class MetricsProcessorTest < Minitest::Test
 
     # Define a method to register evaluations
     register_evals = Proc.new do |feature_id|
-      feature = OpenapiClient::FeatureConfig.new
-      feature.feature = "feature-#{feature_id}"
-      variation = OpenapiClient::Variation.new
-      variation.identifier = "variation-#{feature_id}"
-      variation.value = "value-#{feature_id}"
-      variation.name = "Test-#{feature_id}"
+      feature = "feature-#{feature_id}"
+      variation = "variation-#{feature_id}"
 
-      variation2 = OpenapiClient::Variation.new
-      variation2.identifier = "variation2-#{feature_id}"
-      variation2.value = "value2-#{feature_id}"
-      variation2.name = "Test2-#{feature_id}"
-
-      feature.variations = [variation, variation2]
       metrics_processor.register_evaluation(@target, feature, variation)
     end
 
@@ -316,13 +296,11 @@ class MetricsProcessorTest < Minitest::Test
     metric_found = {}
     expected_metrics_set.each { |metric| metric_found[metric] = false }
 
-    freq_map.each_key do |metrics_event|
-      # Extract feature name and variation identifier from the metrics_event
-      actual_feature_name = metrics_event.feature_config.feature
-      actual_variation_id = metrics_event.variation.identifier
+    freq_map.each_key do |key|
+      feature_name, variation_identifier = key.split("\0", 2)
 
       # Create the key for the current metric
-      metric_key = [actual_feature_name, actual_variation_id]
+      metric_key = [feature_name, variation_identifier]
 
       if metric_found.key?(metric_key)
         metric_found[metric_key] = true
@@ -353,19 +331,9 @@ class MetricsProcessorTest < Minitest::Test
       callback.wait_until_ready
 
       # Register some evaluations
-      feature = OpenapiClient::FeatureConfig.new
-      feature.feature = "feature-error-test"
-      variation = OpenapiClient::Variation.new
-      variation.identifier = "variation-error-test"
-      variation.value = "value-error-test"
-      variation.name = "Test-Error"
+      feature = "feature-error-test"
+      variation = "variation-error-test"
 
-      variation2 = OpenapiClient::Variation.new
-      variation2.identifier = "variation2-error-test"
-      variation2.value = "value2-error-test"
-      variation2.name = "Test2-Error"
-
-      feature.variations = [variation, variation2]
       metrics_processor.register_evaluation(@target, feature, variation)
 
       # Attempt to send data, which should raise an exception
@@ -379,18 +347,10 @@ class MetricsProcessorTest < Minitest::Test
       assert_empty target_metrics_map, "Target metrics map should be cleared even if an error occurs"
 
       # Verify that the MetricsProcessor remains operational by registering another evaluation
-      feature_new = OpenapiClient::FeatureConfig.new
-      feature_new.feature = "feature-new"
-      variation_new = OpenapiClient::Variation.new
-      variation_new.identifier = "variation-new"
-      variation_new.value = "value-new"
-      variation_new.name = "Test-New"
+      feature_new = "feature-new"
+      variation_new = "variation-new"
 
-      variation2_new = OpenapiClient::Variation.new
-      variation2_new.identifier = "variation2-new"
-      variation2_new.value = "value2-new"
-      variation2_new.name = "Test2-New"
-      metrics_processor.register_evaluation(@target, feature, variation)
+      metrics_processor.register_evaluation(@target, feature_new, variation_new)
 
       # Ensure that the new evaluation is registered correctly
       freq_map = metrics_processor.send(:get_frequency_map)
@@ -465,18 +425,6 @@ class MetricsProcessorTest < Minitest::Test
     assert targets.key?("target-id")
   end
 
-  def test_comparable_metrics_event_equals_and_hash
-
-    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-    event2 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-
-    assert(event1 == event2)
-
-    event1 = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-    event2 = MetricsEvent.new(@feature2, @target, @variation2, Logger.new(STDOUT))
-
-    assert(event1 != event2)
-  end
 
   def test_metrics_processor_prevents_invalid_metrics_event
     logger = Logger.new(STDOUT)
@@ -495,15 +443,15 @@ class MetricsProcessorTest < Minitest::Test
     callback.wait_until_ready
 
     # Attempt to register invalid evaluations
-    metrics_processor.register_evaluation(@target, nil, @variation1)
+    metrics_processor.register_evaluation(@target, nil, @variation1.identifier)
     metrics_processor.register_evaluation(@target, nil, nil)
-    metrics_processor.register_evaluation(nil, @feature1, nil)
+    metrics_processor.register_evaluation(nil, @feature1.feature, nil)
 
     # Register some valid evaluations
-    metrics_processor.register_evaluation(@target, @feature1, @variation1)
-    metrics_processor.register_evaluation(@target, @feature2, @variation2)
+    metrics_processor.register_evaluation(@target, @feature1.feature, @variation1.identifier)
+    metrics_processor.register_evaluation(@target, @feature2.feature, @variation2.identifier)
     # Nil target, which is a valid input to variation methods
-    metrics_processor.register_evaluation(nil, @feature2, @variation2)
+    metrics_processor.register_evaluation(nil, @feature2.feature, @variation2.identifier)
 
     # Run iteration
     metrics_processor.send(:run_one_iteration)
@@ -533,13 +481,6 @@ class MetricsProcessorTest < Minitest::Test
 
     # Target data is still correctly sent
     assert_equal 1, captured_metrics[0].target_data.size, "There should only be a single target"
-  end
-
-  def test_metrics_event_eql_with_invalid_object
-    event = MetricsEvent.new(@feature1, @target, @variation1, Logger.new(STDOUT))
-    non_event = "Not a MetricsEvent"
-
-    refute_equal(event, non_event, "MetricsEvent should not be equal to a non-MetricsEvent object")
   end
 
 end

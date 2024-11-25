@@ -117,7 +117,9 @@ class Evaluator < Evaluation
 
       if variation != nil
         if callback != nil
-          callback.process_evaluation(flag, target, variation)
+          feature_name = flag.feature
+          variation_identifier = variation.identifier
+          callback.process_evaluation(feature_name, target, variation_identifier)
         end
         return variation
       end

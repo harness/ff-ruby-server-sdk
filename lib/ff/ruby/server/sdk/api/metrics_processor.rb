@@ -6,12 +6,9 @@ require_relative "../dto/target"
 require_relative "../../sdk/version"
 require_relative "../common/closeable"
 require_relative "../common/sdk_codes"
-require_relative "../api/metrics_event"
 require_relative "../api/summary_metrics"
 
 class MetricsProcessor < Closeable
-  GLOBAL_TARGET = Target.new(identifier: "__global__cf_target", name: "Global Target").freeze
-
   def init(connector, config, callback)
 
     unless connector.kind_of?(Connector)
@@ -79,8 +76,8 @@ class MetricsProcessor < Closeable
     @config.logger.debug "Closing metrics processor"
   end
 
-  def register_evaluation(target, feature_config, variation)
-    register_evaluation_metric(feature_config, variation)
+  def register_evaluation(target, feature_name, variation_identifier)
+    register_evaluation_metric(feature_name, variation_identifier)
     if target
       register_target_metric(target)
     end
@@ -88,29 +85,24 @@ class MetricsProcessor < Closeable
 
   private
 
-  def register_evaluation_metric(feature_config, variation)
+  def register_evaluation_metric(feature_name, variation_identifier)
     # Guard clause to ensure feature_config, @global_target, and variation are valid.
     # While they should be, this adds protection for an edge case we are seeing where the the ConcurrentMap (now replaced with our own thread safe hash)
     # seemed to be accessing invalid areas of memory and seg faulting.
     # Issue being tracked in FFM-12192, and once resolved, can remove these checks in a future release && once the issue is resolved.
-    if feature_config.nil? || !feature_config.respond_to?(:feature) || feature_config.feature.nil?
-      @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_config.inspect}")
+    unless feature_name && !feature_name.empty?
+      @config.logger.warn("Skipping invalid MetricsEvent: feature_config is missing or incomplete. feature_config=#{feature_name.inspect}")
       return
     end
 
-    if GLOBAL_TARGET.nil? || !GLOBAL_TARGET.respond_to?(:identifier) || GLOBAL_TARGET.identifier.nil?
-      @config.logger.warn("Skipping invalid MetricsEvent: global_target is missing or incomplete. global_target=#{GLOBAL_TARGET.inspect}")
+    unless variation_identifier && !variation_identifier.empty?
+      @config.logger.warn("Skipping iInvalid MetricsEvent: variation is missing or incomplete. variation=#{variation_identifier.inspect}")
       return
     end
 
-    if variation.nil? || !variation.respond_to?(:identifier) || variation.identifier.nil?
-      @config.logger.warn("Skipping iInvalid MetricsEvent: variation is missing or incomplete. variation=#{variation.inspect}")
-      return
-    end
-
-    event = MetricsEvent.new(feature_config, GLOBAL_TARGET, variation, @config.logger)
     @metric_maps_mutex.synchronize do
-      @evaluation_metrics[event] = (@evaluation_metrics[event] || 0) + 1
+      key = "#{feature_name}\0#{variation_identifier}"
+      @evaluation_metrics[key] = (@evaluation_metrics[key] || 0) + 1
     end
   end
 
@@ -185,31 +177,28 @@ class MetricsProcessor < Closeable
 
     total_count = 0
     evaluation_metrics_clone.each do |key, value|
-      # While Components should not be missing, this adds protection for an edge case we are seeing with very large
-      # project sizes.  Issue being tracked in FFM-12192, and once resolved, can feasibly remove
-      # these checks in a future release.
-      # Initialize an array to collect missing components
-      missing_components = []
+      feature_name, variation_identifier = key.split("\0", 2)
 
-      # Check each required component and add to missing_components if absent
-      missing_components << 'feature_config' unless key.respond_to?(:feature_config) && key.feature_config
-      missing_components << 'variation' unless key.respond_to?(:variation) && key.variation
-      missing_components << 'target' unless key.respond_to?(:target) && key.target
-      missing_components << 'count' if value.nil?
-
-      # If any components are missing, log a detailed warning and skip processing
-      unless missing_components.empty?
-        @config.logger.warn "Skipping invalid metrics event: missing #{missing_components.join(', ')} in key: #{key.inspect}, full details: #{key.inspect}"
+      # Although feature_name and variation_identifier should always be present,
+      # this guard provides protection against an edge case where keys reference
+      # other objects in memory. In versions <= 1.4.4, we were keying on the MetricsEvent
+      # class (now deleted). To remediate this, we have transitioned to using strings as keys.
+      # This issue is being tracked in FFM-12192. Once resolved, these checks can be safely
+      # removed in a future release.
+      # If any required data is missing, log a detailed warning and skip processing.
+      unless feature_name && variation_identifier && value.is_a?(Integer) && value > 0
+        @config.logger.warn "Skipping invalid metrics event: missing or invalid feature_name, variation_identifier, or count. Key: #{key.inspect}, Count: #{value.inspect}"
         next
       end
 
       total_count += value
+
       metrics_data = OpenapiClient::MetricsData.new({ :attributes => [] })
       metrics_data.timestamp = (Time.now.to_f * 1000).to_i
       metrics_data.count = value
       metrics_data.metrics_type = "FFMETRICS"
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @feature_name_attribute, :value => key.feature_config.feature }))
-      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @variation_identifier_attribute, :value => key.variation.identifier }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @feature_name_attribute, :value => feature_name }))
+      metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @variation_identifier_attribute, :value => variation_identifier }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @target_attribute, :value => @global_target_identifier }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_type, :value => @server }))
       metrics_data.attributes.push(OpenapiClient::KeyValue.new({ :key => @sdk_language, :value => "ruby" }))
