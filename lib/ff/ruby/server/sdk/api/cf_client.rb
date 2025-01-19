@@ -5,13 +5,17 @@ require_relative "inner_client"
 
 class CfClient < Closeable
   include Singleton
-
+  
+  @@instance_mutex = Mutex.new
   def init(api_key, config, connector = nil)
     # Only initialize if @client is nil to avoid reinitialization
-    unless @client
-      @config = config || ConfigBuilder.new.build
-      @client = InnerClient.new(api_key, @config, connector)
-      @config.logger.debug "Client initialized with API key: #{api_key}"
+    
+    @@instance_mutex.synchronize do
+      unless @client
+        @config = config || ConfigBuilder.new.build
+        @client = InnerClient.new(api_key, @config, connector)
+        @config.logger.debug "Client initialized with API key: #{api_key}"
+      end
     end
     @client
   end
