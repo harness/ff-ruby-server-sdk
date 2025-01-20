@@ -120,9 +120,11 @@ class InnerClient < ClientCallback
   end
 
   def on_auth_failed
-    SdkCodes::warn_auth_failed_srv_defaults @config.logger
-    @initialized = true
-    @condition.signal
+    @my_mutex.synchronize do
+      SdkCodes::warn_auth_failed_srv_defaults @config.logger
+      @initialized = true
+      @condition.broadcast
+    end
   end
 
   def close
@@ -243,7 +245,7 @@ class InnerClient < ClientCallback
 
       SdkCodes.info_sdk_init_ok @config.logger
 
-      @condition.signal
+      @condition.broadcast
       @initialized = true
     end
   end
@@ -257,7 +259,6 @@ class InnerClient < ClientCallback
       remaining = timeout ? timeout / 1000.0 : nil # Convert timeout to seconds
 
       until @initialized
-
         # Break if timeout has elapsed
         if remaining && remaining <= 0
           @config.logger.warn "The SDK has timed out waiting to initialize with supplied timeout #{timeout} ms. The SDK will continue to initialize in the background.  Default variations will be served until the SDK initializes."
