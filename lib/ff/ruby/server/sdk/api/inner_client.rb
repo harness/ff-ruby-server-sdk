@@ -120,9 +120,11 @@ class InnerClient < ClientCallback
   end
 
   def on_auth_failed
-    SdkCodes::warn_auth_failed_srv_defaults @config.logger
-    @initialized = true
-    @condition.broadcast
+    @my_mutex.synchronize do
+      SdkCodes::warn_auth_failed_srv_defaults @config.logger
+      @initialized = true
+      @condition.broadcast
+    end
   end
 
   def close
