@@ -98,6 +98,10 @@ class InnerClient < ClientCallback
     @evaluator.json_variation(identifier, target, default_value, @evaluator_callback)
   end
 
+  def initialized
+    @initialized
+  end
+
   def on_auth_success
 
     SdkCodes::info_sdk_auth_ok @config.logger

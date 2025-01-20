@@ -47,6 +47,10 @@ def wait_for_initialization(timeout_ms: nil)
     @client.json_variation(identifier, target, default_value)
   end
 
+  def initialized
+    @client.initialized
+  end
+
   def destroy
 
     close
