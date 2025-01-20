@@ -96,11 +96,12 @@ client.init(apiKey, ConfigBuilder.new.logger(logger).build)
 
 The Public API exposes a few methods that you can utilize:
 
-Instantiate, initialize and close when done:
+Instantiate, initialize, check if initialized and close when done:
 
 * `def initialize(api_key = nil, config = nil, connector = nil)`
+* `def initialized`
 * `def init(api_key = nil, config = nil, connector = nil)`
-* `def wait_for_initialization`
+* `def wait_for_initialization(timeout: nil)`
 * `def close`
 
 Evaluations:
