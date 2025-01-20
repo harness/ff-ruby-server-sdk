@@ -24,8 +24,10 @@ client = CfClient.instance
 client.init(apiKey, ConfigBuilder.new.logger(logger).build)
 
 logger.info "----- initialization started ----- "
+logger.info "initialised: #{client.initialized}"
 client.wait_for_initialization
 logger.info "----- initialization done ----- "
+logger.info "initialised: #{client.initialized}"
 
 # Create a target (different targets can get different results based on rules.  This include a custom attribute 'location')
 target = Target.new("RubySDK", identifier="rubysdk", attributes={"location": "emea"})
