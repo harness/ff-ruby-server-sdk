@@ -118,7 +118,7 @@ class MetricsProcessor < Closeable
     end
 
     # Add to target_metrics if marked for inclusion
-    remove_dropped = @metric_maps_mutex.synchronize do
+    dropped = @metric_maps_mutex.synchronize do
       if @target_metrics.size < @target_metrics_max_payload
         @target_metrics[target.identifier] = target
         false
@@ -127,13 +127,11 @@ class MetricsProcessor < Closeable
       end
     end if add_to_target_metrics
 
-    if remove_dropped
-      # If we had to drop the target, remove it from the seen list too, assume it will be readded later
-      # avoids a situation where targets were marked seen but never really sent
-      @seen_targets_mutex.synchronize do
-        @seen_targets.delete(target.identifier)
-      end
-    end
+    # If we had to drop the target, remove it from the seen list too, assume it will be readded later
+    # avoids a situation where targets were marked seen but never really sent
+    @seen_targets_mutex.synchronize do
+      @seen_targets.delete(target.identifier)
+    end if dropped
 
   end
 
