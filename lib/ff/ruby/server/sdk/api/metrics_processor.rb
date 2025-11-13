@@ -44,7 +44,7 @@ class MetricsProcessor < Closeable
     @metric_maps_mutex = Mutex.new
     @evaluation_metrics = {}
     @target_metrics = {}
-    @target_metrics_max_payload = 100000
+    @target_metrics_max_payload = 1000
 
     # Keep track of targets that have already been sent to avoid sending them again. We track a max 500K targets
     # to prevent unbounded growth.
